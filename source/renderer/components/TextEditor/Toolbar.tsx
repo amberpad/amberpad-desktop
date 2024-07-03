@@ -5,7 +5,7 @@ import {
   Element as SlateElement,
 } from 'slate'
 import { useSlate } from 'slate-react'
-import { Box, Flex, IconButton, Select } from "@radix-ui/themes"
+import { Flex, IconButton, Select, Text, Tooltip } from "@radix-ui/themes"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
   faSquare, 
@@ -24,170 +24,20 @@ import {
   faLink,
 } from '@fortawesome/free-solid-svg-icons'
 
+import { 
+  getTextElementNodesInSelection,
+  AmberpadEditor,
+  toggleTextBlock,
+  toggleListBlock, 
+  toggleMark,
+} from "@renderer/utils/slate"
+
 import type { ElementType, NodeType } from "@ts/slate.types"
 import type { FlexProps, IconButtonProps } from "@radix-ui/themes"
-
-import { toggleTextBlock } from "@renderer/utils/slate"
-
-/******************************************************************************
-* Utils
-******************************************************************************/
-
-/*
-const TEXT_TYPES = []
-const isTextBlockActive = (editor, format) => {
-  const { selection } = editor
-  if (!selection) return false
-
-  const [match] = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (node: NodeType) =>
-        !Editor.isEditor(node) &&
-        SlateElement.isElement(node) &&
-        node.type === format,
-    })
-  )
-
-  console.log('NODES', Array.from(Editor.nodes(editor, {
-    at: Editor.unhangRange(editor, selection),
-  })))
-  console.log('MATCH', match, )
-
-  return !!match
-}
-
-const toggleTextBlock = (editor, format) => {
-  const isActive = isTextBlockActive(
-    editor,
-    format,
-  )
-
-  Transforms.unwrapNodes<NodeType>(editor, {
-    match: (node: NodeType) => 
-      !Editor.isEditor(node) &&
-      SlateElement.isElement(node),
-    split: true,
-  })
-  Transforms.setNodes<ElementType>(
-    editor, { type: isActive ? 'paragraph' : format })
-}
-*/
-
-const LIST_TYPES = ['numbered-list', 'bulleted-list']
-const toggleBlock = (editor, format) => {
-  const isActive = isBlockActive(
-    editor,
-    format,
-  )
-  const isList = LIST_TYPES.includes(format)
-
-  Transforms.unwrapNodes<NodeType>(editor, {
-    match: (node: NodeType) => 
-      !Editor.isEditor(node) &&
-      SlateElement.isElement(node),
-    split: true,
-  })
-  let newProperties: Partial<ElementType>
-
-  newProperties = {
-    type: isActive ? 
-      'paragraph' : 
-      (isList ? 'list-item' : format),
-  }
-  Transforms.setNodes<ElementType>(editor, newProperties)
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] }
-    Transforms.wrapNodes(editor, block)
-  }
-}
-
-const toggleMark = (editor, format) => {
-  const isActive = isMarkActive(editor, format)
-
-  if (isActive) {
-    Editor.removeMark(editor, format)
-  } else {
-    Editor.addMark(editor, format, true)
-  }
-}
-
-const isBlockActive = (editor, format, attribute = 'type') => {
-  const { selection } = editor
-  if (!selection) return false
-
-  const [match] = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: n =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        n[attribute] === format,
-    })
-  )
-
-  return !!match
-}
-
-const isMarkActive = (editor, format) => {
-  const marks = Editor.marks(editor)
-  return marks ? marks[format] === true : false
-}
 
 /******************************************************************************
 * Secondary components
 ******************************************************************************/
-
-const BlockButton = React.forwardRef(
-  (
-    { 
-      format,
-      ...iconButtonProps 
-    }: IconButtonProps & {
-      format: any,
-    },
-    ref: React.LegacyRef<HTMLButtonElement>
-  ) => {
-  const editor = useSlate()
-  return (
-    <IconButton
-      ref={ref}
-      variant='ghost'
-      onMouseDown={event => {
-        event.preventDefault()
-        toggleBlock(editor, format)
-      }}
-      {...iconButtonProps }
-    />
-  )
-})
-
-
-const MarkButton = React.forwardRef(
-  (
-    { 
-      format,
-      ...iconButtonProps 
-    }: IconButtonProps & {
-      format: any,
-    },
-    ref: React.LegacyRef<HTMLButtonElement>
-  ) => {
-    const editor = useSlate()
-    return (
-      <IconButton
-        ref={ref}
-        variant='ghost'
-        onMouseDown={event => {
-          event.preventDefault()
-          toggleMark(editor, format)
-        }}
-        {...iconButtonProps }
-      />
-    )
-  }
-)
 
 const ToolbarGroup = React.forwardRef((
   {
@@ -207,7 +57,53 @@ const ToolbarGroup = React.forwardRef((
   )
 })
 
-const ToolbarTextWeightSelect = ({ editor }) => {
+const ToolbarButton = (
+iconButtonProps: IconButtonProps
+) => (
+  <IconButton
+    variant='ghost'
+    {...iconButtonProps }
+  />
+)
+
+const BlockButton = (
+  { 
+    format,
+    ...iconButtonProps 
+  }: IconButtonProps & { format: string }
+) => {
+  const editor = useSlate()
+  return (
+    <ToolbarButton
+      onMouseDown={event => {
+        event.preventDefault()
+        toggleListBlock(editor, format)
+      }}
+      {...iconButtonProps }
+    />
+  )
+}
+
+const MarkButton = (
+  { 
+    format,
+    ...iconButtonProps 
+  }: IconButtonProps & { format: string }
+) => {
+  const editor = useSlate()
+  return (
+    <ToolbarButton
+      onMouseDown={event => {
+        event.preventDefault()
+        toggleMark(editor, format)
+      }}
+      {...iconButtonProps }
+    />
+  )
+}
+
+const ToolbarTextWeightSelect = () => {
+  const editor = useSlate() as AmberpadEditor
   const items: { 
     format: string, 
     label: string,
@@ -215,15 +111,17 @@ const ToolbarTextWeightSelect = ({ editor }) => {
     { format: 'heading-one', label: 'Heading 1' },
     { format: 'heading-two', label: 'Heading 2' },
     { format: 'heading-three', label: 'Heading 3' },
-    { format: 'paragraph', label: 'Normal' },
   ], [])
   const [state, setState] = useState({
-    textWeight: 'paragraph'
+    textWeight: ''
   })
 
   useEffect(() => {
     const onSelectListener = (operation) => {
-      console.log('SELECTION CHANGED')
+      const nodes = getTextElementNodesInSelection(editor)
+      //console.log('SELECTION CHANGE')
+      //console.log('Nodes:', JSON.stringify(nodes, undefined, 2))
+
     }
     editor.setOnOperationListener('set_selection', onSelectListener)
    return () => {
@@ -231,40 +129,62 @@ const ToolbarTextWeightSelect = ({ editor }) => {
    }
   }, [])
 
-  const onTextWeightChange = (format) => {
-    //console.log('CHANGE TEXT WEIGHT', format)
+  const onItemClick = (format) => {
     toggleTextBlock(editor, format)
     setState((prev) => ({
       ...prev,
-      textWeight: format
+      textWeight: prev.textWeight === format ? '' : format
     }))
   }
 
   return (
-    <Select.Root 
-      defaultValue='paragraph'
-      value={state.textWeight}
-      onValueChange={onTextWeightChange}
+    <Tooltip 
+      content='Heading'
+      open={false}
     >
-      <Select.Trigger variant='ghost'>
-        <FontAwesomeIcon
-          size='sm'
-          icon={faHeader}
-        />
-      </Select.Trigger>
-      <Select.Content variant='soft' >
-        {
-          items.map(item => (
-            <Select.Item
-              key={item.format}
-              value={item.format}
-            >
-              {item.label}
-            </Select.Item>
-          ))
-        }
-      </Select.Content>
-    </Select.Root>
+    <Flex
+      className="text-editor__weight-select"
+      direction='row'
+      justify='center'
+      align='center'
+    >
+      <Select.Root 
+        defaultValue=''
+        value={state.textWeight}
+      >
+        <Select.Trigger 
+          variant='ghost'
+          placeholder={
+            <FontAwesomeIcon
+              size='sm'
+              icon={faHeader}
+            /> as any
+          }
+        >
+          <FontAwesomeIcon
+            size='sm'
+            icon={faHeader}
+          />
+        </Select.Trigger>
+        <Select.Content variant='soft' >
+          {
+            items.map(item => (
+              <Select.Item
+                key={item.format}
+                value={item.format}
+                onMouseDown={(event) => {
+                  event.preventDefault()
+                  onItemClick(item.format)
+                }}
+              >
+                {item.label}
+              </Select.Item>
+            ))
+          }
+        </Select.Content>
+      </Select.Root>
+    </Flex>
+    </Tooltip>
   )
 }
 
@@ -278,7 +198,6 @@ const Toolbar = React.forwardRef(function (
   }: FlexProps,
   ref: React.LegacyRef<HTMLDivElement>
 ) {
-  const editor = useSlate()
   return (
     <Flex
       ref={ref}
@@ -289,7 +208,7 @@ const Toolbar = React.forwardRef(function (
       gap='4'
     >
       <ToolbarGroup>
-        <ToolbarTextWeightSelect editor={editor} />
+        <ToolbarTextWeightSelect />
       </ToolbarGroup>
 
       <ToolbarGroup>

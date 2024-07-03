@@ -13,6 +13,14 @@ const initialValue: DescendantType[] = [
     type: 'paragraph',
     children: [{ text: 'A line of text in a paragraph.' }],
   },
+  {
+    type: 'paragraph',
+    children: [{ text: 'Second line.' }],
+  },
+  {
+    type: 'paragraph',
+    children: [{ text: 'Third line.' }],
+  },
 ]
 
 /******************************************************************************
@@ -25,87 +33,56 @@ const defaultElement = ({ attributes, children, element }) => (
   </p>
 )
 
-const TextWeights = ({ attributes, children, element }) => (
-  {
-    'heading-one' : (
-      <h1 {...attributes}>
-        {children}
-      </h1>
-    ),
-    'heading-two': (
-      <h2 {...attributes}>
-        {children}
-      </h2>
-    ),
-    'heading-three': (
-      <h3 {...attributes}>
-        {children}
-      </h3>
-    ),
-    'text-normal': (
-      <p {...attributes}>
-        {children}
-      </p>
-    )
-  }[element.type]
-)
+const TextElements = ({ attributes, children }) => ({
+  'heading-one' : (
+    <h1 {...attributes}>
+      {children}
+    </h1>
+  ),
+  'heading-two': (
+    <h2 {...attributes}>
+      {children}
+    </h2>
+  ),
+  'heading-three': (
+    <h3 {...attributes}>
+      {children}
+    </h3>
+  ),
+  'text-normal': (
+    <p {...attributes}>
+      {children}
+    </p>
+  )
+})
+
+const ListElements = ({ attributes, children, element }) => ({
+  'numbered-list': (
+    <ol {...attributes}>
+      {children}
+    </ol>
+  ), 
+  'bulleted-list': (
+    <ul {...attributes}>
+      {children}
+    </ul>
+  ),
+  'list-item': (
+    <li {...attributes}>
+      {children}
+    </li>
+  )
+})
 
 const Element = (props) => {
   const { element } = props;
+  const textElements = TextElements(props)
+  const listElements = ListElements(props)
   return {
-    'heading-one': TextWeights(props),
-    'heading-two': TextWeights(props),
-    'heading-three': TextWeights(props),
-    'text-normal': TextWeights(props),
+    ...textElements,
+    ...listElements,
   }[element.type] || 
   defaultElement(props)
-
-  /*
-  switch (element.type) {
-    case 'block-quote':
-      return (
-        <blockquote style={style} {...attributes}>
-          {children}
-        </blockquote>
-      )
-    case 'bulleted-list':
-      return (
-        <ul style={style} {...attributes}>
-          {children}
-        </ul>
-      )
-    case 'heading-one':
-      return (
-        <h1 style={style} {...attributes}>
-          {children}
-        </h1>
-      )
-    case 'heading-two':
-      return (
-        <h2 style={style} {...attributes}>
-          {children}
-        </h2>
-      )
-    case 'list-item':
-      return (
-        <li style={style} {...attributes}>
-          {children}
-        </li>
-      )
-    case 'numbered-list':
-      return (
-        <ol style={style} {...attributes}>
-          {children}
-        </ol>
-      )
-    default:
-      return (
-        <p style={style} {...attributes}>
-          {children}
-        </p>
-      )
-  }
-  */
 }
 
 /******************************************************************************
@@ -113,20 +90,25 @@ const Element = (props) => {
 ******************************************************************************/
 
 const Leaf = ({ attributes, children, leaf }) => {
-  if (leaf.bold) {
+
+  if (leaf['bold']) {
     children = <strong>{children}</strong>
   }
 
-  if (leaf.code) {
+  if (leaf['inline-code']) {
     children = <code>{children}</code>
   }
 
-  if (leaf.italic) {
+  if (leaf['italic']) {
     children = <em>{children}</em>
   }
 
-  if (leaf.underline) {
+  if (leaf['underline']) {
     children = <u>{children}</u>
+  }
+
+  if (leaf['strikethrough']) {
+    children = <s>{children}</s>
   }
 
   return <span {...attributes}>{children}</span>
@@ -154,9 +136,7 @@ function TextEditor () {
         <Slate 
           editor={editor} 
           initialValue={initialValue as Descendant[]}
-          //onChange={(value) => {
-          //  console.log('EDITOR:', JSON.stringify(value, undefined, 2))
-          //}}
+          //onChange={value => console.log('CONTENT', JSON.stringify(value, undefined, 4))}
         >
           <Flex
             width='100%'

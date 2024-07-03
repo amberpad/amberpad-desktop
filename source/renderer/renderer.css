@@ -14,12 +14,23 @@
   --cursor-slider-thumb: grab;
   --cursor-slider-thumb-active: grabbing;
   --cursor-switch: pointer;
+
+  --text-color: var(--gray-12);
 }
 
 /* Ghost Icon buttons  */
 .radix-themes .rt-BaseButton.rt-variant-ghost {
-  color: inherit;
+  color: var(--text-color);
 }
+
+.radix-themes .rt-BaseButton.rt-variant-ghost {
+  color: var(--text-color);
+}
+
+.radix-themes .rt-SelectTrigger.rt-variant-ghost * {
+  color: var(--text-color);
+}
+
 
 /******************************************************************************
 * Commons
@@ -133,6 +144,10 @@
   padding: 0px;
   /*border: 1px solid red;*/
   outline: none;
+}
+
+.radix-themes .text-editor__weight-select .rt-SelectTriggerInner {
+  opacity: 1.0;
 }
 
 /******************************************************************************

@@ -153,7 +153,7 @@ export default React.forwardRef(function InifiniteScroll (
     } else {
       containerRef.current.removeEventListener('scroll', ListenToScrollEnd)
     }
-    return () => containerRef.current.removeEventListener('scroll', ListenToScrollEnd)
+    return () => containerRef.current?.removeEventListener('scroll', ListenToScrollEnd)
   }, [
     containerRef.current, 
     itemsHash,
@@ -204,7 +204,7 @@ export default React.forwardRef(function InifiniteScroll (
     }
     containerRef.current.addEventListener(
       'scroll', listener, {passive: true})
-    return () => containerRef.current.removeEventListener('scroll', listener)
+    return () => containerRef.current?.removeEventListener('scroll', listener)
   }, [containerRef.current, JSON.stringify(scrolledOverHashMap)])
 
   return (
