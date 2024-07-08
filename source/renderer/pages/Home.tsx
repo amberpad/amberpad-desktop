@@ -92,7 +92,7 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       const { setSelectedPageID } = pagesSlice.actions
-      const selectedPageID = await window.electronAPI.settings.selectedPageID.get()
+      const selectedPageID = await window.electronAPI.store.get({ key: 'selectedPageID' })
       store.dispatch(setSelectedPageID({ value: selectedPageID }))
     })()
   }, [])
@@ -254,10 +254,13 @@ export default function Home() {
                 height='100%'
                 overflow='clip'
               >
-                <AddNote
-                  p='4'
-                  onFocusChange={(isFocused) => setAddNoteIsFocused(isFocused)}
-                />
+                {
+                  <AddNote
+                    p='4'
+                    onFocusChange={(isFocused) => setAddNoteIsFocused(isFocused)}
+                  />
+                }
+
               </Box>
             </ResizableSide>
           </Box>

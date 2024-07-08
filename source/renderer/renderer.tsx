@@ -12,6 +12,14 @@ import './renderer.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
+/*
+Object.defineProperty(window, 'Text', {
+  value: window.Text,
+  writable: false,
+});
+*/
+
+
 const ThemeWrapper = ({ children }) => {
   return (
     <Theme 

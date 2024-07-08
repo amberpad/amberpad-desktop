@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Box, Flex, IconButton, TextArea } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowRight, faArrowUp } from '@fortawesome/free-solid-svg-icons'
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 
 import store from "@renderer/utils/redux-store"
 import { createNoteThunk } from "@renderer/actions/notes.slice"
@@ -89,23 +89,10 @@ function AddNote ({
       <Box 
         flexGrow='1'
       >
-        {
-          <TextEditor 
-            //onFocus={() => onFocusChange(true)}
-            //onBlur={() => onFocusChange(false)}
-          />
-        }
-        {/*
-          <TextArea
-            size='1'
-            value={state.inputValue}
-            onKeyDown={onKeyDown}
-            onKeyUp={onKeyUp} 
-            onChange={(event) => setState({ inputValue: event.target.value })}
-            onFocus={() => onFocusChange(true)}
-            onBlur={() => onFocusChange(false)}
-          />
-        */}
+        <TextEditor 
+          //onFocus={() => onFocusChange(true)}
+          //onBlur={() => onFocusChange(false)}
+        />
       </Box>
       <Flex
         direction='column'
@@ -121,7 +108,7 @@ function AddNote ({
         >
           <FontAwesomeIcon
             size='1x'
-            icon={faArrowUp}
+            icon={faPaperPlane}
           />
         </IconButton>
       </Flex>

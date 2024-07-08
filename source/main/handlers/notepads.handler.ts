@@ -21,7 +21,7 @@ import type {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notepads:getAll',
+    'notepads.getAll',
     async function getAll (_, payload) {
       /* -- Raw query
 
@@ -99,7 +99,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notepads.pages:get',
+    'notepads.pages.get',
     async function getAll (_, payload) {
       const options = Object.assign({
         page: 1,
@@ -154,7 +154,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notepads:create',
+    'notepads.create',
     async function create (_, payload) {
       try {
         const knex = await database.getManager();
@@ -176,7 +176,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notepads:update',
+    'notepads:update',
     async function update (_, payload) {
       try {
         const knex = await database.getManager();
@@ -200,7 +200,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notepads:destroy',
+    'notepads.destroy',
     async function destroy (_, payload) {
       try {
         const knex = await database.getManager();

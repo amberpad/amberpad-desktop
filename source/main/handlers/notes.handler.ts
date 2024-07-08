@@ -17,7 +17,7 @@ import type {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notes:getAll',
+    'notes.getAll',
     async function getAll (_, payload) {
       /* 
         -- Raw query
@@ -100,7 +100,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notes:create',
+    'notes.create',
     async function create (_, payload) {
       try {
         const knex = await database.getManager();
@@ -122,7 +122,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.note:update',
+    'note.update',
     async function update (_, payload) {
       try {
         const knex = await database.getManager();
@@ -146,7 +146,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.notes:destroy',
+    'notes.destroy',
     async function destroy (_, payload) {
       try {
         const knex = await database.getManager();

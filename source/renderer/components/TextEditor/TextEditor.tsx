@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback } from 'react'
 import { Descendant, createEditor } from 'slate'
 import { Slate, Editable, withReact } from 'slate-react'
-import { Box, Card, Flex } from '@radix-ui/themes'
+import { Box, Card, Flex, Link, Tooltip } from '@radix-ui/themes'
 
 import { widthAmberpadEditor } from '@renderer/utils/slate'
 import TextEditorToolbar from '@renderer/components/TextEditor/Toolbar'
@@ -27,7 +27,7 @@ const initialValue: DescendantType[] = [
 * Element rendering components
 ******************************************************************************/
 
-const defaultElement = ({ attributes, children, element }) => (
+const defaultElement = ({ attributes, children }) => (
   <p {...attributes}>
     {children}
   </p>
@@ -56,7 +56,7 @@ const TextElements = ({ attributes, children }) => ({
   )
 })
 
-const ListElements = ({ attributes, children, element }) => ({
+const ListElements = ({ attributes, children }) => ({
   'numbered-list': (
     <ol {...attributes}>
       {children}
@@ -75,12 +75,23 @@ const ListElements = ({ attributes, children, element }) => ({
 })
 
 const Element = (props) => {
-  const { element } = props;
+  const { element, attributes, children } = props;
   const textElements = TextElements(props)
   const listElements = ListElements(props)
+
   return {
     ...textElements,
     ...listElements,
+    'block-code': (
+      <code {...attributes}>
+        {children}
+      </code>
+    ),
+    'block-quote': (
+      <blockquote {...attributes}>
+        {children}
+      </blockquote>
+    )
   }[element.type] || 
   defaultElement(props)
 }
@@ -95,10 +106,6 @@ const Leaf = ({ attributes, children, leaf }) => {
     children = <strong>{children}</strong>
   }
 
-  if (leaf['inline-code']) {
-    children = <code>{children}</code>
-  }
-
   if (leaf['italic']) {
     children = <em>{children}</em>
   }
@@ -107,8 +114,42 @@ const Leaf = ({ attributes, children, leaf }) => {
     children = <u>{children}</u>
   }
 
+  if (leaf['inline-code']) {
+    children = <code>{children}</code>
+  }
+
   if (leaf['strikethrough']) {
     children = <s>{children}</s>
+  }
+
+  if (leaf['highlight']) {
+    children = <mark>{children}</mark>
+  }
+
+  if (leaf['link']) {
+    children = (
+      <Tooltip
+        content={
+          <Link
+            href='#'
+            className='text-editor__content tooltip-link'
+            onMouseDown={async (event) => {
+              event.preventDefault()
+              await window.electronAPI.general.openExternal({ 
+                url: leaf['link'].url })
+            }}
+          >
+            {leaf['link'].url}
+          </Link>
+        }
+      >
+        <Link
+          style={{ cursor: 'text' }}
+        >
+          {children}
+        </Link>
+    </Tooltip>
+    )
   }
 
   return <span {...attributes}>{children}</span>
@@ -136,7 +177,7 @@ function TextEditor () {
         <Slate 
           editor={editor} 
           initialValue={initialValue as Descendant[]}
-          //onChange={value => console.log('CONTENT', JSON.stringify(value, undefined, 4))}
+          //onChange={(value) => console.log(JSON.stringify(value, undefined, 4))}
         >
           <Flex
             width='100%'

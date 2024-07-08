@@ -50,7 +50,7 @@ const CreatePageContent = (
 
   return (
     <Dialog.Content
-      //maxWidth='520px'
+      aria-describedby={undefined}
       {...aditionalProps}
     >
       <Dialog.Title size='2'>

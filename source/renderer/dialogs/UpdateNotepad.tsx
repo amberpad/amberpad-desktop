@@ -58,6 +58,7 @@ function CreateNotepadContent(
 
   return (
     <Dialog.Content
+      aria-describedby={undefined}
       onOpenAutoFocus={() => setFormValues()}
       {...aditionalProps}
     >

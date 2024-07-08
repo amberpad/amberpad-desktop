@@ -9,9 +9,9 @@ const isPackaged = globals.ENVIRONMENT === 'production' ||
   (globals.ENVIRONMENT === 'testing' && !globals.DEBUG)
 
 const config = {
-  target: 'es2020',
+  target: 'chrome124',
   platform: 'browser',
-  format: 'cjs',
+  format: 'iife',
   logLevel: "info",
   bundle: true,
   minify: !!isPackaged,

@@ -7,25 +7,23 @@ import {
   Text
 } from '@radix-ui/themes'
 
-import store from "@renderer/utils/redux-store"
-import { createNotepadThunk } from "@renderer/actions/notepads.slice"
-
-function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
+function AddURLContent(
+  {
+    onSuccess=undefined,
+    initial={},
+    ...dialogContentprops
+  }: Parameters<typeof Dialog.Content>[0] & {
+    onSuccess?: (URL: string) => void,
+    initial?: {[key: string]: any}
+  }
+) {
   const [state, setState] = useState({
-    name: '',
+    url: initial.url || '',
   })
 
   const clearForm = () => {
     setState({
-      name: '',
-    })
-  }
-
-  const createNotepad = () => {
-    store.dispatch(createNotepadThunk({
-      name: state.name
-    })).then(() => {
-      // Show success
+      url: '',
     })
   }
 
@@ -34,17 +32,18 @@ function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
   }
 
   const _onSuccess = () => {
-    createNotepad()
+    // Resolve
+    onSuccess(state.url)
     clearForm()
   }
 
   return (
     <Dialog.Content
       aria-describedby={undefined}
-      {...props}
+      {...dialogContentprops}
     >
       <Dialog.Title size='2'>
-        Create notepad
+        Update link
       </Dialog.Title>
 
       <Flex 
@@ -53,12 +52,12 @@ function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
       >
         <label>
           <Text as="div" size="2" mb="1" weight="bold">
-            Name
+            URL
           </Text>
           <TextField.Root 
             size='2'
-            value={state.name}
-            onChange={(event) => setState({ name: event.target.value })}
+            value={state.url}
+            onChange={(event) => setState({ url: event.target.value })}
           />
         </label>
       </Flex>
@@ -75,6 +74,7 @@ function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
         </Dialog.Close>
         <Dialog.Close>
           <Button
+            disabled={state.url === ''}
             onClick={_onSuccess}
           >
             Save
@@ -87,5 +87,5 @@ function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
 
 export default {
   ...Dialog,
-  Content: CreateNotepadContent,
+  Content: AddURLContent,
 }

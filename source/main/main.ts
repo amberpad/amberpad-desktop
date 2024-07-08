@@ -6,11 +6,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
-import '@main/handlers/notepads.handler'
-import '@main/handlers/pages.handler'
-import '@main/handlers/notes.handler'
-import '@main/handlers/settings.handler'
-import '@main/handlers/store.handler'
+import '@main/handlers/index'
 
 var appContext: {
   mainWindow: BrowserWindow,

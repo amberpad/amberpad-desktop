@@ -16,21 +16,17 @@
   --cursor-switch: pointer;
 
   --text-color: var(--gray-12);
+  --tooltip-text-color: var(--accent-6);
 }
 
 /* Ghost Icon buttons  */
-.radix-themes .rt-BaseButton.rt-variant-ghost {
+.radix-themes .rt-IconButton {
   color: var(--text-color);
 }
 
-.radix-themes .rt-BaseButton.rt-variant-ghost {
+.radix-themes .rt-SelectTrigger * {
   color: var(--text-color);
 }
-
-.radix-themes .rt-SelectTrigger.rt-variant-ghost * {
-  color: var(--text-color);
-}
-
 
 /******************************************************************************
 * Commons
@@ -142,12 +138,28 @@
 
 .radix-themes .text-editor__content {
   padding: 0px;
-  /*border: 1px solid red;*/
   outline: none;
 }
 
-.radix-themes .text-editor__weight-select .rt-SelectTriggerInner {
+.radix-themes .text-editor__select .rt-SelectTriggerInner {
   opacity: 1.0;
+}
+
+.radix-themes .text-editor__button--checked {
+  background-color: var(--accent-a3);
+  outline: 1px solid var(--accent-6);
+}
+
+.radix-themes .text-editor__button--disabled {
+  color: var(--gray-8) !important;
+}
+
+.radix-themes .text-editor__content.tooltip-link {
+  color: var(--tooltip-text-color)
+}
+
+.radix-themes .text-editor__content.tooltip-link:hover {
+  text-decoration: underline;
 }
 
 /******************************************************************************

@@ -13,6 +13,7 @@ export interface ElementType extends BaseElement {
 
 export interface TextType extends BaseText {
   text: string
+  url?: string
 }
 
 export interface EditorType extends BaseEditor {

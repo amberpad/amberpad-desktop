@@ -1,15 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState }  from "react"
-import {
-  Editor,
-  Transforms,
-  Element as SlateElement,
-} from 'slate'
-import { useSlate } from 'slate-react'
-import { Flex, IconButton, Select, Text, Tooltip } from "@radix-ui/themes"
+//import { useSlate } from 'slate-react'
+import { Flex, IconButton, Select, Tooltip } from "@radix-ui/themes"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { 
-  faSquare, 
-} from '@fortawesome/free-regular-svg-icons'
 import { 
   faHeader, 
   faBold, 
@@ -22,17 +14,25 @@ import {
   faListUl,
   faQuoteRight,
   faLink,
+  faHighlighter
 } from '@fortawesome/free-solid-svg-icons'
 
-import { 
-  getTextElementNodesInSelection,
+import AddURL from "@renderer/dialogs/AddURL"
+import { useAmberpadEditor } from "@renderer/utils/slate"
+/*
+import {
   AmberpadEditor,
-  toggleTextBlock,
-  toggleListBlock, 
+  toggleBlock,
+  getTextElementTypesInSelection, 
   toggleMark,
+  isBlockActive,
+  isMarkActive,
+  isSelectionCollpased,
+  toggleLinkMark,
+  isLinkMarkActive,
 } from "@renderer/utils/slate"
+ */
 
-import type { ElementType, NodeType } from "@ts/slate.types"
 import type { FlexProps, IconButtonProps } from "@radix-ui/themes"
 
 /******************************************************************************
@@ -57,32 +57,28 @@ const ToolbarGroup = React.forwardRef((
   )
 })
 
-const ToolbarButton = (
-iconButtonProps: IconButtonProps
+const ToolbarButton = React.forwardRef((
+{
+  className,
+  disabled,
+  checked=undefined,
+  ...iconButtonProps
+}: IconButtonProps & {
+  checked?: boolean,
+},
+ref: React.LegacyRef<HTMLButtonElement>,
 ) => (
   <IconButton
+    ref={ref}
     variant='ghost'
-    {...iconButtonProps }
+    className={[
+      !!checked ? 'text-editor__button--checked' : '',
+      !!disabled ? 'text-editor__button--disabled': '', 
+    ].join(' ')}
+    disabled={disabled}
+    {...iconButtonProps}
   />
-)
-
-const BlockButton = (
-  { 
-    format,
-    ...iconButtonProps 
-  }: IconButtonProps & { format: string }
-) => {
-  const editor = useSlate()
-  return (
-    <ToolbarButton
-      onMouseDown={event => {
-        event.preventDefault()
-        toggleListBlock(editor, format)
-      }}
-      {...iconButtonProps }
-    />
-  )
-}
+))
 
 const MarkButton = (
   { 
@@ -90,12 +86,61 @@ const MarkButton = (
     ...iconButtonProps 
   }: IconButtonProps & { format: string }
 ) => {
-  const editor = useSlate()
+  const editor = useAmberpadEditor()
   return (
     <ToolbarButton
+      checked={editor.isMarkActive(format)}
       onMouseDown={event => {
         event.preventDefault()
-        toggleMark(editor, format)
+        editor.toggleMark(format)
+      }}
+      {...iconButtonProps }
+    />
+  )
+}
+
+const URLButton = (
+  iconButtonProps: IconButtonProps
+) => {
+  const editor = useAmberpadEditor()
+
+  const applyMark = (url) => {
+    editor.toggleLinkMark(url)
+  }
+
+  //isLinkMarkActive
+  const _isSelectionCollapsed = editor.isSelectionCollpased()
+  const isButtonEnabled = _isSelectionCollapsed === null ? false : !_isSelectionCollapsed
+  return (
+    <AddURL.Root 
+      open={isButtonEnabled ? undefined : false}
+    >
+      <AddURL.Trigger>
+        <ToolbarButton
+          disabled={!isButtonEnabled}
+          {...iconButtonProps }
+        />
+      </AddURL.Trigger>
+      <AddURL.Content 
+        onSuccess={applyMark}
+      />
+    </AddURL.Root>
+  )
+}
+
+const BlockButton = (
+  { 
+    format,
+    ...iconButtonProps 
+  }: IconButtonProps & { format: string }
+) => {
+  const editor = useAmberpadEditor()
+  return (
+    <ToolbarButton
+      className={ editor.isBlockActive(format) && 'text-editor__button--checked' }
+      onMouseDown={event => {
+        event.preventDefault()
+        editor.toggleBlock(format)
       }}
       {...iconButtonProps }
     />
@@ -103,7 +148,7 @@ const MarkButton = (
 }
 
 const ToolbarTextWeightSelect = () => {
-  const editor = useSlate() as AmberpadEditor
+  const editor = useAmberpadEditor()
   const items: { 
     format: string, 
     label: string,
@@ -113,15 +158,27 @@ const ToolbarTextWeightSelect = () => {
     { format: 'heading-three', label: 'Heading 3' },
   ], [])
   const [state, setState] = useState({
-    textWeight: ''
+    value: '',
+    checked: false,
   })
 
   useEffect(() => {
-    const onSelectListener = (operation) => {
-      const nodes = getTextElementNodesInSelection(editor)
-      //console.log('SELECTION CHANGE')
-      //console.log('Nodes:', JSON.stringify(nodes, undefined, 2))
-
+    const onSelectListener = () => {
+      const textTypesInSelection = editor.getTextElementTypesInSelection()
+      if (textTypesInSelection.length === 1) {
+        const type = textTypesInSelection[0] as string
+        setState((prev) => ({
+          ...prev,
+          value: type === 'paragraph' ? '' : type,
+          checked: type !== 'paragraph'
+        }))
+      } else if (textTypesInSelection.length > 1) {
+        setState((prev) => ({
+          ...prev,
+          value: '',
+          checked: true,
+        }))
+      }
     }
     editor.setOnOperationListener('set_selection', onSelectListener)
    return () => {
@@ -130,10 +187,11 @@ const ToolbarTextWeightSelect = () => {
   }, [])
 
   const onItemClick = (format) => {
-    toggleTextBlock(editor, format)
+    editor.toggleBlock(format)
     setState((prev) => ({
       ...prev,
-      textWeight: prev.textWeight === format ? '' : format
+      value: prev.value === format ? '' : format,
+      checked: true,
     }))
   }
 
@@ -143,17 +201,18 @@ const ToolbarTextWeightSelect = () => {
       open={false}
     >
     <Flex
-      className="text-editor__weight-select"
+      className="text-editor__select"
       direction='row'
       justify='center'
       align='center'
     >
       <Select.Root 
         defaultValue=''
-        value={state.textWeight}
+        value={state.value}
       >
-        <Select.Trigger 
+        <Select.Trigger
           variant='ghost'
+          className={state.checked && 'text-editor__button--checked'}
           placeholder={
             <FontAwesomeIcon
               size='sm'
@@ -166,7 +225,7 @@ const ToolbarTextWeightSelect = () => {
             icon={faHeader}
           />
         </Select.Trigger>
-        <Select.Content variant='soft' >
+        <Select.Content>
           {
             items.map(item => (
               <Select.Item
@@ -206,6 +265,7 @@ const Toolbar = React.forwardRef(function (
       justify='start'
       align='center'
       gap='4'
+      px='1'
     >
       <ToolbarGroup>
         <ToolbarTextWeightSelect />
@@ -236,43 +296,34 @@ const Toolbar = React.forwardRef(function (
             icon={faStrikethrough}
           />
         </MarkButton>
+        <MarkButton format="highlight">
+          <FontAwesomeIcon
+            size='sm'
+            icon={faHighlighter}
+          />
+        </MarkButton>
       </ToolbarGroup>
 
       <ToolbarGroup>
-        <MarkButton format="inline-code">
+        <URLButton>
           <FontAwesomeIcon
             size='sm'
-            icon={faCode}
+            icon={faLink}
+            transform={'shrink-2'}
           />
-        </MarkButton>
-        <BlockButton format='block-code'>
-          <span className="fa-layers fa-fw">
-            <FontAwesomeIcon
-              size='sm'
-              icon={faSquare}
-              transform={'grow-4'}
-            />
-            <FontAwesomeIcon
-              size='sm'
-              icon={faCode}
-              transform={'shrink-8'}
-            />
-          </span>
-        </BlockButton>
+        </URLButton>
         <BlockButton format='block-quote'>
           <FontAwesomeIcon
             size='sm'
             icon={faQuoteRight}
           />
         </BlockButton>
-        <BlockButton format='link'>
+        <MarkButton format="inline-code">
           <FontAwesomeIcon
             size='sm'
-            icon={faLink}
-            transform={'shrink-2'}
+            icon={faCode}
           />
-        </BlockButton>
-        
+        </MarkButton>
       </ToolbarGroup>
 
       <ToolbarGroup>

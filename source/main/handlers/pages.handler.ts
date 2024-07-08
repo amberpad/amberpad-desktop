@@ -24,7 +24,7 @@ import {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.pages:getAll',
+    'pages.getAll',
     async function getAll (_, payload) {
       const options = Object.assign({
         page: 1,
@@ -46,7 +46,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.pages:get',
+    'pages.get',
     async function get (_, payload) {
       const knex = await database.getManager();
       const notepadsColumns = Object.keys(await knex('notepads').columnInfo())
@@ -70,7 +70,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.pages:create',
+    'pages.create',
     async function create (_, payload) {
       try {
         const knex = await database.getManager();
@@ -92,7 +92,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.pages:update',
+    'pages.update',
     async function update (_, payload) {
       try {
         const knex = await database.getManager();
@@ -116,7 +116,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'database.pages:destroy',
+    'pages.destroy',
     async function destroy (_, payload) {
       try {
         const knex = await database.getManager();
