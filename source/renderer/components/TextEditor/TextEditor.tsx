@@ -1,159 +1,129 @@
 import React, { useMemo, useCallback } from 'react'
 import { Descendant, createEditor } from 'slate'
 import { Slate, Editable, withReact } from 'slate-react'
-import { Box, Card, Flex, Link, Tooltip } from '@radix-ui/themes'
+import { Box, Card, Flex } from '@radix-ui/themes'
 
 import { widthAmberpadEditor } from '@renderer/utils/slate'
-import TextEditorToolbar from '@renderer/components/TextEditor/Toolbar'
+import TextEditorToolbar from './Toolbar'
+import Element from './Element'
+import Leaf from './Leaf'
 
 import type { DescendantType } from '@ts/slate.types'
 
 const initialValue: DescendantType[] = [
   {
-    type: 'paragraph',
-    children: [{ text: 'A line of text in a paragraph.' }],
+      "type": "bulleted-list",
+      "children": [
+          {
+              "type": "list-item",
+              "children": [
+                  {
+                      "type": "paragraph",
+                      "children": [
+                          {
+                              "text": "First"
+                          }
+                      ]
+                  }
+              ]
+          },
+          {
+              "type": "list-item",
+              "children": [
+                  {
+                      "type": "paragraph",
+                      "children": [
+                          {
+                              "text": "Second"
+                          }
+                      ]
+                  }
+              ]
+          },
+          {
+              "type": "list-item",
+              "children": [
+                  {
+                      "type": "paragraph",
+                      "children": [
+                          {
+                              "text": "Third"
+                          }
+                      ]
+                  }
+              ]
+          }
+      ]
   },
   {
-    type: 'paragraph',
-    children: [{ text: 'Second line.' }],
+      "type": "paragraph",
+      "children": [
+          {
+              "text": "Text"
+          }
+      ]
   },
   {
-    type: 'paragraph',
-    children: [{ text: 'Third line.' }],
-  },
-]
-
-/******************************************************************************
-* Element rendering components
-******************************************************************************/
-
-const defaultElement = ({ attributes, children }) => (
-  <p {...attributes}>
-    {children}
-  </p>
-)
-
-const TextElements = ({ attributes, children }) => ({
-  'heading-one' : (
-    <h1 {...attributes}>
-      {children}
-    </h1>
-  ),
-  'heading-two': (
-    <h2 {...attributes}>
-      {children}
-    </h2>
-  ),
-  'heading-three': (
-    <h3 {...attributes}>
-      {children}
-    </h3>
-  ),
-  'text-normal': (
-    <p {...attributes}>
-      {children}
-    </p>
-  )
-})
-
-const ListElements = ({ attributes, children }) => ({
-  'numbered-list': (
-    <ol {...attributes}>
-      {children}
-    </ol>
-  ), 
-  'bulleted-list': (
-    <ul {...attributes}>
-      {children}
-    </ul>
-  ),
-  'list-item': (
-    <li {...attributes}>
-      {children}
-    </li>
-  )
-})
-
-const Element = (props) => {
-  const { element, attributes, children } = props;
-  const textElements = TextElements(props)
-  const listElements = ListElements(props)
-
-  return {
-    ...textElements,
-    ...listElements,
-    'block-code': (
-      <code {...attributes}>
-        {children}
-      </code>
-    ),
-    'block-quote': (
-      <blockquote {...attributes}>
-        {children}
-      </blockquote>
-    )
-  }[element.type] || 
-  defaultElement(props)
-}
-
-/******************************************************************************
-* Leaf rendering components
-******************************************************************************/
-
-const Leaf = ({ attributes, children, leaf }) => {
-
-  if (leaf['bold']) {
-    children = <strong>{children}</strong>
-  }
-
-  if (leaf['italic']) {
-    children = <em>{children}</em>
-  }
-
-  if (leaf['underline']) {
-    children = <u>{children}</u>
-  }
-
-  if (leaf['inline-code']) {
-    children = <code>{children}</code>
-  }
-
-  if (leaf['strikethrough']) {
-    children = <s>{children}</s>
-  }
-
-  if (leaf['highlight']) {
-    children = <mark>{children}</mark>
-  }
-
-  if (leaf['link']) {
-    children = (
-      <Tooltip
-        content={
-          <Link
-            href='#'
-            className='text-editor__content tooltip-link'
-            onMouseDown={async (event) => {
-              event.preventDefault()
-              await window.electronAPI.general.openExternal({ 
-                url: leaf['link'].url })
-            }}
-          >
-            {leaf['link'].url}
-          </Link>
+    "type": "paragraph",
+    "children": [
+        {
+            "text": "Another Text"
         }
-      >
-        <Link
-          style={{ cursor: 'text' }}
-        >
-          {children}
-        </Link>
-    </Tooltip>
-    )
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+        {
+            "text": "Yet Another Text"
+        }
+    ]
+  },
+  {
+      "type": "numbered-list",
+      "children": [
+          {
+              "type": "list-item",
+              "children": [
+                  {
+                      "type": "paragraph",
+                      "children": [
+                          {
+                              "text": "Fourth"
+                          }
+                      ]
+                  }
+              ]
+          },
+          {
+              "type": "list-item",
+              "children": [
+                  {
+                      "type": "paragraph",
+                      "children": [
+                          {
+                              "text": "Fifth"
+                          }
+                      ]
+                  }
+              ]
+          },
+          {
+              "type": "list-item",
+              "children": [
+                  {
+                      "type": "paragraph",
+                      "children": [
+                          {
+                              "text": "Sixth"
+                          }
+                      ]
+                  }
+              ]
+          }
+      ]
   }
-
-  return <span {...attributes}>{children}</span>
-}
+]
 
 /******************************************************************************
 * Render text editor

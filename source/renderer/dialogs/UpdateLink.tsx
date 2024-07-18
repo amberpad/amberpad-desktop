@@ -7,7 +7,7 @@ import {
   Text
 } from '@radix-ui/themes'
 
-function AddURLContent(
+function UpdateLinkContent(
   {
     onSuccess=undefined,
     initial={},
@@ -18,12 +18,12 @@ function AddURLContent(
   }
 ) {
   const [state, setState] = useState({
-    url: initial.url || '',
+    link: initial.link || '',
   })
 
   const clearForm = () => {
     setState({
-      url: '',
+      link: '',
     })
   }
 
@@ -33,7 +33,7 @@ function AddURLContent(
 
   const _onSuccess = () => {
     // Resolve
-    onSuccess(state.url)
+    onSuccess(state.link)
     clearForm()
   }
 
@@ -56,8 +56,8 @@ function AddURLContent(
           </Text>
           <TextField.Root 
             size='2'
-            value={state.url}
-            onChange={(event) => setState({ url: event.target.value })}
+            value={state.link}
+            onChange={(event) => setState({ link: event.target.value })}
           />
         </label>
       </Flex>
@@ -74,7 +74,7 @@ function AddURLContent(
         </Dialog.Close>
         <Dialog.Close>
           <Button
-            disabled={state.url === ''}
+            disabled={state.link === ''}
             onClick={_onSuccess}
           >
             Save
@@ -87,5 +87,5 @@ function AddURLContent(
 
 export default {
   ...Dialog,
-  Content: AddURLContent,
+  Content: UpdateLinkContent,
 }

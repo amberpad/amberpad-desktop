@@ -19,12 +19,16 @@
   --tooltip-text-color: var(--accent-6);
 }
 
+.text-color {
+  color: var(--text-color);  
+}
+
 /* Ghost Icon buttons  */
-.radix-themes .rt-IconButton {
+.radix-themes .rt-variant-ghost.rt-IconButton {
   color: var(--text-color);
 }
 
-.radix-themes .rt-SelectTrigger * {
+.radix-themes .rt-variant-ghost.rt-SelectTrigger * {
   color: var(--text-color);
 }
 
@@ -152,14 +156,6 @@
 
 .radix-themes .text-editor__button--disabled {
   color: var(--gray-8) !important;
-}
-
-.radix-themes .text-editor__content.tooltip-link {
-  color: var(--tooltip-text-color)
-}
-
-.radix-themes .text-editor__content.tooltip-link:hover {
-  text-decoration: underline;
 }
 
 /******************************************************************************

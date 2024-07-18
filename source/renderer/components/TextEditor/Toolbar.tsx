@@ -17,21 +17,8 @@ import {
   faHighlighter
 } from '@fortawesome/free-solid-svg-icons'
 
-import AddURL from "@renderer/dialogs/AddURL"
+import UpdateLink from "@renderer/dialogs/UpdateLink"
 import { useAmberpadEditor } from "@renderer/utils/slate"
-/*
-import {
-  AmberpadEditor,
-  toggleBlock,
-  getTextElementTypesInSelection, 
-  toggleMark,
-  isBlockActive,
-  isMarkActive,
-  isSelectionCollpased,
-  toggleLinkMark,
-  isLinkMarkActive,
-} from "@renderer/utils/slate"
- */
 
 import type { FlexProps, IconButtonProps } from "@radix-ui/themes"
 
@@ -50,7 +37,7 @@ const ToolbarGroup = React.forwardRef((
       direction='row'
       justify='start'
       align='center'
-      gap='2'
+      gap='3'
       ref={ref}
       {...flexProps}
     />
@@ -99,32 +86,30 @@ const MarkButton = (
   )
 }
 
-const URLButton = (
+const URLMarkButton = (
   iconButtonProps: IconButtonProps
 ) => {
   const editor = useAmberpadEditor()
 
-  const applyMark = (url) => {
-    editor.toggleLinkMark(url)
+  const applyMark = (link) => {
+    editor.toggleLinkMark(link)
   }
 
-  //isLinkMarkActive
-  const _isSelectionCollapsed = editor.isSelectionCollpased()
-  const isButtonEnabled = _isSelectionCollapsed === null ? false : !_isSelectionCollapsed
+  const isButtonEnabled = editor.isLinkButtonEnabled()
   return (
-    <AddURL.Root 
+    <UpdateLink.Root 
       open={isButtonEnabled ? undefined : false}
     >
-      <AddURL.Trigger>
+      <UpdateLink.Trigger>
         <ToolbarButton
           disabled={!isButtonEnabled}
           {...iconButtonProps }
         />
-      </AddURL.Trigger>
-      <AddURL.Content 
+      </UpdateLink.Trigger>
+      <UpdateLink.Content 
         onSuccess={applyMark}
       />
-    </AddURL.Root>
+    </UpdateLink.Root>
   )
 }
 
@@ -135,12 +120,35 @@ const BlockButton = (
   }: IconButtonProps & { format: string }
 ) => {
   const editor = useAmberpadEditor()
+
   return (
     <ToolbarButton
-      className={ editor.isBlockActive(format) && 'text-editor__button--checked' }
+      checked={editor.isBlockActive(format)}
       onMouseDown={event => {
         event.preventDefault()
         editor.toggleBlock(format)
+      }}
+      {...iconButtonProps }
+    />
+  )
+}
+
+
+
+const ListBlockButton = (
+  { 
+    format,
+    ...iconButtonProps 
+  }: IconButtonProps & { format: string }
+) => {
+  const editor = useAmberpadEditor()
+
+  return (
+    <ToolbarButton
+      checked={editor.isBlockListActive(format)}
+      onMouseDown={event => {
+        event.preventDefault()
+        editor.toggleListBlock(format)
       }}
       {...iconButtonProps }
     />
@@ -157,44 +165,14 @@ const ToolbarTextWeightSelect = () => {
     { format: 'heading-two', label: 'Heading 2' },
     { format: 'heading-three', label: 'Heading 3' },
   ], [])
-  const [state, setState] = useState({
-    value: '',
-    checked: false,
-  })
-
-  useEffect(() => {
-    const onSelectListener = () => {
-      const textTypesInSelection = editor.getTextElementTypesInSelection()
-      if (textTypesInSelection.length === 1) {
-        const type = textTypesInSelection[0] as string
-        setState((prev) => ({
-          ...prev,
-          value: type === 'paragraph' ? '' : type,
-          checked: type !== 'paragraph'
-        }))
-      } else if (textTypesInSelection.length > 1) {
-        setState((prev) => ({
-          ...prev,
-          value: '',
-          checked: true,
-        }))
-      }
-    }
-    editor.setOnOperationListener('set_selection', onSelectListener)
-   return () => {
-    editor.removeOnOperationListener('set_selection', onSelectListener)
-   }
-  }, [])
 
   const onItemClick = (format) => {
-    editor.toggleBlock(format)
-    setState((prev) => ({
-      ...prev,
-      value: prev.value === format ? '' : format,
-      checked: true,
-    }))
+    editor.toggleTextBlock(format)
   }
 
+  const textTypes = editor.getTextTypes()
+  const isButtonEnabled = (textTypes.length === 1 && textTypes[0] !== 'paragraph') || 
+    textTypes.length > 1
   return (
     <Tooltip 
       content='Heading'
@@ -208,11 +186,18 @@ const ToolbarTextWeightSelect = () => {
     >
       <Select.Root 
         defaultValue=''
-        value={state.value}
+        value={
+          (
+            textTypes.length === 1 && 
+            textTypes[0] !== 'paragraph'
+          ) ? 
+            textTypes[0] : 
+            null
+        }
       >
         <Select.Trigger
           variant='ghost'
-          className={state.checked && 'text-editor__button--checked'}
+          className={isButtonEnabled && 'text-editor__button--checked'}
           placeholder={
             <FontAwesomeIcon
               size='sm'
@@ -257,6 +242,7 @@ const Toolbar = React.forwardRef(function (
   }: FlexProps,
   ref: React.LegacyRef<HTMLDivElement>
 ) {
+  const editor = useAmberpadEditor()
   return (
     <Flex
       ref={ref}
@@ -264,7 +250,7 @@ const Toolbar = React.forwardRef(function (
       direction='row'
       justify='start'
       align='center'
-      gap='4'
+      gap='6'
       px='1'
     >
       <ToolbarGroup>
@@ -305,46 +291,46 @@ const Toolbar = React.forwardRef(function (
       </ToolbarGroup>
 
       <ToolbarGroup>
-        <URLButton>
+        <URLMarkButton>
           <FontAwesomeIcon
             size='sm'
             icon={faLink}
             transform={'shrink-2'}
           />
-        </URLButton>
-        <BlockButton format='block-quote'>
-          <FontAwesomeIcon
-            size='sm'
-            icon={faQuoteRight}
-          />
-        </BlockButton>
+        </URLMarkButton>
         <MarkButton format="inline-code">
           <FontAwesomeIcon
             size='sm'
             icon={faCode}
           />
         </MarkButton>
+        <BlockButton format='block-quote'>
+          <FontAwesomeIcon
+            size='sm'
+            icon={faQuoteRight}
+          />
+        </BlockButton>
       </ToolbarGroup>
 
       <ToolbarGroup>
-        <BlockButton format='bulleted-list'>
+        <ListBlockButton format='bulleted-list'>
           <FontAwesomeIcon
             size='sm'
             icon={faListUl}
           />
-        </BlockButton>
-        <BlockButton format='numbered-list'>
+        </ListBlockButton>
+        <ListBlockButton format='numbered-list'>
           <FontAwesomeIcon
             size='sm'
             icon={faListOl}
           />
-        </BlockButton>
-        <BlockButton format='check-list'>
+        </ListBlockButton>
+        <ListBlockButton format='check-list'>
           <FontAwesomeIcon
             size='sm'
             icon={faListCheck}
           />
-        </BlockButton>
+        </ListBlockButton>
       </ToolbarGroup>
     </Flex>
   )
