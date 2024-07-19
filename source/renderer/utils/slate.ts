@@ -12,10 +12,13 @@ import {
   Ancestor,
   Path,
   NodeMatch,
+  node,
+  path,
 } from 'slate'
 import { useSlate, ReactEditor } from 'slate-react'
 
 import type { EditorType, ElementType, NodeType, TextType, NodeFormat } from "@ts/slate.types"
+import { reverse } from 'lodash'
 
 export const useAmberpadEditor = () => {
   return useSlate() as AmberpadEditor
@@ -53,6 +56,11 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
       'list-item',
       'check-list-item'
     ]
+    this.listItemsMap = {
+      'numbered-list': 'list-item', 
+      'bulleted-list': 'list-item',
+      'check-list': 'check-list-item',
+    }
     this.allowedParents = {
       'block-quote': []
     }
@@ -111,7 +119,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     const { selection } = editor
     if (selection && Range.isCollapsed(selection)) {
       const stack = Array.from(getAncestorsStack(selection.anchor.path, { includeCeiling: true }))
-      console.log('STACK', stack)
+
       if (
         stack.length >= 2 && 
         stack[0][0].type === 'paragraph' &&
@@ -149,18 +157,21 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   ****************************************************************************/
 
   const getLeaves = ({
-    match=() => true
+    match=() => true,
+    reverse=false,
   }: {
-    match?: NodeMatch<NodeType>
+    match?: NodeMatch<NodeType>,
+    reverse?: boolean
   } = {}): Generator<NodeEntry<EditorType | ElementType>, void, undefined> => {
-    console.log('EDTIOR SELECTION', editor.selection)
+    // Finds the lowest paragraph blocks in selection
     if (!editor.selection) {
-      return undefined
+      return (function* () {})()
     }
 
     const floorTypes = [...context.listTypes, ...context.paragraphTypes]
     const leafs = editor.nodes<ElementType | EditorType>({
       mode: 'lowest',
+      reverse: reverse,
       at: Editor.unhangRange(editor, editor.selection),
       match: (node: ElementType, path) =>
         Element.isElement(node) &&
@@ -185,6 +196,9 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
       includeCeiling=false,
     }: GetAncestorsStackOptions = {}
   ): Generator<NodeEntry<EditorType | ElementType>> {
+    // Returns a generator with the ancestor branch of a given node
+    // The generator will stop when finding one of the ceiling element types
+    // or throwing an error
     if (!editor.selection) return
 
     for(let [node, path] of Node.ancestors(editor, leafPath, { reverse })) {
@@ -201,9 +215,17 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
 
   const findStackAncestor = (
     path: Path,
-    match: (node, path) => boolean,
-    options: GetAncestorsStackOptions={},
+    match: (
+      node: EditorType | ElementType, 
+      path: Path
+    ) => boolean,
+    options: GetAncestorsStackOptions={
+      ceiling: ['editor'],
+      includeCeiling: true,
+    },
   ): NodeEntry<EditorType | ElementType> => {
+    // Iterates the ancestors branch of a given node to find an element
+    // that makes the match function to return true
     for (
       let [ancestor, ancestorPath] of 
       getAncestorsStack(path, options)
@@ -214,6 +236,43 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     }
    return undefined
   }
+
+  const groupAdjacentLeaves = (
+    leaves: Generator<NodeEntry<EditorType | ElementType>, void, undefined>
+  ): { items: Path[], location: Path | Range }[] => {
+    const paths = Array.from(leaves).map(entry => entry[1])
+    // Key will be the lead element in the group, value will be the group
+    //const groups: Map<Path, Path[]> = new Map()
+    const groups: { lead: Path, items: Path[] }[] = []
+    paths.forEach((path) => {
+      const group = groups.find(
+        item => Path.isSibling(item.lead, path) ||
+        context.listTypes.includes(
+          (Node.get(editor, Path.common(item.lead, path)) as ElementType | EditorType).type
+        )
+      )
+      if (!!group) {
+        group.lead = path
+        group.items.push(path)
+      } else {
+        groups.push({ lead: path, items: [path] })
+      }
+    })
+
+    return groups.map(({ items }) => ({
+      items,
+      location: items.length === 1 ?
+        items[0] as Path :
+        { 
+          anchor: { path: items[0], offset: 0 },
+          focus: { path: items[items.length -1], offset: 0 }
+        } as Range
+    }))
+  }
+
+  /****************************************************************************
+  * General use block commands
+  ****************************************************************************/
 
   const isBlockActive = (format: NodeFormat) => {
     if (!editor.selection) return false
@@ -237,8 +296,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     } else {
       const leaves = Array.from(getLeaves())
       for (let [leaf, leafPath] of leaves) {
-        const entry = findStackAncestor(leafPath, 
-          (node) => node.type === format)
+        const entry = findStackAncestor(leafPath, (node) => node.type === format)
         if (entry) {
           Transforms.unwrapNodes<NodeType>(editor, { at: entry[1] })
         }
@@ -271,147 +329,199 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     const textBlocks =  Array.from(getLeaves())
       .map(([node, path]) => node) as ElementType[]
     const textTypes = Array.from((new Set(textBlocks.map(node => node.type))).values())
-    const type = textTypes.length === 1 && textTypes[0] === format ?
-      TEXT_BLOCK_TYPES.find(item => item === format) || 'paragraph' :
-      'paragraph'
-
-    /*
-    if (
+    const type = (
       textTypes.length === 1 && 
       textTypes[0] === format
-    ) {
-      // Set to paragraph
+    ) ?
+      'paragraph' :
+      TEXT_BLOCK_TYPES.find(item => item === format) || 'paragraph'
 
-    } else {
-      // Set to format
-    }
-    */
-
-    /*
     for (let [node, path] of leaves) {
       Transforms.setNodes<ElementType>(editor, { type }, { at: path })
     }
-    */
-
-
-    /*
-    // Set new format for selected blocks of text
-    const type = TEXT_BLOCK_TYPES.find(item => item === format) || 'paragraph'
-    Transforms.setNodes<ElementType>(
-      editor, 
-      { type },
-      {
-        at: Editor.unhangRange(editor, editor.selection),
-        match: (node: NodeType) =>
-          !Editor.isEditor(node) &&
-          Element.isElement(node) &&
-          TEXT_BLOCK_TYPES.includes(node.type),
-      }
-    )
-    */
   }
 
   /****************************************************************************
   * List block commands
   ****************************************************************************/
-
-  var LIST_TYPES = [
-    'numbered-list', 
-    'bulleted-list',
-    'check-list',
-  ]
-  var LIST_ITEMS = [
-    'list-item',
-    'check-list-item'
-  ]
-
-  const LIST_ITEM_INDEXES = {
-    'numbered-list': LIST_ITEMS[0], 
-    'bulleted-list': LIST_ITEMS[0],
-    'check-list': LIST_ITEMS[1],
-    
-  }
   
   const isBlockListActive = (format: NodeFormat): boolean => {
     if (!editor.selection) return false
 
-    const nodes: NodeEntry<ElementType>[] = Array.from(Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, editor.selection),
-      match: (node: NodeType, path) =>
-        !Editor.isEditor(node) &&
-        Element.isElement(node) &&
-        path.length === 1,
-    }))
+    const leaves = Array.from(getLeaves())
+    const listAncestor = leaves
+      .map(([node, path]) => {
+        const ancestor = findStackAncestor(path, (node) => node.type === format)
+        // return an ancestor or an empty node
+        return ancestor !== undefined ? ancestor[0] : { type: undefined }
+      })
 
-    return nodes.length === 1 && 
-      LIST_TYPES.includes(nodes[0][0].type) &&
-      nodes[0][0].type === format
+    return listAncestor.length > 0 &&
+      listAncestor[0].type === format &&
+      // All array elements are the same
+      listAncestor.every(node => node === listAncestor[0])
   }
 
-  const removeContainerListBlocks = () => {
-    if (!editor.selection) return false
+  const unsetListItem = (
+    path: Path
+  ) => {
+    const listItem: NodeEntry<EditorType | ElementType> = 
+      findStackAncestor(path, (node) => context.listItems.includes(node.type))
 
-    // Remove list items
-    const itemNodes: NodeEntry<ElementType>[] = Array.from(Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, editor.selection),
-      match: (node: NodeType, path) =>
-        !Editor.isEditor(node) &&
-        Element.isElement(node) &&
-        LIST_ITEMS.includes(node.type) &&
-        path.length === 2,
-    }))
+    if (listItem !== undefined) {
+      if (Path.hasPrevious(listItem[1])) {
+        Transforms.liftNodes(editor, { at: listItem[1] })
+        Transforms.unwrapNodes(editor, { at: Path.next(Path.parent(listItem[1])) })
+      } else {
+        Transforms.liftNodes(editor, { at: listItem[1] })
+        Transforms.unwrapNodes(editor, { at: Path.parent(listItem[1]) })
+      }
+    }
+  }
 
-    for ( let [node, path] of itemNodes.reverse()) {
-      Transforms.unwrapNodes<NodeType>(editor, { at: path })
+  const unsetListOnSelection = () => {
+    if (!editor.selection) {
+      return
     }
 
-    // Remove list containers
-    const listNodes: NodeEntry<ElementType>[] = Array.from(Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, editor.selection),
-      match: (node: NodeType, path) =>
+    for (let [node, path] of getLeaves({ reverse: true })) {
+      unsetListItem(path)
+    }
+  }
+
+  const setListOnSelection = (format: NodeFormat) => {
+    if (!editor.selection) {
+      return
+    }
+    
+    const nodes = Array.from(editor.nodes({
+      at: editor.unhangRange(editor.selection),
+      mode: 'highest',
+      match: (node, path) =>
         !Editor.isEditor(node) &&
-        Element.isElement(node) &&
-        LIST_TYPES.includes(node.type) &&
-        path.length === 1,
+        Element.isElement(node)
     }))
 
-    for ( let [node, path] of listNodes.reverse()) {
-      Transforms.unwrapNodes<NodeType>(
-        editor, { at: path, split: true })
+    for (let [node, path] of nodes) {
+      Transforms.wrapNodes<ElementType>(
+        editor, 
+        { type: context.listItemsMap[format], children: [] } as ElementType,
+        { at: path }
+      )
     }
+    Transforms.wrapNodes<ElementType>(
+      editor, 
+      { type: format, children: [] } as ElementType,
+      { 
+        at: nodes.length === 1 ?
+          nodes[0][1] :
+          editor.unhangRange(editor.selection)
+      }
+    )
   }
 
   const toggleListBlock = (format: NodeFormat): void => {
-    if (!isBlockListActive(format)) {
-      removeContainerListBlocks()
-      // Group into a list
-      const nodes = Editor.nodes(editor, {
-        at: Editor.unhangRange(editor, editor.selection),
-        match: (node: NodeType) =>
-          !Editor.isEditor(node) &&
-          Element.isElement(node)
-      })
-      for( let [node, path] of nodes) {
-        Transforms.wrapNodes<NodeType>(
-          editor, 
-          { type: LIST_ITEM_INDEXES[format], children: [] } as any,
-          {at: path}
-        )
-      }
-      Transforms.wrapNodes<NodeType>(
-        editor, 
-        { type: format, children: [] } as ElementType,
-      )
+    if (!editor.selection) {
+      return
+    }
+
+    if (isBlockActive(format)) {
+      unsetListOnSelection()
     } else {
-      // Unflatten to original form
-      Transforms.unwrapNodes<NodeType>(editor, {
-        mode: 'all',
-        match: (node: NodeType) =>
-          !Editor.isEditor(node) &&
-          Element.isElement(node) &&
-          [...LIST_TYPES, LIST_ITEM_INDEXES[format]].includes(node.type),
-        split: true,
-      })
+      unsetListOnSelection()
+      setListOnSelection(format)
+    }
+  }
+
+  const _toggleListBlock = (format: NodeFormat): void => {
+    if (!editor.selection) {
+      return
+    }  
+
+    console.log('[leaves]', JSON.stringify(Array.from(getLeaves()).map(([node, path]) => [node.type, path]), null, 2))
+    console.log('[locations]', groupAdjacentLeaves(getLeaves()))
+
+    // Active means that all the selected paragraphs are descendents of the
+    // same type of list
+    if (isBlockActive(format)) {
+      // if there only one group and the group belongs to a list and the format is different 
+      // from the list it contains change the list type
+      const groups = groupAdjacentLeaves(getLeaves())
+
+      /*
+      // For a single node
+      for (let [leaf, leafPath] of getLeaves({ reverse: true })) {
+        Transforms.liftNodes(editor, { at: Path.parent(leafPath) })
+        Transforms.unwrapNodes(editor, { at: Path.next(Path.parent(Path.parent(leafPath))) })
+      }
+      // Check if all nodes in the list are removed, remove also the list
+      */
+    } else {
+      const groups = groupAdjacentLeaves(getLeaves())
+
+      /*
+      // If group belongs to a list and format of list is different from the one getting set
+      // Change item list type to the one getting set
+      if (groups.length === 1 && Path.isPath(groups[0].location)) {
+        const { location, items } = groups[0]
+        const ancestor = findStackAncestor(
+          location, (node) => context.listTypes.includes(node.type))
+
+      } else if (groups.length === 1 && Range.isRange(groups[0].location)) {
+        const listNode = Node.get(editor, Path.common(groups[0].items[0], groups[0].items[1])) as ElementType
+
+      } else {
+
+      }
+      */
+
+      for (let i = 0; i < groups.length; i++) {
+        const { location, items } = groups[i]
+        
+        // If group belongs to a list and format of list is different from the one getting set
+        // Change item list type to the one getting set
+
+        if (Path.isPath(location)) {
+          const ancestor = findStackAncestor(
+            location, (node) => context.listTypes.includes(node.type))
+
+          if (ancestor !== undefined) {
+
+          } else {
+            Transforms.wrapNodes<ElementType>(
+              editor, 
+              { type: context.listItemsMap[format], children: [] } as ElementType,
+              { at: location }
+            )
+            Transforms.wrapNodes<ElementType>(
+              editor, 
+              { type: format, children: [] } as ElementType,
+              { at: location }
+            )
+          }
+        } else {
+          const listNode = Node.get(
+            editor, 
+            Path.common(groups[0].items[0], groups[groups.length - 1].items[1])) as ElementType
+
+          if (context.listTypes.includes(listNode.type)) {
+
+          } else {
+            for (let path of items) {
+              Transforms.wrapNodes<ElementType>(
+                editor, 
+                { type: context.listItemsMap[format], children: [] } as ElementType,
+                { at: path }
+              )
+            }
+            Transforms.wrapNodes<ElementType>(
+              editor, 
+              { type: format, children: [] } as ElementType,
+              { at: location }
+            ) 
+          }
+        }
+      }
     }
   }
 

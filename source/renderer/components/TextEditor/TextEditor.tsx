@@ -147,7 +147,7 @@ function TextEditor () {
         <Slate 
           editor={editor} 
           initialValue={initialValue as Descendant[]}
-          //onChange={(value) => console.log(JSON.stringify(value, undefined, 4))}
+          onChange={(value) => console.log(JSON.stringify(value, undefined, 4))}
         >
           <Flex
             width='100%'
