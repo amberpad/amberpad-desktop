@@ -14,6 +14,7 @@ import {
   NodeMatch,
   node,
   path,
+  Point,
 } from 'slate'
 import { useSlate, ReactEditor } from 'slate-react'
 
@@ -106,7 +107,17 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     const { selection } = editor
 
     if (selection && Range.isCollapsed(selection)) {
-      console.log('deleteBackward')
+      const leaves = Array.from(getLeaves())
+      const start = editor.start(leaves[0][1])
+      if (
+        Point.equals(selection.anchor, start) &&
+        // Check that it exist a list item ancestor
+        !!findStackAncestor(leaves[0][1], (node) => context.listItems.includes(node.type))
+      ) {
+        unsetListItem(leaves[0][1])
+        // Return to avoid deleting the current text node
+        return
+      }
     }
 
     return _deleteBackward(...args)
@@ -125,7 +136,16 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
         stack[0][0].type === 'paragraph' &&
         context.listItems.includes(stack[1][0].type)
       ) {
-        if (Node.string(Node.get(editor, Path.previous(stack[0][1]))) === '') {
+        const previuos = [
+          Node.get(editor, Path.previous(stack[0][1])), 
+          Path.previous(stack[0][1])
+        ] as NodeEntry<EditorType | ElementType>
+
+        if (
+          Node.string(previuos[0]) === '' &&
+          // If previous is the first element in list dont close the list
+          Path.hasPrevious(previuos[1])
+        ) {
           // If the last empty list item has no text the next paragraph 
           // is created out of list
           let [ paragraph, item ] = stack
@@ -430,98 +450,6 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     } else {
       unsetListOnSelection()
       setListOnSelection(format)
-    }
-  }
-
-  const _toggleListBlock = (format: NodeFormat): void => {
-    if (!editor.selection) {
-      return
-    }  
-
-    console.log('[leaves]', JSON.stringify(Array.from(getLeaves()).map(([node, path]) => [node.type, path]), null, 2))
-    console.log('[locations]', groupAdjacentLeaves(getLeaves()))
-
-    // Active means that all the selected paragraphs are descendents of the
-    // same type of list
-    if (isBlockActive(format)) {
-      // if there only one group and the group belongs to a list and the format is different 
-      // from the list it contains change the list type
-      const groups = groupAdjacentLeaves(getLeaves())
-
-      /*
-      // For a single node
-      for (let [leaf, leafPath] of getLeaves({ reverse: true })) {
-        Transforms.liftNodes(editor, { at: Path.parent(leafPath) })
-        Transforms.unwrapNodes(editor, { at: Path.next(Path.parent(Path.parent(leafPath))) })
-      }
-      // Check if all nodes in the list are removed, remove also the list
-      */
-    } else {
-      const groups = groupAdjacentLeaves(getLeaves())
-
-      /*
-      // If group belongs to a list and format of list is different from the one getting set
-      // Change item list type to the one getting set
-      if (groups.length === 1 && Path.isPath(groups[0].location)) {
-        const { location, items } = groups[0]
-        const ancestor = findStackAncestor(
-          location, (node) => context.listTypes.includes(node.type))
-
-      } else if (groups.length === 1 && Range.isRange(groups[0].location)) {
-        const listNode = Node.get(editor, Path.common(groups[0].items[0], groups[0].items[1])) as ElementType
-
-      } else {
-
-      }
-      */
-
-      for (let i = 0; i < groups.length; i++) {
-        const { location, items } = groups[i]
-        
-        // If group belongs to a list and format of list is different from the one getting set
-        // Change item list type to the one getting set
-
-        if (Path.isPath(location)) {
-          const ancestor = findStackAncestor(
-            location, (node) => context.listTypes.includes(node.type))
-
-          if (ancestor !== undefined) {
-
-          } else {
-            Transforms.wrapNodes<ElementType>(
-              editor, 
-              { type: context.listItemsMap[format], children: [] } as ElementType,
-              { at: location }
-            )
-            Transforms.wrapNodes<ElementType>(
-              editor, 
-              { type: format, children: [] } as ElementType,
-              { at: location }
-            )
-          }
-        } else {
-          const listNode = Node.get(
-            editor, 
-            Path.common(groups[0].items[0], groups[groups.length - 1].items[1])) as ElementType
-
-          if (context.listTypes.includes(listNode.type)) {
-
-          } else {
-            for (let path of items) {
-              Transforms.wrapNodes<ElementType>(
-                editor, 
-                { type: context.listItemsMap[format], children: [] } as ElementType,
-                { at: path }
-              )
-            }
-            Transforms.wrapNodes<ElementType>(
-              editor, 
-              { type: format, children: [] } as ElementType,
-              { at: location }
-            ) 
-          }
-        }
-      }
     }
   }
 

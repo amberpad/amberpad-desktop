@@ -243,8 +243,7 @@ export default function Home() {
               direction='top'
               minSize='100px'
               offsetpad='120px'
-              isOpen={true}
-              //isOpen={state.addNoteIsFocused}
+              isOpen={state.addNoteIsFocused}
               separator={
                 <div className='resizable-side__horizontal-divider'/>
               }
