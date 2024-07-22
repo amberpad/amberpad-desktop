@@ -55,30 +55,6 @@
 }
 
 /******************************************************************************
-* Scroll area
-/*****************************************************************************/
-
-.radix-themes .scroll-area {
-  --scrollarea-scrollbar-size: var(--space-1);
-  --scrollarea-scrollbar-border-radius: max(var(--radius-1), var(--radius-full));
-}
-
-.radix-themes .scroll-area::-webkit-scrollbar {
-  width: var(--scrollarea-scrollbar-size);
-  height: var(--scrollarea-scrollbar-size);
-}
-
-.radix-themes .scroll-area::-webkit-scrollbar-track {
-  background-color: var(--gray-a3);
-  border-radius: var(--scrollarea-scrollbar-border-radius);
-}
-
-.radix-themes .scroll-area::-webkit-scrollbar-thumb {
-  background-color: var(--gray-a8);
-  border-radius: var(--scrollarea-scrollbar-border-radius);
-}
-
-/******************************************************************************
 * Selected page
 /*****************************************************************************/
 
@@ -104,46 +80,9 @@
     height 0.5s;
 }
 
-.radix-themes .resizable-side__vertical-divider {
-  height: 100%;
-  border-left: 1px solid var(--accent-a3);
-}
-
-.radix-themes .resizable-side__vertical-divider:hover {
-  border-left: 3px solid var(--accent-a3);
-}
-
-.radix-themes .resizable-side__horizontal-divider {
-  width: 100%;
-  border-bottom: 1px solid var(--accent-a3);
-}
-
-.radix-themes .resizable-side__horizontal-divider:hover {
-  border-bottom: 3px solid var(--accent-a3);
-}
-
-/******************************************************************************
-* Sidebar
-/*****************************************************************************/
-
-.radix-themes .sidebar__container {
-  background-color: var(--accent-a2);
-}
-
 /******************************************************************************
 * Text editor
 /*****************************************************************************/
-
-.radix-themes .text-editor__frame {
-  --card-padding: var(--space-2);
-  --card-border-radius: var(--radius-1);
-  --card-background-color: var(--color-background);
-}
-
-.radix-themes .text-editor__content {
-  padding: 0px;
-  outline: none;
-}
 
 .radix-themes .text-editor__select .rt-SelectTriggerInner {
   opacity: 1.0;

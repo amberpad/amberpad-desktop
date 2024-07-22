@@ -3,8 +3,7 @@ import React, {
   useEffect,
   useImperativeHandle
 } from "react"
-
-//import styles from '@renderer/styles/infinite-scroll.module.css'
+import { css } from "@emotion/css"
 
 type ScrolledOverHash = string | number
 
@@ -212,7 +211,25 @@ export default React.forwardRef(function InifiniteScroll (
       data-testid='inifinite-scroll'
       ref={containerRef}
       {...aditionalProps}
-      className={`scroll-area ${aditionalProps.className || ''}`}
+      className={`${aditionalProps.className || ''} ${css`
+        --scrollarea-scrollbar-size: var(--space-1);
+        --scrollarea-scrollbar-border-radius: max(var(--radius-1), var(--radius-full));
+
+        ::-webkit-scrollbar {
+          width: var(--scrollarea-scrollbar-size);
+          height: var(--scrollarea-scrollbar-size);
+        }
+
+        ::-webkit-scrollbar-track {
+          background-color: var(--gray-a3);
+          border-radius: var(--scrollarea-scrollbar-border-radius);
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background-color: var(--gray-a8);
+          border-radius: var(--scrollarea-scrollbar-border-radius);
+        }
+      `}`}
     >
       { loading && inverse ? loadingElement : null }
       { children }

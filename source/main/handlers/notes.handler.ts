@@ -126,9 +126,12 @@ app.on('ready', () => {
     async function update (_, payload) {
       try {
         const knex = await database.getManager();
+        const columns = Object.keys(await knex('notes').columnInfo())
+        const instance = Object.fromEntries(
+          columns.map((column) => [column, payload.value[column]]))
         const data = await knex('notes')
-          .where({ id: payload.value.id })
-          .update(payload.value, '*')
+          .where({ id: instance.id })
+          .update(instance, '*')
 
         if (data.length === 0) {
           throw('Row could not been updated')

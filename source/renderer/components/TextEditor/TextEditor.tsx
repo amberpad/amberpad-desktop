@@ -1,180 +1,104 @@
-import React, { useMemo, useCallback } from 'react'
-import { Descendant, createEditor } from 'slate'
-import { Slate, Editable, withReact } from 'slate-react'
+import React, { useMemo, useCallback, useEffect } from 'react'
+import { BaseEditor, Descendant, Node as SlateNode, createEditor } from 'slate'
+import { Slate, Editable, withReact, ReactEditor } from 'slate-react'
+import { withHistory } from 'slate-history'
 import { Box, Card, Flex } from '@radix-ui/themes'
 
-import { widthAmberpadEditor } from '@renderer/utils/slate'
+import { AmberpadEditor, widthAmberpadEditor } from '@renderer/utils/slate'
 import TextEditorToolbar from './Toolbar'
 import Element from './Element'
 import Leaf from './Leaf'
 
-import type { DescendantType } from '@ts/slate.types'
-
-const initialValue: DescendantType[] = [
-  {
-      "type": "bulleted-list",
-      "children": [
-          {
-              "type": "list-item",
-              "children": [
-                  {
-                      "type": "paragraph",
-                      "children": [
-                          {
-                              "text": "First"
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "type": "list-item",
-              "children": [
-                  {
-                      "type": "paragraph",
-                      "children": [
-                          {
-                              "text": "Second"
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "type": "list-item",
-              "children": [
-                  {
-                      "type": "paragraph",
-                      "children": [
-                          {
-                              "text": "Third"
-                          }
-                      ]
-                  }
-              ]
-          }
-      ]
-  },
-  {
-      "type": "paragraph",
-      "children": [
-          {
-              "text": "Text"
-          }
-      ]
-  },
-  {
-    "type": "paragraph",
-    "children": [
-        {
-            "text": "Another Text"
-        }
-    ]
-  },
-  {
-    "type": "paragraph",
-    "children": [
-        {
-            "text": "Yet Another Text"
-        }
-    ]
-  },
-  {
-      "type": "numbered-list",
-      "children": [
-          {
-              "type": "list-item",
-              "children": [
-                  {
-                      "type": "paragraph",
-                      "children": [
-                          {
-                              "text": "Fourth"
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "type": "list-item",
-              "children": [
-                  {
-                      "type": "paragraph",
-                      "children": [
-                          {
-                              "text": "Fifth"
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "type": "list-item",
-              "children": [
-                  {
-                      "type": "paragraph",
-                      "children": [
-                          {
-                              "text": "Sixth"
-                          }
-                      ]
-                  }
-              ]
-          }
-      ]
-  }
-]
+import { css } from '@emotion/css'
 
 /******************************************************************************
 * Render text editor
 ******************************************************************************/
 
-function TextEditor () {
+function TextEditor (
+  {
+    slateEditorRef=undefined,
+    onIsEmptyChange=undefined,
+    ...slateProps
+  }: Omit<Parameters<typeof Slate>[0], 'editor' | 'initialValue' | 'children'> & {
+    slateEditorRef?: React.MutableRefObject<AmberpadEditor>,
+    onIsEmptyChange?: (value: Boolean) => void
+  }
+) {
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
-  const editor = useMemo(() => withReact(widthAmberpadEditor(createEditor())), [])
+  const editor = useMemo(() => {
+    const editor = widthAmberpadEditor(withHistory(withReact(createEditor())))
+    if (slateEditorRef !== undefined) {
+      slateEditorRef.current = editor
+    }
+    return editor
+  }, [])
 
   return (
     <Box
+      data-testid='text-editor-container'
       width='100%'
       height='100%'
-      asChild={true}
+      className={css`
+        border: 1px solid  var(--gray-a5);
+        border-radius: var(--radius-1);
+        padding: var(--space-2);
+        background-color: var(--color-background);
+        z-index: -1;
+      `}
     >
-      <Card
-        className='text-editor__frame'
-        variant='surface'
+      <Slate 
+        {...slateProps}
+        editor={editor} 
+        initialValue={editor.initialValue}
       >
-        <Slate 
-          editor={editor} 
-          initialValue={initialValue as Descendant[]}
-          //onChange={(value) => console.log(JSON.stringify(value, undefined, 4))}
+        <Flex
+          width='100%'
+          height='100%'
+          direction='column'
+          justify='start'
+          align='stretch'
+          gap='1'
         >
-          <Flex
-            width='100%'
-            height='100%'
-            direction='column'
-            justify='start'
-            align='stretch'
-            gap='1'
+          <TextEditorToolbar />
+          <Box
+            className={css`
+                --scrollarea-scrollbar-size: var(--space-1);
+                --scrollarea-scrollbar-border-radius: max(var(--radius-1), var(--radius-full));
+
+                ::-webkit-scrollbar {
+                  width: var(--scrollarea-scrollbar-size);
+                  height: var(--scrollarea-scrollbar-size);
+                }
+
+                ::-webkit-scrollbar-track {
+                  background-color: var(--gray-a3);
+                  border-radius: var(--scrollarea-scrollbar-border-radius);
+                }
+
+                ::-webkit-scrollbar-thumb {
+                  background-color: var(--gray-a8);
+                  border-radius: var(--scrollarea-scrollbar-border-radius);
+                }
+            `}
+            minHeight='0'
+            flexGrow='1'
+            asChild={true}
+            overflowX='clip'
+            overflowY='auto'
           >
-            <TextEditorToolbar />
-            <Box
-              className='scroll-area'
-              minHeight='0'
-              flexGrow='1'
-              asChild={true}
-              overflowX='clip'
-              overflowY='auto'
-            >
-              <Editable 
-                className='text-editor__content'
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-              />
-            </Box>
-          </Flex>
-        </Slate>
-      </Card>
+            <Editable 
+              className={css`
+                padding: var(--space-2);
+                outline: none;
+              `}
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+            />
+          </Box>
+        </Flex>
+      </Slate>
     </Box>
 
   )

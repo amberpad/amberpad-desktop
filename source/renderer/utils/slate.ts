@@ -2,12 +2,12 @@ import {
   Editor,
   Transforms,
   Element,
-  Text,
+  Text as SlateText,
   createEditor as _createEditor,
   BaseEditor,
   BaseOperation,
   Range,
-  Node,
+  Node as SlateNode,
   NodeEntry,
   Ancestor,
   Path,
@@ -18,8 +18,16 @@ import {
 } from 'slate'
 import { useSlate, ReactEditor } from 'slate-react'
 
-import type { EditorType, ElementType, NodeType, TextType, NodeFormat } from "@ts/slate.types"
+import type { 
+  EditorType, 
+  ElementType, 
+  NodeType, 
+  TextType, 
+  NodeFormat, 
+  DescendantType 
+} from "@ts/slate.types"
 import { reverse } from 'lodash'
+import { HistoryEditor } from 'slate-history'
 
 export const useAmberpadEditor = () => {
   return useSlate() as AmberpadEditor
@@ -30,7 +38,7 @@ export const useAmberpadEditor = () => {
 ******************************************************************************/
 export type AmberpadEditor = ReturnType<typeof widthAmberpadEditor>
 type OperationListener = (operation?: BaseOperation) => void
-type OperationType = BaseOperation['type']
+type OperationType = BaseOperation['type'] | 'default'
 
 export function widthAmberpadEditor<T extends BaseEditor, P> (
   editor: T
@@ -71,6 +79,49 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   })()
 
   /****************************************************************************
+  * Utils commands
+  ****************************************************************************/
+
+  const initialValue: DescendantType[] = [{
+    "type": "paragraph",
+    "children": [{ "text": "" }]
+  }]
+
+  const isEmpty = () => {
+    let isComposing = false
+    try {
+      /* @ts-ignore */
+      isComposing = ReactEditor.isComposing(editor)
+    } catch (e) {
+      console.error('\'isEmpty\' method needs that editor implements \'withReact\' plugin')
+    }
+
+    return editor.children.length === 1 &&
+      Array.from(SlateNode.texts(editor)).length === 1 &&
+      SlateNode.string(editor) === '' &&
+      !isComposing
+  }
+
+  const clear = () => {
+    for(let i = 0; i < editor.children.length; i++) {
+      editor.delete({at: [i]})
+    }
+    editor.insertNodes(initialValue, {at: [0]})
+    // Reset history if exist
+    if ((editor as unknown as HistoryEditor).history !== undefined) {
+      (editor as unknown as HistoryEditor).history = { undos: [], redos: [] }
+    }
+  }
+
+  const toJSON = () => {
+    return JSON.stringify(editor.children)
+  }
+
+  const fromJSON = (value: string): DescendantType[] => {
+    return JSON.parse(value) as DescendantType[]
+  }
+
+  /****************************************************************************
   * onChange custom listener functions
   ****************************************************************************/
   const _onChange = editor.onChange
@@ -78,6 +129,12 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     const [options, ...extraArgs] = args
     if (options) {
       const { operation } = options
+      // Call default listener
+      if (listenersMap.has('default')) {
+        const listeners = listenersMap.get('default') as OperationListener[]
+        listeners.forEach((listener) => listener(operation))
+      }
+      // Call listeners by type
       if (listenersMap.has(operation.type)) {
         const listeners = listenersMap.get(operation.type) as OperationListener[]
         listeners.forEach((listener) => listener(operation))
@@ -85,6 +142,14 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     }
 
     _onChange(...args)
+  }
+
+  const setOnChangeListener = (listener) => {
+    return setOnOperationListener('default', listener)
+  }
+
+  const removeOnChangeListener = (listener) => {
+    removeOnOperationListener('default', listener)
   }
 
   const setOnOperationListener = (type, listener) => {
@@ -137,12 +202,12 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
         context.listItems.includes(stack[1][0].type)
       ) {
         const previuos = [
-          Node.get(editor, Path.previous(stack[0][1])), 
+          SlateNode.get(editor, Path.previous(stack[0][1])), 
           Path.previous(stack[0][1])
         ] as NodeEntry<EditorType | ElementType>
 
         if (
-          Node.string(previuos[0]) === '' &&
+          SlateNode.string(previuos[0]) === '' &&
           // If previous is the first element in list dont close the list
           Path.hasPrevious(previuos[1])
         ) {
@@ -221,7 +286,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     // or throwing an error
     if (!editor.selection) return
 
-    for(let [node, path] of Node.ancestors(editor, leafPath, { reverse })) {
+    for(let [node, path] of SlateNode.ancestors(editor, leafPath, { reverse })) {
       if (ceiling.includes((node as ElementType).type)) {
         if (includeCeiling) {
           yield [node, path] as NodeEntry<EditorType | ElementType>
@@ -268,7 +333,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
       const group = groups.find(
         item => Path.isSibling(item.lead, path) ||
         context.listTypes.includes(
-          (Node.get(editor, Path.common(item.lead, path)) as ElementType | EditorType).type
+          (SlateNode.get(editor, Path.common(item.lead, path)) as ElementType | EditorType).type
         )
       )
       if (!!group) {
@@ -456,6 +521,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   const setCheckListItemValue = (element: ElementType, value) => {
     const path = ReactEditor.findPath(editor as any, element)
     Transforms.setNodes<ElementType>(editor, { checked: value }, { at: path })
+    updateContentHash()
   }
 
   /****************************************************************************
@@ -516,7 +582,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
         },
         match: (node: NodeType) =>
           !Editor.isEditor(node) &&
-          Text.isText(node) &&
+          SlateText.isText(node) &&
           !!node.link &&
           !!node._hovered
       }
@@ -535,7 +601,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
         },
         match: (node: NodeType) =>
           !Editor.isEditor(node) &&
-          Text.isText(node) &&
+          SlateText.isText(node) &&
           !!node.link &&
           !!node._hovered
       }
@@ -557,7 +623,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
           },
           match: (node: NodeType) =>
             !Editor.isEditor(node) &&
-            Text.isText(node) &&
+            SlateText.isText(node) &&
             !!node.link 
         }
       )
@@ -573,21 +639,42 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
           at: Editor.unhangRange(editor, editor.selection),
           match: (node: NodeType) =>
             !Editor.isEditor(node) &&
-            Text.isText(node)
+            SlateText.isText(node)
         }
       )
       hoveredLink.value = true
     }
   })
 
+  /****************************************************************************
+  * Visualizer content
+  ****************************************************************************/
+
+  const visualizerContentHash = { value: 0 }
+
+  const updateContentHash = () => {
+    visualizerContentHash.value += 1
+  }
+
+  const onVisualizerContentUpdate = (callback: (contentHash: { value: number}) => void) => {
+    return callback(visualizerContentHash)
+  }
+
   // Return editor reference with aggregated functions
   /*****************************************************************************/
   return Object.assign(editor, {
     type: 'editor',
+    initialValue,
+    clear,
+    isEmpty,
+    toJSON,
+    fromJSON,
     onChange,
     deleteBackward,
     insertBreak,
-    // Custom methods
+    // Custom commands
+    setOnChangeListener,
+    removeOnChangeListener,
     setOnOperationListener,
     removeOnOperationListener,
     isBlockActive,
@@ -604,5 +691,9 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     updateHoveredLink,
     removeHoveredLink,
     setCheckListItemValue,
+    // Visualizer content commands
+    visualizerContentHash,
+    updateContentHash,
+    onVisualizerContentUpdate,
   })
 }

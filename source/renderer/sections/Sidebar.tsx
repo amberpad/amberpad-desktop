@@ -103,7 +103,7 @@ function Sidebar(props: BoxProps) {
   return (
     <Box
       { ...props }
-      className={`sidebar ${props.className || ''}`}
+      className={`${props.className || ''}`}
     >
       <Flex
         height='100%'

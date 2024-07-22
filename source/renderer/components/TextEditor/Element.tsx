@@ -123,6 +123,7 @@ const ListElements = (props) => {
                 vertical-align: middle;
               `}
               size='1'
+              defaultChecked={!!element.checked}
               onCheckedChange={(value) => editor.setCheckListItemValue(element, value)}              
             />
           </Box>

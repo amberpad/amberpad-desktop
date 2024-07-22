@@ -22,6 +22,8 @@ import { useAmberpadEditor } from "@renderer/utils/slate"
 
 import type { FlexProps, IconButtonProps } from "@radix-ui/themes"
 
+const FONTAWESOME_ICON_SIZE = 'xs'
+
 /******************************************************************************
 * Secondary components
 ******************************************************************************/
@@ -200,13 +202,13 @@ const ToolbarTextWeightSelect = () => {
           className={isButtonEnabled && 'text-editor__button--checked'}
           placeholder={
             <FontAwesomeIcon
-              size='sm'
+              size={FONTAWESOME_ICON_SIZE}
               icon={faHeader}
             /> as any
           }
         >
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faHeader}
           />
         </Select.Trigger>
@@ -260,31 +262,31 @@ const Toolbar = React.forwardRef(function (
       <ToolbarGroup>
         <MarkButton format="bold">
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faBold}
           />
         </MarkButton>
         <MarkButton format="italic">
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faItalic}
           />
         </MarkButton>
         <MarkButton format="underline">
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faUnderline}
           />
         </MarkButton>
         <MarkButton format="strikethrough">
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faStrikethrough}
           />
         </MarkButton>
         <MarkButton format="highlight">
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faHighlighter}
           />
         </MarkButton>
@@ -293,20 +295,20 @@ const Toolbar = React.forwardRef(function (
       <ToolbarGroup>
         <URLMarkButton>
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faLink}
             transform={'shrink-2'}
           />
         </URLMarkButton>
         <MarkButton format="inline-code">
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faCode}
           />
         </MarkButton>
         <BlockButton format='block-quote'>
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faQuoteRight}
           />
         </BlockButton>
@@ -315,19 +317,19 @@ const Toolbar = React.forwardRef(function (
       <ToolbarGroup>
         <ListBlockButton format='bulleted-list'>
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faListUl}
           />
         </ListBlockButton>
         <ListBlockButton format='numbered-list'>
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faListOl}
           />
         </ListBlockButton>
         <ListBlockButton format='check-list'>
           <FontAwesomeIcon
-            size='sm'
+            size={FONTAWESOME_ICON_SIZE}
             icon={faListCheck}
           />
         </ListBlockButton>

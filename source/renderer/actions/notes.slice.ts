@@ -184,10 +184,7 @@ const notesSlice = createSlice({
       addBotom(state, {...action, payload: { values: action.payload.values }})
       state.scrollBeginingHash += 1
     })
-    builder.addCase(updateNoteThunk.fulfilled, (state, action) => {
-      addBotom(state, {...action, payload: { values: [action.payload.value] }})
-      state.scrollBeginingHash += 1
-    })
+    builder.addCase(updateNoteThunk.fulfilled, (state, action) => {})
     builder.addCase(destroyNoteThunk.fulfilled, (state, action) => {
       destroy(state, {...action, payload: { values: [action.payload.value] }})
     })

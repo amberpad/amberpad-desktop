@@ -11,6 +11,7 @@ import Searchbar from '@renderer/components/Searchbar';
 import Sidebar from '@renderer/sections/Sidebar';
 import AddNote from '@renderer/sections/AddNote';
 import NotesBoard from '@renderer/sections/NotesBoard';
+import { css } from '@emotion/css';
 
 export default function Home() {
   const [state, setState] = useState({
@@ -180,7 +181,10 @@ export default function Home() {
         flexShrink='1'
       >
         <Box
-          className='sidebar__container'
+          className={css`
+            background-color: var(--accent-a2);
+            z-index: 9;
+          `}
           minHeight='0px'
           asChild={true}
         >
@@ -200,7 +204,14 @@ export default function Home() {
             onApertureChange={onSidebarApertureChange}
             separator={
               <div 
-                className='resizable-side__vertical-divider'
+                className={css`
+                  height: 100%;
+                  border-left: 1px solid var(--accent-a3);
+
+                  :hover {
+                    border-left: 3px solid var(--accent-a3);
+                  }
+                `}
               />
             }
           >
@@ -235,17 +246,25 @@ export default function Home() {
           />
           <Box
             width='100%'
-            minHeight='0'
-            flexGrow='10'
             asChild={true}
           >
             <ResizableSide
               direction='top'
               minSize='100px'
+              maxSize='520px'
               offsetpad='120px'
               isOpen={state.addNoteIsFocused}
               separator={
-                <div className='resizable-side__horizontal-divider'/>
+                <div
+                  className={css`
+                    width: 100%;
+                    border-bottom: 1px solid var(--accent-a3);
+
+                    :hover {
+                      border-bottom: 3px solid var(--accent-a3);
+                    }
+                  `}
+                />
               }
             >
               <Box
@@ -253,13 +272,10 @@ export default function Home() {
                 height='100%'
                 overflow='clip'
               >
-                {
-                  <AddNote
-                    p='4'
-                    onFocusChange={(isFocused) => setAddNoteIsFocused(isFocused)}
-                  />
-                }
-
+                <AddNote
+                  p='4'
+                  onFocusChange={(isFocused) => setAddNoteIsFocused(isFocused)}
+                />
               </Box>
             </ResizableSide>
           </Box>

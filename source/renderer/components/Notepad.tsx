@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { css } from '@emotion/css'
 import { Box, Flex, IconButton, Text } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons'
@@ -68,6 +69,10 @@ function Notepad ({
             flexGrow='1'
           >
             <Text 
+              className={css`
+                user-select: none;
+                -webkit-user-drag: none;
+              `}
               size='2' 
               weight='bold'
             >

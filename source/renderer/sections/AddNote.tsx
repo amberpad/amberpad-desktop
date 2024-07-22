@@ -8,6 +8,10 @@ import { createNoteThunk } from "@renderer/actions/notes.slice"
 import TextEditor from '@renderer/components/TextEditor/TextEditor'
 
 import type { FlexProps  } from '@radix-ui/themes'
+import { useSlate } from 'slate-react'
+import { BaseEditor } from 'slate'
+
+import type { AmberpadEditor } from '@renderer/utils/slate'
 
 /* @ts-ignore */
 const PLATFORM = navigator.userAgentData.platform
@@ -19,7 +23,7 @@ function AddNote ({
   onFocusChange?: (value: boolean) => void
 }) {
   const [state, setState] = useState({
-    inputValue: '',
+    isTextEditorEmpty: true,
   })
   const [context, setContext] = useState({
     selectedPageID: undefined,
@@ -38,21 +42,11 @@ function AddNote ({
     )
   }, [])
 
-  const createNote = async () => {
-    if (state.inputValue.trim() === '') return
+  /**************************************************************************** 
+  * Listens to keyboard comands to send input
+  ****************************************************************************/
 
-    store.dispatch(createNoteThunk({
-      content: state.inputValue,
-      pageID: context.selectedPageID || null,
-    })).then(() => {
-      // Show success
-    })
-    setState({ inputValue: '' })
-
-  }
-
-  // Listens to keyboard comands to send input
-  // --------------------------------------------------------------------------
+  /*
   const platformKey = (PLATFORM === 'macOS' ? 'Meta' : 'Control')
   const keyMap = useRef<{[key: string]: boolean}>({
     [platformKey]: false,
@@ -72,6 +66,49 @@ function AddNote ({
     if (event.key in keyMap.current)
       keyMap.current[event.key] = false
   }
+  */
+
+  /**************************************************************************** 
+  * SlateJS methods
+  ****************************************************************************/
+  const slateEditorRef = useRef<AmberpadEditor>()
+
+  const createNote = async () => {
+    if (
+      slateEditorRef.current !== undefined &&
+      !slateEditorRef.current.isEmpty()
+    ) {
+      const editor = slateEditorRef.current 
+      store.dispatch(createNoteThunk({
+        content: editor.toJSON(),
+        pageID: context.selectedPageID || null,
+      })).then(() => {
+        // Show success
+        editor.clear()
+      })
+    }
+  }
+
+  useEffect(() => {
+    let listener
+    if (slateEditorRef.current !== undefined) {
+      const editor = slateEditorRef.current 
+      listener = () => {
+        const isEmpty = editor.isEmpty()
+        setState((prev) => ({
+          ...prev, 
+          isTextEditorEmpty: editor.isEmpty() 
+        }))
+      }
+      editor.setOnChangeListener(listener)
+    }
+    return () => {
+      if (slateEditorRef.current !== undefined && listener) {
+        const editor = slateEditorRef.current
+        editor.removeOnChangeListener(listener)
+      }
+    }
+  }, [slateEditorRef.current])
 
   return (
     <Flex
@@ -83,15 +120,15 @@ function AddNote ({
       justify='end'
       align='stretch'
       onFocus={() => onFocusChange(true)}
-      //onBlur={() => onFocusChange(false)}
+      onBlur={() => onFocusChange(false)}
       {...flexProps}
     >
       <Box 
+        minWidth='0'
         flexGrow='1'
       >
         <TextEditor 
-          //onFocus={() => onFocusChange(true)}
-          //onBlur={() => onFocusChange(false)}
+          slateEditorRef={slateEditorRef}
         />
       </Box>
       <Flex
@@ -103,7 +140,7 @@ function AddNote ({
         <IconButton
           data-radius='full'
           size='2'
-          disabled={state.inputValue.trim() === ''}
+          disabled={state.isTextEditorEmpty}
           onClick={createNote}
         >
           <FontAwesomeIcon
