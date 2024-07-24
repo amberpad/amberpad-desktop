@@ -138,23 +138,26 @@ const ResizableSide = React.forwardRef(function ResizableSide (
 
   onIsOpenChange = onIsOpenChange && useCallback(_.throttle(
     onIsOpenChange, 
-    50, 
+    100, 
+    { 'leading': true, 'trailing': true }
+  ), [onIsOpenChange])
+  onApertureChange = onApertureChange && useCallback(_.throttle(
+    onApertureChange, 
+    100, 
     { 'leading': true }
   ), [onIsOpenChange])
   const setAperture = useCallback((aperture: ApertureType) => {
-    if (aperture !== undefined && onApertureChange) {
-      onApertureChange(`${frameAperture(aperture)}px`)
-    } else {
-      setState((prev) => ({
-        ...prev,
-        aperture: frameAperture(aperture),
-      }))
-    }
+    onApertureChange && onApertureChange(`${frameAperture(aperture)}px`)
+    setState((prev) => ({
+      ...prev,
+      aperture: frameAperture(aperture),
+    }))
 
     const _isOpen = (aperture || 0) >= parsePixelMetric(minSize, 0)
     if (onIsOpenChange && isOpen !== _isOpen) {
       onIsOpenChange(_isOpen)
-    } else if (state.isOpen !== _isOpen) {
+    }
+    if (state.isOpen !== _isOpen) {
       setState((prev) => ({
         ...prev,
         isOpen: _isOpen,
@@ -233,7 +236,9 @@ const ResizableSide = React.forwardRef(function ResizableSide (
       setState((prev) => ({
         ...prev,
         isOpen: isOpen,
-        afterSidebarToggleHash: prev.afterSidebarToggleHash + 1,
+        afterSidebarToggleHash: isOpen !== state.isOpen ? 
+          prev.afterSidebarToggleHash + 1 :
+          prev.afterSidebarToggleHash,
       }))
     }
   }, [isOpen])
