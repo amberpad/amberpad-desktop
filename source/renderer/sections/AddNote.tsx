@@ -41,32 +41,6 @@ function AddNote ({
   }, [])
 
   /**************************************************************************** 
-  * Listens to keyboard comands to send input
-  ****************************************************************************/
-
-  /*
-  const platformKey = (PLATFORM === 'macOS' ? 'Meta' : 'Control')
-  const keyMap = useRef<{[key: string]: boolean}>({
-    [platformKey]: false,
-    'Enter': false,
-  })
-  const onKeyDown = (event: any) => {
-    if (event.key in keyMap.current)
-      keyMap.current[event.key] = true
-
-    if (Object.values(keyMap.current).every((item) => item)) {
-      createNote()
-      Object.keys(keyMap.current).forEach((key) => keyMap.current[key] = false)
-    }
-  }
-  
-  const onKeyUp = (event: any) => {
-    if (event.key in keyMap.current)
-      keyMap.current[event.key] = false
-  }
-  */
-
-  /**************************************************************************** 
   * SlateJS methods
   ****************************************************************************/
   const slateEditorRef = useRef<AmberpadEditor>()

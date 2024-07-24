@@ -16,6 +16,7 @@ import type { BoxProps } from '@radix-ui/themes'
 function Sidebar(boxProps: BoxProps) {
   const [state, setState] = useState({
     sidebarInitialAperture: undefined,
+    aperture: undefined,
   })
   const [context, setContext] = useState({
     commons: {
@@ -41,20 +42,34 @@ function Sidebar(boxProps: BoxProps) {
     )
   }, [])
 
+  /******************************************************************************
+  * Aperture sidebar context/localStorage setters
+  ******************************************************************************/
+
+  const onApertureChange = useCallback((aperture: string) => {
+    setState((prev) => ({
+      ...prev,
+      aperture
+    }))
+  }, [])
+
   useEffect(() => {
     window.electronAPI.store
       .get({ key: 'sidebarAperture' })
       .then((aperture) => {
-        setState((prev) => ({ 
-          ...prev, 
-          sidebarInitialAperture: aperture 
+        setState((prev) => ({
+          ...prev,
+          sidebarInitialAperture: aperture
         }))
       })
   }, [])
 
-  const onSidebarApertureChange = (aperture: string) => {
-    //window.electronAPI.store.set({ key: 'sidebarAperture', value: aperture })
-  }
+  useEffect(() => {
+    // Store in local storage if changes
+    if (state.aperture !== undefined) {
+      window.electronAPI.store.set({ key: 'sidebarAperture', value: state.aperture })
+    }
+  }, [state.aperture])
 
   /******************************************************************************
   * IsOpen sidebar context/localStorage setters
@@ -100,9 +115,10 @@ function Sidebar(boxProps: BoxProps) {
           globals.ENVIRONMENT === 'testing' ||
           context.commons.isSidebarOpen
         }
-        initialAperture={state.sidebarInitialAperture}
         onIsOpenChange={(isOpen) => onIsSidebarOpenChange(isOpen)}
-        onApertureChange={onSidebarApertureChange}
+        initialAperture={state.sidebarInitialAperture}
+        aperture={state.aperture}
+        onApertureChange={onApertureChange}
         separator={
           <div 
             className={css`

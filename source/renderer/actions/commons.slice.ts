@@ -6,14 +6,12 @@ export interface CommonsSliceState {
   search: string,
   initialIsSidebarOpen: boolean,
   isSidebarOpen: boolean,
-  sidebarToggleHash: number,
 }
 
 export const commonsSliceInitials: CommonsSliceState = {
   search: '',
   initialIsSidebarOpen: undefined,
   isSidebarOpen: undefined,
-  sidebarToggleHash: 0,
 }
 
 /******************************************************************************
@@ -56,12 +54,6 @@ function toggleIsSidebarOpen (
   )
 }
 
-function mutateSidebarToggleHash (
-  state: CommonsSliceState,
-) {
-  state.sidebarToggleHash += 1
-}
-
 const commonsSlice = createSlice({
   name: 'commons',
   initialState: commonsSliceInitials,
@@ -69,12 +61,10 @@ const commonsSlice = createSlice({
     setSearch,
     setIsSidebarOpen,
     toggleIsSidebarOpen,
-    mutateSidebarToggleHash,
   },
   extraReducers: (builder) => {
     builder.addCase(fetchInitialIsSidebarOpen.fulfilled, (state, action) => {
       state.initialIsSidebarOpen = action.payload
-      console.log('state.initialIsSidebarOpen', state.initialIsSidebarOpen)
     })
   }
 })

@@ -1,4 +1,5 @@
 import { css } from "@emotion/css"
+import _ from 'lodash'
 import React, { 
   useEffect, 
   useRef, 
@@ -32,7 +33,7 @@ interface ResizableSidePropsType {
 
 interface StateType {
   isOpen?: boolean,
-  aperture: ApertureType,
+  aperture?: ApertureType,
   afterSidebarToggleHash: number,
 }
 
@@ -60,8 +61,6 @@ const ResizableSide = React.forwardRef(function ResizableSide (
     maxSize=undefined,
     offsetpad=undefined,
     toggleIsOpenHash=0,
-    //onOpen=undefined,
-    //onClose=undefined,
     separator=undefined,
     ...aditionalProps
   }: ResizableSidePropsType & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
@@ -101,18 +100,6 @@ const ResizableSide = React.forwardRef(function ResizableSide (
     dragableLineRef.current,
   ])
 
-  const toggleIsOpen = () => {
-    if (isOpen === undefined) {
-      setState((prev) => {
-        return {
-          ...prev,
-          isOpen: !prev.isOpen,
-          afterSidebarToggleHash: prev.afterSidebarToggleHash + 1,
-        }
-      })
-    }
-  }
-
   const frameAperture = useCallback((aperture: number) => {
     // Avoid aperture to grow or shrink on some limits
     for(const { parent } of usingReferences()) {
@@ -137,27 +124,40 @@ const ResizableSide = React.forwardRef(function ResizableSide (
     usingReferences
   ])
 
-  const setAperture = useCallback((aperture: ApertureType) => {
-    if (typeof aperture === 'number') {
-      aperture = frameAperture(aperture)
-      setState((prev) => ({
-        ...prev,
-        aperture: aperture,
-      }))
-      if (isOpen !== undefined && onIsOpenChange) {
-        // If component is controlled
-        onIsOpenChange((aperture || 0) > parsePixelMetric(minSize, 0))
-      } else {
-        // If conponent is uncontrolled
-        setState((prev) => ({
+  const toggleIsOpen = () => {
+    if (isOpen === undefined) {
+      setState((prev) => {
+        return {
           ...prev,
-          isOpen: (aperture || 0) > parsePixelMetric(minSize, 0),
-        }))
-      }
+          isOpen: !prev.isOpen,
+          afterSidebarToggleHash: prev.afterSidebarToggleHash + 1,
+        }
+      })
+    }
+  }
+
+  onIsOpenChange = onIsOpenChange && useCallback(_.throttle(
+    onIsOpenChange, 
+    50, 
+    { 'leading': true }
+  ), [onIsOpenChange])
+  const setAperture = useCallback((aperture: ApertureType) => {
+    if (aperture !== undefined && onApertureChange) {
+      onApertureChange(`${frameAperture(aperture)}px`)
     } else {
       setState((prev) => ({
         ...prev,
-        aperture: aperture
+        aperture: frameAperture(aperture),
+      }))
+    }
+
+    const _isOpen = (aperture || 0) >= parsePixelMetric(minSize, 0)
+    if (onIsOpenChange && isOpen !== _isOpen) {
+      onIsOpenChange(_isOpen)
+    } else if (state.isOpen !== _isOpen) {
+      setState((prev) => ({
+        ...prev,
+        isOpen: _isOpen,
       }))
     }
   }, [
@@ -198,17 +198,23 @@ const ResizableSide = React.forwardRef(function ResizableSide (
   * Props setup
   **************************************************************************/
 
-  const initialApertureRef = useRef(initialAperture)
   useEffect(() => {
-    if (initialApertureRef.current !== initialAperture) {
-      const parsedAperture = parsePixelMetric(initialAperture)
-      setAperture(parsedAperture)
-      initialApertureRef.current = initialAperture
+    if (initialAperture !== undefined) {
+      setState((prev) => ({
+        ...prev,
+        aperture: frameAperture(parsePixelMetric(initialAperture)),
+      }))
     }
-  }, [
-    initialAperture,
-    setAperture
-  ])
+  }, [initialAperture])
+
+  useEffect(() => {
+    if (aperture !== undefined) {
+      setState((prev) => ({
+        ...prev,
+        aperture: frameAperture(parsePixelMetric(aperture)),
+      }))
+    }
+  }, [aperture])
 
   useEffect(() => {
     setState((prev) => {
@@ -235,9 +241,10 @@ const ResizableSide = React.forwardRef(function ResizableSide (
   /**************************************************************************
   * Open/Close container
   **************************************************************************/
-  /* Change internal isOpen with toggle hash change */
+
   const toggleIsOpenHashRef = useRef(toggleIsOpenHash)
   useEffect(() => {
+      /* Change internal isOpen with toggle hash change */
     if (toggleIsOpenHashRef.current !== toggleIsOpenHash) {
       toggleIsOpen()
     }
@@ -260,11 +267,11 @@ const ResizableSide = React.forwardRef(function ResizableSide (
       containerRef.current?.classList.remove(transitionStyle)
     }, 0.5 * 1000)
   }, [state.afterSidebarToggleHash])
+
   /**************************************************************************
   * Change container width/height using aperture as source
   **************************************************************************/
 
-  /* Change container size using state values */
   useEffect(() => {
     const parsedMinSize = parsePixelMetric(minSize, 0)
     if (
@@ -352,23 +359,6 @@ const ResizableSide = React.forwardRef(function ResizableSide (
   }, [
     usingReferences,
     resizeAperture,
-  ])
-
-  /**************************************************************************
-  * Props callbacks
-  **************************************************************************/
-
-  const apertureRef = useRef(parsePixelMetric(initialAperture))
-  useEffect(() => {
-    if (apertureRef.current !== state.aperture) {
-      onApertureChange && onApertureChange(
-        state.aperture !== undefined ? `${state.aperture}px` : undefined
-      )
-    }
-    apertureRef.current = state.aperture
-  }, [
-    onApertureChange,
-    state.aperture,
   ])
 
   /**************************************************************************

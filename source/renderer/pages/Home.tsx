@@ -3,6 +3,7 @@ import { Flex, Section, Box, Separator } from '@radix-ui/themes'
 import { css } from '@emotion/css'
 
 import store from '@renderer/utils/redux-store'
+import commonsSlice from '@renderer/actions/commons.slice'
 import pagesSlice, { fetchSelectedPageThunk } from '@renderer/actions/pages.slice'
 import { fetchNotesThunk } from '@renderer/actions/notes.slice'
 import { fetchNotepadsThunk } from '@renderer/actions/notepads.slice'
@@ -23,11 +24,11 @@ export default function Home() {
 
   useEffect(() => {
     store.monitor(
-      (state: any) => ({
+      (state) => ({
         search: state.commons.search,
         selectedPageID: state.pages.selectedPageID,
       }), 
-      (state: any) => {
+      (state) => {
         setContext({
           commons:  {
             search: state.commons.search,
@@ -115,7 +116,9 @@ export default function Home() {
         flexGrow='1'
         flexShrink='1'
       >
-        <Sidebar />
+        <Sidebar 
+
+        />
         <Flex
           data-testid='home-content'
           minWidth='0'
