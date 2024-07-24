@@ -1,27 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Flex, Section, Box, Separator } from '@radix-ui/themes';
+import { Flex, Section, Box, Separator } from '@radix-ui/themes'
+import { css } from '@emotion/css'
 
 import store from '@renderer/utils/redux-store'
-import commonsSlice, { commonsSliceInitials } from '@renderer/actions/commons.slice'
 import pagesSlice, { fetchSelectedPageThunk } from '@renderer/actions/pages.slice'
 import { fetchNotesThunk } from '@renderer/actions/notes.slice'
 import { fetchNotepadsThunk } from '@renderer/actions/notepads.slice'
-import ResizableSide from '@renderer/wrappers/ResizableSide';
-import Searchbar from '@renderer/components/Searchbar';
-import Sidebar from '@renderer/sections/Sidebar';
-import AddNote from '@renderer/sections/AddNote';
-import NotesBoard from '@renderer/sections/NotesBoard';
-import { css } from '@emotion/css';
+import Sidebar from '@renderer/sections/Sidebar'
+import AddNote from '@renderer/sections/AddNote'
+import NotesBoard from '@renderer/sections/NotesBoard'
+import Header from '@renderer/sections/Header'
 
 export default function Home() {
-  const [state, setState] = useState({
-    sidebarInitialAperture: undefined,
-    addNoteIsFocused: false,
-  })
   const [context, setContext] = useState({
     commons: {
       search: '',
-      sidebarToggleHash: undefined,
     },
     pages: {
       selectedPageID: undefined,
@@ -33,13 +26,11 @@ export default function Home() {
       (state: any) => ({
         search: state.commons.search,
         selectedPageID: state.pages.selectedPageID,
-        sidebarToggleHash: state.commons.sidebarToggleHash,
       }), 
       (state: any) => {
         setContext({
           commons:  {
             search: state.commons.search,
-            sidebarToggleHash: state.commons.sidebarToggleHash,
           },
           pages: {
             selectedPageID: state.pages.selectedPageID
@@ -98,43 +89,6 @@ export default function Home() {
     })()
   }, [])
 
-  useEffect(() => {
-    window.electronAPI.store
-      .get({ key: 'sidebarAperture' })
-      .then((aperture) => {
-        setSidebarInitialAperture(aperture)
-      })
-  }, [])
-
-  const onSidebarApertureChange = (aperture: string) => {
-    window.electronAPI.store
-      .set({ key: 'sidebarAperture', value: aperture })
-  }
-
-  const onSidebarOpen = () => {
-    const { setIsSidebarOpen } = commonsSlice.actions
-    store.dispatch(setIsSidebarOpen({ value: true }))
-  }
-
-  const onSidebarClose = () => {
-    const { setIsSidebarOpen } = commonsSlice.actions
-    store.dispatch(setIsSidebarOpen({ value: false }))
-  }
-
-  const setSidebarInitialAperture = (initialAperture: string) => {
-    setState((prev) => ({ 
-      ...prev, 
-      sidebarInitialAperture: initialAperture 
-    }))
-  }
-
-  const setAddNoteIsFocused = (addNoteIsFocused: boolean) => {
-    setState((prev) => ({ 
-      ...prev, 
-      addNoteIsFocused: addNoteIsFocused 
-    }))
-  }
-
   return (
     <Flex
       width='100%'
@@ -145,26 +99,7 @@ export default function Home() {
       justify='start'
       align='stretch'
     >
-      <Section
-        test-id='header'
-        size='1'
-      >
-        <Flex
-          display='flex'
-          direction='row'
-          gap='1'
-          justify='center'
-          align='center'
-          px='6'
-        >
-          <Box
-            flexGrow='1'
-            maxWidth='768px'
-          >
-            <Searchbar />
-          </Box>
-        </Flex>
-      </Section>
+      <Header />
       <Separator 
         color='yellow'
         orientation='horizontal'
@@ -180,53 +115,9 @@ export default function Home() {
         flexGrow='1'
         flexShrink='1'
       >
-        <Box
-          className={css`
-            background-color: var(--accent-a2);
-            z-index: 9;
-          `}
-          minHeight='0px'
-          asChild={true}
-        >
-          <ResizableSide
-            direction='right'
-            minSize='72px'
-            maxSize='520px'
-            offsetpad='120px'
-            initialIsOpen={
-              globals.ENVIRONMENT === 'testing' || 
-              commonsSliceInitials.isSidebarOpen
-            }
-            initialAperture={state.sidebarInitialAperture}
-            toggleIsOpenHash={context.commons.sidebarToggleHash}
-            onOpen={onSidebarOpen}
-            onClose={onSidebarClose}
-            onApertureChange={onSidebarApertureChange}
-            separator={
-              <div 
-                className={css`
-                  height: 100%;
-                  border-left: 1px solid var(--accent-a3);
-
-                  :hover {
-                    border-left: 3px solid var(--accent-a3);
-                  }
-                `}
-              />
-            }
-          >
-            <Box
-              width='100%'
-              height='100%'
-              overflow='clip'
-              asChild={true}
-            >
-              <Sidebar />
-            </Box>
-          </ResizableSide>
-        </Box>
-
+        <Sidebar />
         <Flex
+          data-testid='home-content'
           minWidth='0'
           minHeight='0'
           width='100%'
@@ -244,41 +135,7 @@ export default function Home() {
             flexGrow='1'
             p='4'
           />
-          <Box
-            width='100%'
-            asChild={true}
-          >
-            <ResizableSide
-              direction='top'
-              minSize='100px'
-              maxSize='520px'
-              offsetpad='120px'
-              isOpen={state.addNoteIsFocused}
-              separator={
-                <div
-                  className={css`
-                    width: 100%;
-                    border-bottom: 1px solid var(--accent-a3);
-
-                    :hover {
-                      border-bottom: 3px solid var(--accent-a3);
-                    }
-                  `}
-                />
-              }
-            >
-              <Box
-                width='100%'
-                height='100%'
-                overflow='clip'
-              >
-                <AddNote
-                  p='4'
-                  onFocusChange={(isFocused) => setAddNoteIsFocused(isFocused)}
-                />
-              </Box>
-            </ResizableSide>
-          </Box>
+          <AddNote />
         </Flex>
       </Flex>
     </Flex>

@@ -1,40 +1,26 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Box, Flex, ScrollArea, } from '@radix-ui/themes'
 import _ from 'lodash'
+import { css } from '@emotion/css';
 
 import store from '@renderer/utils/redux-store'
-import { fetchNotepadsThunk, fetchPagesThunk } from '@renderer/actions/notepads.slice'
-import InifiniteScroll from '@renderer/wrappers/InifiniteScroll'
-import SidebarHeader from '@renderer/sections/SidebarHeader'
-import Notepad from '@renderer/components/Notepad'
-import SelectedPage from '@renderer/components/SelectedPage'
+import commonsSlice, { 
+  commonsSliceInitials,
+  fetchInitialIsSidebarOpen 
+} from '@renderer/actions/commons.slice'
+import ResizableSide from '@renderer/wrappers/ResizableSide'
+import SidebarContent from '@renderer/sections/SidebarContent'
 
 import type { BoxProps } from '@radix-ui/themes'
 
-function Sidebar(props: BoxProps) {
+function Sidebar(boxProps: BoxProps) {
+  const [state, setState] = useState({
+    sidebarInitialAperture: undefined,
+  })
   const [context, setContext] = useState({
     commons: {
-      isSidebarOpen: true,
-      search: '',
-    },
-    pages: {
-      selectedPageID: undefined,
-    },
-    notepads: {
-      values: [],
-      page: 1,
-      hasNextPage: true,
-      adjustScrollHash: 0,
-      scrollEndHash: 0,
-      loading: false,
-      paginationMap: {} as {
-        [key: number]: {
-            page: number,
-            hasNext: boolean;
-            isLoading: boolean;
-            hash: number;
-        }
-      }
+      initialIsSidebarOpen: commonsSliceInitials.initialIsSidebarOpen,
+      isSidebarOpen: commonsSliceInitials.isSidebarOpen,
     }
   })
 
@@ -42,127 +28,103 @@ function Sidebar(props: BoxProps) {
     store.monitor(
       (state) => ({
         isSidebarOpen: state.commons.isSidebarOpen,
-        search: state.commons.search,
-        selectedPageID: state.pages.selectedPageID
-      }),
-      (state) => setContext((prev) => ({
-        ...prev,
-        commons: {
-          isSidebarOpen: state.commons.isSidebarOpen,
-          search: state.commons.search,
-        },
-        pages: {
-          selectedPageID: state.pages.selectedPageID
-        }
-      }))
+        initialIsSidebarOpen: state.commons.initialIsSidebarOpen
+      }), 
+      (state) => {
+        setContext({
+          commons:  {
+            isSidebarOpen: state.commons.isSidebarOpen,
+            initialIsSidebarOpen: state.commons.initialIsSidebarOpen,
+          }
+        })
+      }
     )
   }, [])
 
   useEffect(() => {
-    store.monitor(
-      (state) => ({
-        values: state.notepads.values,
-        page: state.notepads.values,
-        hasNextPage: state.notepads.hasNextPage,
-        adjustScrollHash: state.notes.adjustScrollHash,
-        scrollEndHash: state.notepads.scrollEndHash,
-        paginationMap: state.notepads.paginationMap,
-        loading: state.notepads.loading,
-      }),
-      (state) => setContext((prev) => ({
-        ...prev,
-        notepads: {
-          ...state.notepads,
-          values: state.notepads.values,
-          page: state.notepads.page,
-          hasNextPage: state.notepads.hasNextPage,
-          adjustScrollHash: state.notepads.adjustScrollHash,
-          scrollEndHash: state.notepads.scrollEndHash,
-          loading: state.notepads.loading,
-          paginationMap: state.notepads.paginationMap,
-        }
-      }))
-    )
-  })
+    window.electronAPI.store
+      .get({ key: 'sidebarAperture' })
+      .then((aperture) => {
+        setState((prev) => ({ 
+          ...prev, 
+          sidebarInitialAperture: aperture 
+        }))
+      })
+  }, [])
 
-  const onScrollNext = () => {
-    store.dispatch(fetchNotepadsThunk({
-      page: context.notepads.page + 1,
-      search: context.pages.selectedPageID === undefined ? context.commons.search  : ''
-    }))   
+  const onSidebarApertureChange = (aperture: string) => {
+    //window.electronAPI.store.set({ key: 'sidebarAperture', value: aperture })
   }
 
-  const paginateOverScrolledOver = (elements: any[]) => {
-    const forPagination = elements
-    store.dispatch(fetchPagesThunk({
-      notepads: forPagination,
-      search: '',
-    }))
-  }
+  /******************************************************************************
+  * IsOpen sidebar context/localStorage setters
+  ******************************************************************************/
+
+  const onIsSidebarOpenChange = useCallback((isSidebarOpen: boolean) => {
+    const { setIsSidebarOpen } = commonsSlice.actions
+    store.dispatch(setIsSidebarOpen({ value: isSidebarOpen }))
+  }, [])
+
+  useEffect(() => {
+    store.dispatch(fetchInitialIsSidebarOpen())
+  }, [])
+
+  useEffect(() => {
+    // Store in local storage if changes
+    if (context.commons.isSidebarOpen !== undefined) {
+      window.electronAPI.store.set({ key: 'isSidebarOpen', value: context.commons.isSidebarOpen })
+    }
+  }, [context.commons.isSidebarOpen])
+
+  /******************************************************************************
+  * Render return
+  ******************************************************************************/
 
   return (
     <Box
-      { ...props }
-      className={`${props.className || ''}`}
+      {...boxProps}
+      className={css`
+        background-color: var(--accent-a2);
+        z-index: 9;
+      `}
+      minHeight='0px'
+      asChild={true}
     >
-      <Flex
-        height='100%'
-        direction='column'
-        gap='0'
-        px='4'
-        py='4'
-        justify='start'
-        align='stretch'
+      <ResizableSide
+        direction='right'
+        minSize='72px'
+        maxSize='520px'
+        offsetpad='120px'
+        initialIsOpen={context.commons.initialIsSidebarOpen}
+        isOpen={
+          globals.ENVIRONMENT === 'testing' ||
+          context.commons.isSidebarOpen
+        }
+        initialAperture={state.sidebarInitialAperture}
+        onIsOpenChange={(isOpen) => onIsSidebarOpenChange(isOpen)}
+        onApertureChange={onSidebarApertureChange}
+        separator={
+          <div 
+            className={css`
+              height: 100%;
+              border-left: 1px solid var(--accent-a3);
+
+              :hover {
+                border-left: 3px solid var(--accent-a3);
+              }
+            `}
+          />
+        }
       >
-        <SidebarHeader 
-          maxWidth='100%'
-          isSidebarOpen={context.commons.isSidebarOpen}
-        />
-        <SelectedPage 
-          isSidebarOpen={context.commons.isSidebarOpen}
-        />
-        <Flex
-          className={`infinite-scroll ${
-            context.commons.isSidebarOpen ? '' : 'hidden'
-          }`}
-          minHeight='0'
-          pr='3'
+        <Box
+          width='100%'
           height='100%'
-          direction='column'
-          gap='4'
-          justify='start'
-          align='stretch'
-          overflowY='auto'
-          overflowX='hidden'
+          overflow='clip'
           asChild={true}
         >
-          <InifiniteScroll
-            hasMore={context.notepads.hasNextPage}
-            next={onScrollNext}
-            loading={context.notepads.loading}
-            adjustScrollHash={`${context.notepads.adjustScrollHash}`}
-            scrollEndHash={`${context.notepads.scrollEndHash}`}
-            scrolledOver={paginateOverScrolledOver}
-            scrolledOverToID={(item) => parseInt(item.id)}
-            scrolledOverHashMap={
-              _.mapValues(
-                context.notepads.paginationMap, 
-                (object: any) => object.hash
-              )
-            }
-          >
-            {
-              context.notepads.values.map((item: any, key: number) => (
-                <Notepad 
-                  key={key}
-                  data={item}
-                  loading={context.notepads.paginationMap[item.id].isLoading}
-                />
-              ))
-            }
-          </InifiniteScroll>
-        </Flex>
-      </Flex>
+          <SidebarContent />
+        </Box>
+      </ResizableSide>
     </Box>
   )
 }

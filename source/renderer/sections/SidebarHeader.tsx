@@ -1,9 +1,10 @@
 import React from 'react'
+import store from '@renderer/utils/redux-store'
+import { css } from '@emotion/css'
 import { Box, Flex, Heading, IconButton } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLayerGroup, faPlus } from '@fortawesome/free-solid-svg-icons'
 
-import store from '@renderer/utils/redux-store'
 import commonsSlice from '@renderer/actions/commons.slice'
 import CreateNotepad from '@renderer/dialogs/CreateNotepad'
 
@@ -17,15 +18,15 @@ function SidebarHeader({
 }) {
 
   const toggleIsSidebarOpen = () => {
-    const { mutateSidebarToggleHash } = commonsSlice.actions
-    store.dispatch(mutateSidebarToggleHash())
+    const { toggleIsSidebarOpen } = commonsSlice.actions
+    store.dispatch(toggleIsSidebarOpen())
   }
 
   return (
     <Flex
-      p='2'
       data-testid='sidebar-header'
       direction='row'
+      p='2'
       gap='4'
       justify='start'
       align='center'
@@ -47,7 +48,9 @@ function SidebarHeader({
         </IconButton>
       </Box>
       <Box
-        className={isSidebarOpen ? '' : 'hidden'}
+        className={!isSidebarOpen && css`
+          display: none;
+        `}
         minWidth='0'
         flexGrow='1'
         flexShrink='1'
@@ -66,7 +69,9 @@ function SidebarHeader({
       <CreateNotepad.Root>
         <CreateNotepad.Trigger>
           <Box
-            className={isSidebarOpen ? '' : 'hidden'}
+            className={!isSidebarOpen && css`
+              display: none;
+            `}
             asChild={true}
           >
             <IconButton

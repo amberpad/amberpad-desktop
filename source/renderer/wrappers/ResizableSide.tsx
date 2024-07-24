@@ -1,9 +1,11 @@
+import { css } from "@emotion/css"
 import React, { 
   useEffect, 
   useRef, 
   useImperativeHandle, 
   useCallback, 
-  useState 
+  useState, 
+  useMemo
 } from "react"
 
 // Number in a string with format '0' or '0px' 
@@ -16,18 +18,20 @@ interface ResizableSidePropsType {
   initialIsOpen?: boolean,
   isOpen?: boolean,
   initialAperture?: PixelMetric,
+  aperture?: PixelMetric,
   minSize?: PixelMetric,
   maxSize?: PixelMetric,
   offsetpad?: PixelMetric,
   toggleIsOpenHash?: string | number, // When this value change the isOpen state is toggled
   onApertureChange?: (aperture: PixelMetric) => void,
-  onOpen?: () => void,
-  onClose?: () => void,
+  onIsOpenChange?: (isOpen: boolean) => void,
+  //onOpen?: () => void,
+  //onClose?: () => void,
   separator?: React.ReactNode,
 }
 
 interface StateType {
-  isOpen: boolean,
+  isOpen?: boolean,
   aperture: ApertureType,
   afterSidebarToggleHash: number,
 }
@@ -45,29 +49,27 @@ const parsePixelMetric = (value: PixelMetric, _default: any=undefined) => {
 const ResizableSide = React.forwardRef(function ResizableSide (
   {
     children=undefined,
-    direction='right',
-    initialIsOpen=false,
+    initialIsOpen=undefined,
     isOpen=undefined,
+    onIsOpenChange=undefined,
     initialAperture=undefined,
+    aperture=undefined,
+    onApertureChange=undefined,
+    direction='right',
     minSize='0',
     maxSize=undefined,
     offsetpad=undefined,
     toggleIsOpenHash=0,
-    onApertureChange=undefined,
-    onOpen=undefined,
-    onClose=undefined,
+    //onOpen=undefined,
+    //onClose=undefined,
     separator=undefined,
     ...aditionalProps
   }: ResizableSidePropsType & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
   forwardedRef
 ) {
-  const parsed = {
-    minSize: parsePixelMetric(minSize, 0),
-    initialAperture: parsePixelMetric(initialAperture),
-  }
   const [state, setState] = useState<StateType>({
     isOpen: initialIsOpen,
-    aperture: parsed.initialAperture,
+    aperture: parsePixelMetric(initialAperture),
     afterSidebarToggleHash: 0,
   })
   const containerRef = useRef<HTMLDivElement>()
@@ -118,8 +120,10 @@ const ResizableSide = React.forwardRef(function ResizableSide (
       const parentSize = isVertical ? parentBoundaries.width : parentBoundaries.height
       const parsedMaxSize = parsePixelMetric(maxSize)
       const parsedOffsetpad = parsePixelMetric(offsetpad)
-      if (aperture <= parsed.minSize) {
-        aperture = parsed.minSize
+      const parsedMinSize = parsePixelMetric(minSize, 0)
+
+      if (aperture <= parsedMinSize) {
+        aperture = parsedMinSize
       } else if (aperture > (parsedMaxSize || Infinity)) {
         aperture = parsedMaxSize
       } else if (aperture > (parsedMaxSize || Infinity)) {
@@ -139,8 +143,17 @@ const ResizableSide = React.forwardRef(function ResizableSide (
       setState((prev) => ({
         ...prev,
         aperture: aperture,
-        isOpen: (aperture || 0) > parsed.minSize,
       }))
+      if (isOpen !== undefined && onIsOpenChange) {
+        // If component is controlled
+        onIsOpenChange((aperture || 0) > parsePixelMetric(minSize, 0))
+      } else {
+        // If conponent is uncontrolled
+        setState((prev) => ({
+          ...prev,
+          isOpen: (aperture || 0) > parsePixelMetric(minSize, 0),
+        }))
+      }
     } else {
       setState((prev) => ({
         ...prev,
@@ -159,7 +172,7 @@ const ResizableSide = React.forwardRef(function ResizableSide (
         aperture: aperture,
         isOpen: aperture === undefined || isOpen === undefined ? 
           prev.isOpen :
-          (aperture || 0) > parsed.minSize,
+          (aperture || 0) > parsePixelMetric(minSize, 0),
       }
     })
   }, [
@@ -232,10 +245,19 @@ const ResizableSide = React.forwardRef(function ResizableSide (
     toggleIsOpenHash
   ])
 
+  const transitionStyle = useMemo(() => css`
+    transition: 
+      max-width 0.5s, 
+      max-height 0.5s,
+      min-width 0.5s, 
+      min-height 0.5s,
+      width 0.5s, 
+      height 0.5s;
+  `, [])
   useEffect(() => {
-    containerRef.current?.classList.add('resizable-side__transition')
+    containerRef.current?.classList.add(transitionStyle)
     setTimeout(() => {
-      containerRef.current?.classList.remove('resizable-side__transition')
+      containerRef.current?.classList.remove(transitionStyle)
     }, 0.5 * 1000)
   }, [state.afterSidebarToggleHash])
   /**************************************************************************
@@ -244,12 +266,13 @@ const ResizableSide = React.forwardRef(function ResizableSide (
 
   /* Change container size using state values */
   useEffect(() => {
+    const parsedMinSize = parsePixelMetric(minSize, 0)
     if (
-      state.isOpen && typeof state.aperture == 'number' && 
-      state.aperture > parsed.minSize
+      !!state.isOpen && typeof state.aperture == 'number' && 
+      state.aperture > parsedMinSize
     ) {
       updateSize(`${state.aperture}px`)
-    } else if (state.isOpen && state.aperture === undefined) { 
+    } else if (!!state.isOpen && state.aperture === undefined) { 
       const parsedMaxSize = parsePixelMetric(maxSize)
       const parsedOffsetpad = parsePixelMetric(offsetpad)
       if (parsedMaxSize !== undefined) {
@@ -264,7 +287,7 @@ const ResizableSide = React.forwardRef(function ResizableSide (
         updateSize('max-content')
       }
     } else {
-      updateSize(`${parsed.minSize}px`)
+      updateSize(`${parsedMinSize}px`)
     }
   }, [
     updateSize,
@@ -276,9 +299,6 @@ const ResizableSide = React.forwardRef(function ResizableSide (
     for(const { container,  dragableLine } of usingReferences()) {
       const onMouseMove = (event: MouseEvent) => {
         event.preventDefault()
-        if (!dragableLineRef.current) {
-          return;
-        }
         {
           // Calculate aperture using container boundaries
           const containerBoundaries = container.getBoundingClientRect()
@@ -338,7 +358,7 @@ const ResizableSide = React.forwardRef(function ResizableSide (
   * Props callbacks
   **************************************************************************/
 
-  const apertureRef = useRef(parsed.initialAperture)
+  const apertureRef = useRef(parsePixelMetric(initialAperture))
   useEffect(() => {
     if (apertureRef.current !== state.aperture) {
       onApertureChange && onApertureChange(
@@ -349,21 +369,6 @@ const ResizableSide = React.forwardRef(function ResizableSide (
   }, [
     onApertureChange,
     state.aperture,
-  ])
-
-  const isOpenRef = useRef(initialIsOpen)
-  useEffect(() => {
-    if (isOpenRef.current !== state.isOpen) {
-      state.isOpen ? 
-        onOpen && onOpen() :
-        onClose && onClose()
-      isOpenRef.current = state.isOpen
-    }
-
-  }, [
-    onOpen,
-    onClose,
-    state.isOpen,
   ])
 
   /**************************************************************************

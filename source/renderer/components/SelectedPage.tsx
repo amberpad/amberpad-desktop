@@ -4,6 +4,7 @@ import { Box, Card, Flex, Heading } from '@radix-ui/themes'
 import store from '@renderer/utils/redux-store'
 
 import type { BoxProps } from '@radix-ui/themes'
+import { css } from '@emotion/css'
 
 export default function SelectedPage ({
   className='',
@@ -43,13 +44,23 @@ export default function SelectedPage ({
       data-testid='selected-page'
       py='6'
       {...boxProps}
-      className={`selected-page ${className} ${
-        !hasSelectedPage || !isSidebarOpen ? 'selected-page--hidden' : ''
-      }`}
+      className={css`
+        ${!hasSelectedPage || !isSidebarOpen ? 
+          'animation: slide-out-blurred-left 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;':
+          'animation: slide-in-blurred-left 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;'
+        }
+      `}
     >
       <Card
+        className={css`
+          background-color: var(--color-background);
+          box-shadow: 0 0 2px 0 color-mix(in oklab, var(--accent-a5), var(--accent-5) 25%);
+
+          ::before, ::after {
+            content: none;
+          }
+        `}
         data-radius='none'
-        className='selected-page--card'
         variant='surface'
       >
         <Flex
