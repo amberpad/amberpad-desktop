@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 import { PageType, PagePayloadType } from '@ts/models/Pages.types'
 import type { NotepadType, NotepadIDType, NotepadPayloadType } from '@ts/models/Notepads.types'
+import pagesSlice, { fetchSelectedPageThunk } from './pages.slice'
 
 export interface NotepadsSliceState {
   values: NotepadType[],
@@ -311,6 +312,37 @@ function destroyPages (
     }
     return notepad
   })
+}
+
+/*
+*  Extra Reducers
+*/
+
+const moveTop = (state, action) => {
+  /*
+  * Developer to be used with:
+  * builder.addCase(fetchSelectedPageThunk.fulfilled, moveTop)
+  * Deprecated because didnt know when to launch it, but gonna
+  * keep it here in case is needed in the future.
+  */
+  if (
+    action.meta.arg.pageID !== undefined &&
+    action.payload.value !== undefined
+  ) {
+    const page = action.payload.value
+    console.log('page', page)
+
+    // Move notepad to first position in array
+    const notepadIndex = state.values.findIndex((item) => item.id === page.notepadID)        
+    state.values.unshift(state.values.splice(notepadIndex, 1)[0])
+
+    // Move page to first position in array
+    const pages = state.values[notepadIndex].pages
+    const pageIndex = pages.findIndex((item) => item.id === page.id)        
+    pages.unshift(pages.splice(pageIndex, 1)[0])
+
+    window.electronAPI.pages.moveTop({ value: page.id })
+  }
 }
 
 const notepadsSlice = createSlice({

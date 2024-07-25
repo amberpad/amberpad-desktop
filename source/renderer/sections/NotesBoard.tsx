@@ -84,7 +84,7 @@ function NotesBoard (props: BoxProps) {
         height='100%'
         pr='2'
         direction='column'
-        gap='2'
+        gap='4'
         justify='start'
         align='end'
         overflowY='auto'

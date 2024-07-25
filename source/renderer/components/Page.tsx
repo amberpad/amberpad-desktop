@@ -1,4 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react'
+import { css, injectGlobal } from '@emotion/css'
 import { Flex, Separator, Text, IconButton, Button, Box } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons'
@@ -8,10 +9,29 @@ import store from '@renderer/utils/redux-store'
 import DropdownMenu from '@renderer/primitives/DropdownMenu'
 import UpdatePage from '@renderer/dialogs/UpdatePage'
 import DeletePage from '@renderer/dialogs/DeletePage'
-import { setSelectedPageIDThunk } from '@renderer/actions/pages.slice'
+import pagesSlice from '@renderer/actions/pages.slice'
 
 import type { FlexProps } from '@radix-ui/themes'
 import type { PageType } from "@ts/models/Pages.types"
+
+injectGlobal`
+  .page-YBdupuKlEX__options {
+    opacity: 0.0;
+  }
+  .page-YBdupuKlEX:hover .page-YBdupuKlEX__options {
+    opacity: 1.0;
+  }
+
+  .page-YBdupuKlEX__separator {
+    width: 3px;
+    height: 100%;
+    border-left: 2px solid var(--accent-a3);
+  }
+
+  .page-YBdupuKlEX:hover .page-YBdupuKlEX__separator {
+    border-left: 2px solid var(--accent-a9);
+  }
+`
 
 function Page ({
   data,
@@ -42,11 +62,12 @@ function Page ({
     )
   }, [])
 
-  const onPageSelected = () => {
-    store.dispatch(setSelectedPageIDThunk({
-      value: context.selectedPageID !== data.id ? 
-        data.id :
-        undefined
+  const onPageClick = () => {
+    const { setSelectedPageID } = pagesSlice.actions
+    store.dispatch(setSelectedPageID({ 
+      value: context.selectedPageID === data.id ?
+        undefined :
+        data.id
     }))
   }
 
@@ -67,37 +88,50 @@ function Page ({
         </DeletePage.Root>
       </>
       <Flex 
+        className='page-YBdupuKlEX'
         direction='row'
         gap='4'
         justify='start'
         align='center'
         {...flexProps}
       >
-        <Separator 
-          color='yellow'
-          orientation='vertical'
-          size='1'
+        <div
+          data-testid='page-separator'
+          className='page-YBdupuKlEX__separator'
         />
-
         <Box
-          flexGrow='1'
+          flexBasis='1'
+          overflow='clip'
         >
-          <Button
-            variant='ghost'
-            onClick={onPageSelected}
+          <Box
+            maxWidth='100%'
+            asChild={true}
           >
-            <Text 
-              size='2' 
-              weight='bold'
-            >
-              {data.name}
-            </Text>
-          </Button>
-        </Box>
+            <Button
+              className={css`
+                color: var(--accent-a9);
 
+                :hover {
+                  background-color: transparent;
+                }
+              `}
+              variant='ghost'
+              onClick={onPageClick}
+            >
+              <Text 
+                size='2' 
+                weight='medium'
+                truncate={true}
+              >
+                {data.name}
+              </Text>
+            </Button>
+          </Box>
+        </Box>
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
               <IconButton
+                className='page-YBdupuKlEX__options'
                 size='1'
                 variant='ghost'
               >

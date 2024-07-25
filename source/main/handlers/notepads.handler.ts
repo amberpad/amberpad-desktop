@@ -47,7 +47,7 @@ app.on('ready', () => {
           `(SELECT 
             ROW_NUMBER () OVER (
                 PARTITION BY "notepads"."id"
-                ORDER BY "pages"."id") AS rowNumber,
+                ORDER BY "pages"."updated_at" DESC) AS rowNumber,
             ${notepadsColumns.map(item => `"notepads"."${item}" as "${item}"`).join(',\n')},
             ${pagesColumns.map(item => `"pages"."${item}" as "pages:${item}"`).join(',\n')}
         FROM "notepads"
@@ -179,11 +179,14 @@ app.on('ready', () => {
     'notepads:update',
     async function update (_, payload) {
       try {
-        const knex = await database.getManager();
+        const knex = await database.getManager()
+        const instance = payload.value
+        instance.updatedAt = knex.fn.now()
+
         const columns = Object.keys(await knex('notepads').columnInfo())
         const data = await knex('notepads')
-          .where({ id: payload.value.id })
-          .update(lodash.pick(payload.value, columns), '*')
+          .where({ id: instance.id })
+          .update(lodash.pick(instance, columns), '*')
         if (data.length === 0) {
           throw('Row could not been updated')
         }

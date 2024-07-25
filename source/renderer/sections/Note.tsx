@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { Box, Card, Flex, IconButton } from "@radix-ui/themes"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
@@ -8,8 +8,10 @@ import DropdownMenu from "@renderer/primitives/DropdownMenu"
 import TextNote from "@renderer/components/TextNote"
 import DeleteNote from "@renderer/dialogs/DeleteNote"
 
+import type { AmberpadEditor } from "@renderer/utils/slate"
 import type { BoxProps } from "@radix-ui/themes"
 import type { NoteType } from '@ts/models/Notes.types'
+import { Node as SlateNode } from "slate"
 
 function Note (
   { 
@@ -20,9 +22,13 @@ function Note (
   const [state, setState] = useState({
     isDeleteNoteOpen: false,
   })
+  const editorRef = useRef<AmberpadEditor>()
 
   const copyClipboard = () => {
-    navigator.clipboard.writeText(data.content)
+    if (editorRef) {
+      const editor = editorRef.current
+      navigator.clipboard.writeText(SlateNode.string(editor));
+    }
     // Show alert
   }
 
@@ -60,6 +66,7 @@ function Note (
               align='end'
             >
               <TextNote 
+                editorRef={editorRef}
                 data={data}
               />
             </Flex>

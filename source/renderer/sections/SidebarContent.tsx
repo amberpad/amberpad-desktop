@@ -135,8 +135,8 @@ function SidebarContent(props: BoxProps) {
             display: none;
           `}
           minHeight='0'
+          flexGrow='1'
           pr='3'
-          height='100%'
           direction='column'
           gap='4'
           justify='start'

@@ -45,6 +45,7 @@ export default function SelectedPage ({
       py='6'
       {...boxProps}
       className={css`
+        max-height: 150px;
         ${!hasSelectedPage || !isSidebarOpen ? 
           'animation: slide-out-blurred-left 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;':
           'animation: slide-in-blurred-left 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;'
@@ -73,12 +74,14 @@ export default function SelectedPage ({
             size='1'
             color='gray'
             align='right'
+            truncate={true}
           >
             {selectedPage ? selectedPage.notepad.name : ''}
           </Heading>
           <Heading
             size='4'
             align='right'
+            truncate={true}
           >
             {selectedPage ? selectedPage.name : ''}
           </Heading>

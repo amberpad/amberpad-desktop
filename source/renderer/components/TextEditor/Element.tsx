@@ -1,6 +1,6 @@
 import React from 'react'
 import { css } from '@emotion/css'
-import { Blockquote, Box, Checkbox, Text } from '@radix-ui/themes'
+import { Blockquote, Box, Checkbox, Heading, Text } from '@radix-ui/themes'
 
 import { useAmberpadEditor } from '@renderer/utils/slate'
 
@@ -10,6 +10,7 @@ const defaultElement = (props) => {
   return (
     <Text 
       as='p'
+      size='2'
       {...attributes}
     >
       {children}
@@ -21,19 +22,31 @@ const TextElements = (props) => {
   const { attributes, children } = props
   return {
     'heading-one' : (
-      <h1 {...attributes}>
+      <Heading
+        {...attributes}
+        as="h1"
+        size='3'
+      >
         {children}
-      </h1>
+      </Heading>
     ),
     'heading-two': (
-      <h2 {...attributes}>
+      <Heading
+        {...attributes}
+        as="h2"
+        size='2'
+      >
         {children}
-      </h2>
+      </Heading>
     ),
     'heading-three': (
-      <h3 {...attributes}>
+      <Heading
+        {...attributes}
+        as="h3"
+        size='1'
+      >
         {children}
-      </h3>
+      </Heading>
     ),
     'text-normal': defaultElement(props)
   }
@@ -122,6 +135,7 @@ const ListElements = (props) => {
                 position: relative;
                 vertical-align: middle;
               `}
+              variant='surface'
               size='1'
               defaultChecked={!!element.checked}
               onCheckedChange={(value) => editor.setCheckListItemValue(element, value)}              

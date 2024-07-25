@@ -1,5 +1,6 @@
 import { app, ipcMain } from 'electron'
 import { unflatten } from "flat"
+import lodash from 'lodash'
 import knex from 'knex'
 
 import { ThrowError } from '@main/utils/errors'
@@ -34,6 +35,7 @@ app.on('ready', () => {
 
       const data = await knex('pages')
         .select('*')
+        .orderBy([{ column: 'updated_at', order: 'desc' }])
         .limit(options.paginationOffset)
         .offset(options.paginationOffset * (options.page - 1))
 
@@ -96,9 +98,13 @@ app.on('ready', () => {
     async function update (_, payload) {
       try {
         const knex = await database.getManager();
+        const instance = payload.value
+        instance.updatedAt = knex.fn.now()
+
+        const columns = Object.keys(await knex('notes').columnInfo())
         const data = await knex('pages')
-          .where({ id: payload.value.id })
-          .update(payload.value, '*')
+          .where({ id: instance.id })
+          .update(lodash.pick(instance, columns), '*')
         
         if (data.length === 0) {
           throw('Row could not been updated')
@@ -140,5 +146,34 @@ app.on('ready', () => {
         })
       }
     } as ModelDestroyHandlerType<PageType>
+  )
+})
+
+
+
+app.on('ready', () => {
+  ipcMain.handle(
+    'pages.moveTop',
+    async function update (_, payload): Promise<boolean> {
+      try {
+        const knex = await database.getManager()
+
+        const updatedPages = await knex('pages')
+          .where({ id: payload.value })
+          .update({ updated_at: knex.fn.now() }, '*')
+
+        const updatesNotepads = await knex('notepads')
+          .where({ id: updatedPages[0].notepadID })
+          .update({ updated_at: knex.fn.now() }, '*')
+
+        return true
+      } catch (error) {
+        ThrowError({ 
+          content: 'Values could not been updated',
+          error: error,
+        })
+        return false
+      }
+    }
   )
 })

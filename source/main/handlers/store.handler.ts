@@ -30,7 +30,11 @@ app.on('ready', () => {
       payload: { key: string, value: any }
     ): Promise<any> {
       try {
-        return store.set(payload.key, payload.value) 
+        if (payload.value === undefined) {
+          store.set(payload.key, null) 
+        } else {
+          store.set(payload.key, payload.value) 
+        }
       } catch (error) {
         ThrowError({ 
           content: 'Error retrieving value from electron storage',

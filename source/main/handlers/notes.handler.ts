@@ -1,4 +1,5 @@
 import { app, ipcMain } from 'electron'
+import lodash from 'lodash'
 
 import { ThrowError } from '@main/utils/errors'
 import database from '@main/utils/database'
@@ -126,12 +127,13 @@ app.on('ready', () => {
     async function update (_, payload) {
       try {
         const knex = await database.getManager();
+        const instance = payload.value
+        instance.updatedAt = knex.fn.now()
+
         const columns = Object.keys(await knex('notes').columnInfo())
-        const instance = Object.fromEntries(
-          columns.map((column) => [column, payload.value[column]]))
         const data = await knex('notes')
           .where({ id: instance.id })
-          .update(instance, '*')
+          .update(lodash.pick(instance, columns), '*')
 
         if (data.length === 0) {
           throw('Row could not been updated')

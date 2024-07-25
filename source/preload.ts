@@ -96,6 +96,9 @@ export const electronAPI = {
     destroy: ((payload) => {
       return ipcRenderer.invoke('pages.destroy', payload)
     }) as ModelDestroyInvokerType<PageType>,
+    moveTop: ((payload: { value: PageIDType }): Promise<boolean> => {
+      return ipcRenderer.invoke('pages.moveTop', payload)
+    }),
   }
 }
 

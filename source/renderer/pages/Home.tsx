@@ -43,6 +43,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch selected page
+    /*
     let promise: any = undefined
     if (context.pages.selectedPageID === undefined) {
       const { setSelectedPage } = pagesSlice.actions
@@ -52,9 +53,15 @@ export default function Home() {
         pageID: context.pages.selectedPageID
       }))
     }
+    */
+    store.dispatch(fetchSelectedPageThunk({
+      pageID: context.pages.selectedPageID
+    }))
+    /*
     return () => {
       promise && promise.abort()
     }
+    */
   }, [context.pages.selectedPageID])
 
   useEffect(() => {
@@ -82,12 +89,28 @@ export default function Home() {
     }
   }, [context.commons.search])
 
+  /****************************************************************************
+  * Local storage
+  ****************************************************************************/
+
+  /*
   useEffect(() => {
-    (async () => {
-      const { setSelectedPageID } = pagesSlice.actions
-      const selectedPageID = await window.electronAPI.store.get({ key: 'selectedPageID' })
-      store.dispatch(setSelectedPageID({ value: selectedPageID }))
-    })()
+    if (context.pages.selectedPageID !== undefined) {
+      window.electronAPI.store.set({ 
+        key: 'selectedPageID',
+        value: context.pages.selectedPageID,
+      })
+    }
+  }, [context.pages.selectedPageID])
+  */
+
+  useEffect(() => {
+    window.electronAPI.store
+      .get({ key: 'selectedPageID' })
+      .then((selectedPageID) => {
+        const { setSelectedPageID } = pagesSlice.actions
+        store.dispatch(setSelectedPageID({ value: selectedPageID }))
+      })
   }, [])
 
   return (

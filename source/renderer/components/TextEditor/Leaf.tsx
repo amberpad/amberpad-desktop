@@ -132,28 +132,29 @@ export default function Leaf (props) {
   let { attributes, children, leaf } = props;
 
   if (leaf['bold']) {
-    children = <Strong>{children}</Strong>
+    children = <Strong {...attributes}>{children}</Strong>
   }
 
   if (leaf['italic']) {
-    children = <Em>{children}</Em>
+    children = <Em {...attributes}>{children}</Em>
   }
 
   if (leaf['underline']) {
-    children = <u>{children}</u>
+    children = <u {...attributes}>{children}</u>
   }
 
   if (leaf['inline-code']) {
-    children = <Code>{children}</Code>
+    children = <Code {...attributes}>{children}</Code>
   }
 
   if (leaf['strikethrough']) {
-    children = <s>{children}</s>
+    children = <s {...attributes}>{children}</s>
   }
 
   if (leaf['highlight']) {
     children = (
       <mark
+        {...attributes}
         className={css`
           background-color: var(--accent-10);
           color: var(--accent-contrast);
@@ -172,10 +173,11 @@ export default function Leaf (props) {
     )
   }
 
-  return <Text 
-    {...attributes}
-    as='span'
-  >
-    {children}
-  </Text>
+  return (
+    <span
+      {...attributes}
+    >
+      {children}
+    </span>
+  )
 }

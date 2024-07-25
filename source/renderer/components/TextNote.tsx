@@ -6,11 +6,15 @@ import { updateNoteThunk } from "@renderer/actions/notes.slice"
 import Visualizer from "@renderer/components/TextEditor/Visualizer"
 import { NoteType } from '@ts/models/Notes.types'
 
+import type { AmberpadEditor } from "@renderer/utils/slate"
+
 function TextNote (
   { 
     data,
+    editorRef=undefined,
   }: { 
     data: NoteType 
+    editorRef?: React.MutableRefObject<AmberpadEditor>
   }
 ) {
   const onTextNodeUpdate = useCallback((content) => {
@@ -27,6 +31,7 @@ function TextNote (
       width='100%'
     >
       <Visualizer 
+        editorRef={editorRef}
         content={data.content}
         onContentChange={onTextNodeUpdate}
       />

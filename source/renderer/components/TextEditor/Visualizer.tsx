@@ -10,6 +10,7 @@ import Leaf from './Leaf'
 
 import { css } from '@emotion/css'
 import { DescendantType } from '@ts/slate.types'
+import { current } from '@reduxjs/toolkit'
 
 /******************************************************************************
 * Render text editor
@@ -19,15 +20,27 @@ function Visualizer (
   {
     content=undefined,
     onContentChange=undefined,
+    editorRef=undefined,
     ...slateProps
   }: Omit<Parameters<typeof Slate>[0], 'editor' | 'initialValue' | 'children'> & {
     content?: string,
     onContentChange?: (content: string) => void
+    editorRef?: React.MutableRefObject<AmberpadEditor>
   }
 ) {
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
-  const editor = useMemo(() => widthAmberpadEditor(withReact(createEditor())), [])
+  const editor = useMemo(() => {
+    const editor = widthAmberpadEditor(withReact(createEditor()))
+    /*
+    if (editorRef !== undefined) {
+      editorRef.current = editor
+    }
+      */
+    editorRef !== undefined && Object.assign(editorRef, { current: editor })
+    return editor
+  }, [])
+
 
   const onChange = useCallback(() => {
     editor.onVisualizerContentUpdate(() => {

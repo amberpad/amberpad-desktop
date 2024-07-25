@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import { stat } from 'original-fs'
 
 export interface CommonsSliceState {
   search: string,

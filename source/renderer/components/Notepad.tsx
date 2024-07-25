@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { css } from '@emotion/css'
+import { css, injectGlobal } from '@emotion/css'
 import { Box, Flex, IconButton, Text } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons'
@@ -14,6 +14,16 @@ import DeleteNotepad from '@renderer/dialogs/DeleteNotepad'
 import type { FlexProps } from '@radix-ui/themes'
 import type { NotepadType } from "@ts/models/Notepads.types"
 import { PageType } from '@ts/models/Pages.types'
+
+injectGlobal`
+  .notepad-lavr8Nx04e__options {
+    opacity: 0.0;
+  }
+
+  .notepad-lavr8Nx04e:hover .notepad-lavr8Nx04e__options {
+    opacity: 1.0;
+  }
+`
 
 function Notepad ({
   data,
@@ -60,28 +70,27 @@ function Notepad ({
       >
 
         <Flex 
+          className={`notepad-lavr8Nx04e`}
           direction='row'
           gap='4'
           justify='start'
           align='center'
         >
-          <Box
-            flexGrow='1'
+          <Text
+            className={css`
+              user-select: none;
+              -webkit-user-drag: none;
+            `}
+            size='2' 
+            weight='bold'
+            truncate={true}
           >
-            <Text 
-              className={css`
-                user-select: none;
-                -webkit-user-drag: none;
-              `}
-              size='2' 
-              weight='bold'
-            >
-              {data.name}
-            </Text>
-          </Box>
+            {data.name}
+          </Text>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <IconButton
+                className={'notepad-lavr8Nx04e__options'}
                 size='1'
                 variant='ghost'
               >

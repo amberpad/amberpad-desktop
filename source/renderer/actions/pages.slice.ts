@@ -13,6 +13,10 @@ export interface PagesSliceState {
 export const fetchSelectedPageThunk = createAsyncThunk(
   'pages/fetchSelectedPage',
   async (payload: { pageID: PageIDType }, thunkAPI) => {
+    if (payload.pageID === undefined) {
+      return { value: undefined }
+    }
+
     const response = await window.electronAPI.pages.get({
       pageID: payload.pageID
     })
@@ -26,15 +30,6 @@ export const fetchSelectedPageThunk = createAsyncThunk(
     return {
       ...response,
     }
-  },
-)
-
-export const setSelectedPageIDThunk = createAsyncThunk(
-  'pages/setSelectedPageID',
-  async (payload: { value: PageIDType }, thunkAPI) => {
-    await window.electronAPI.settings.selectedPageID.set({ 
-      selectedPageID: payload.value })
-    return payload
   },
 )
 
@@ -74,15 +69,10 @@ const pagesSlice = createSlice({
     builder.addCase(fetchSelectedPageThunk.fulfilled, (state, action) => {
       setSelectedPage(state, action)
       state.loadingSelectedPage = false
-    })
-    builder.addCase(setSelectedPageIDThunk.pending, (state, action) => {
-      setSelectedPageID(state, {
-        ...action,
-        payload: {
-          value: action.meta.arg.value
-        }
+      window.electronAPI.store.set({ 
+        key: 'selectedPageID',
+        value: action.payload.value && action.payload.value.id,
       })
-      state.loadingSelectedPage = true
     })
   }
 })
