@@ -8,6 +8,7 @@ import {
 } from '@radix-ui/themes'
 
 import store from "@renderer/utils/redux-store"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import { updateNotepadThunk } from "@renderer/actions/notepads.slice"
 
 import type { NotepadType } from "@ts/models/Notepads.types"
@@ -23,6 +24,7 @@ function CreateNotepadContent(
   const [state, setState] = useState({
     name: '',
   })
+  const { show } = useAlert()
 
   const setFormValues = () => {
     setState({
@@ -43,7 +45,7 @@ function CreateNotepadContent(
         ...state,
       }
     })).then(() => {
-      // Show alert
+      show('Notepad updated successfully', 'success')
     })
   }
 

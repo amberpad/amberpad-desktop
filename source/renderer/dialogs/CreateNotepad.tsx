@@ -8,12 +8,14 @@ import {
 } from '@radix-ui/themes'
 
 import store from "@renderer/utils/redux-store"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import { createNotepadThunk } from "@renderer/actions/notepads.slice"
 
 function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
   const [state, setState] = useState({
     name: '',
   })
+  const { show } = useAlert()
 
   const clearForm = () => {
     setState({
@@ -25,7 +27,7 @@ function CreateNotepadContent(props: Parameters<typeof Dialog.Content>[0]) {
     store.dispatch(createNotepadThunk({
       name: state.name
     })).then(() => {
-      // Show success
+      show('Notepad created successfully', 'success')
     })
   }
 

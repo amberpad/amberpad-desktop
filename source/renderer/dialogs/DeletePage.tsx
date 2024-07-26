@@ -6,6 +6,7 @@ import {
 } from '@radix-ui/themes'
 
 import store from "@renderer/utils/redux-store"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import { destroyPageThunk } from "@renderer/actions/notepads.slice"
 
 import type { PageType } from "@ts/models/Pages.types"
@@ -18,9 +19,11 @@ function DeletePageContent(
     page: PageType,
   }
 ) {
+  const { show } = useAlert()
+
   const destroyPage = () => {
     store.dispatch(destroyPageThunk({ value: page })).then(() => {
-      // Show alert
+      show('Page deleted successfully', 'success')
     })
   }
 

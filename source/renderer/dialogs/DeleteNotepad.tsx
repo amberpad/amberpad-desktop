@@ -6,6 +6,7 @@ import {
 } from '@radix-ui/themes'
 
 import store from "@renderer/utils/redux-store"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import { destroyNotepadThunk } from "@renderer/actions/notepads.slice"
 
 import type { NotepadType } from "@ts/models/Notepads.types"
@@ -18,9 +19,11 @@ function DeleteNotepadContent(
     notepad: NotepadType,
   }
 ) {
+  const { show } = useAlert()
+
   const destroyNotepad = () => {
     store.dispatch(destroyNotepadThunk({ value: notepad })).then(() => {
-      // Show alert
+      show('Notepad deleted successfully', 'success')
     })
   }
 

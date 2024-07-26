@@ -4,8 +4,8 @@ import { css } from '@emotion/css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInfo, faWrench, faCheck, faXmark, faExclamation } from '@fortawesome/free-solid-svg-icons'
 
-import { useAlert } from '@renderer/providers/Alert'
-import type { AlertType } from '@renderer/providers/Alert'
+import { useAlert } from '@renderer/providers/AlertProvider'
+import type { AlertType } from '@renderer/providers/AlertProvider'
 
 const colorMap = {
   'info': 'yellow',

@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react"
+import { Node as SlateNode } from "slate"
 import { Box, Card, Flex, IconButton } from "@radix-ui/themes"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 import { faClipboard, faTrashCan } from '@fortawesome/free-regular-svg-icons'
 
-import { useAlert } from "@renderer/providers/Alert"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import DropdownMenu from "@renderer/primitives/DropdownMenu"
 import TextNote from "@renderer/components/TextNote"
 import DeleteNote from "@renderer/dialogs/DeleteNote"
@@ -12,7 +13,6 @@ import DeleteNote from "@renderer/dialogs/DeleteNote"
 import type { AmberpadEditor } from "@renderer/utils/slate"
 import type { BoxProps } from "@radix-ui/themes"
 import type { NoteType } from '@ts/models/Notes.types'
-import { Node as SlateNode } from "slate"
 
 function Note (
   { 
@@ -32,7 +32,6 @@ function Note (
       navigator.clipboard.writeText(SlateNode.string(editor));
       show('Content copied to clipboard')
     }
-    // Show alert
   }
 
   return (

@@ -8,7 +8,7 @@ import { Theme } from '@radix-ui/themes'
 import store from '@renderer/utils/redux-store'
 import { Router } from '@renderer/routes'
 import '@radix-ui/themes/styles.css'
-import AlertProvider from '@renderer/providers/Alert'
+import AlertProvider from '@renderer/providers/AlertProvider'
 import '@renderer/renderer.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))

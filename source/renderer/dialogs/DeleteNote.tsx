@@ -6,6 +6,7 @@ import {
 } from '@radix-ui/themes'
 
 import store from "@renderer/utils/redux-store"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import { destroyNoteThunk } from "@renderer/actions/notes.slice"
 
 import type { NoteType } from "@ts/models/Notes.types"
@@ -18,9 +19,11 @@ function DeleteNoteContent(
     note: NoteType,
   }
 ) {
+  const { show } = useAlert()
+
   const destroyNote = () => {
     store.dispatch(destroyNoteThunk({ value: note })).then(() => {
-      // Show alert
+      show('Note deleted successfully', 'success')
     })
   }
 

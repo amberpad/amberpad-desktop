@@ -8,6 +8,7 @@ import {
 } from '@radix-ui/themes'
 
 import store from "@renderer/utils/redux-store"
+import { useAlert } from "@renderer/providers/AlertProvider"
 import { updatePageThunk } from "@renderer/actions/notepads.slice"
 
 import type { PageType } from "@ts/models/Pages.types"
@@ -23,6 +24,7 @@ function UpdatePageContent(
   const [state, setState] = useState({
     name: '',
   })
+  const { show } = useAlert()
 
   const setFormValues = () => {
     setState({
@@ -43,7 +45,7 @@ function UpdatePageContent(
         name: state.name,
       }
     })).then(() => {
-      // Show success
+      show('Page updated successfully', 'success')
     })
   }
 

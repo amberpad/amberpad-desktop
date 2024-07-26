@@ -57,6 +57,7 @@ function AddNote ({
       })).then(() => {
         // Show success
         editor.clear()
+        onFocusChange(false)
       })
     }
   }
