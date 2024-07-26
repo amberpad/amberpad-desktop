@@ -32,21 +32,15 @@ function Visualizer (
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
   const editor = useMemo(() => {
     const editor = widthAmberpadEditor(withReact(createEditor()))
-    /*
-    if (editorRef !== undefined) {
-      editorRef.current = editor
-    }
-      */
     editorRef !== undefined && Object.assign(editorRef, { current: editor })
     return editor
   }, [])
 
-
-  const onChange = useCallback(() => {
-    editor.onVisualizerContentUpdate(() => {
-      onContentChange && onContentChange(editor.toJSON())
-    })
-  }, [])
+  useEffect(() => {
+    if (onContentChange) {
+      editor.onVisualizerContentUpdate(onContentChange)
+    }
+  }, [editor, onContentChange])
 
   return (
     <Box
@@ -56,7 +50,6 @@ function Visualizer (
       <Slate 
         {...slateProps}
         editor={editor}
-        onChange={onChange}
         initialValue={content !== undefined ? 
           editor.fromJSON(content) :
           editor.initialValue 

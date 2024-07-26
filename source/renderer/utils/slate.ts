@@ -28,6 +28,7 @@ import type {
 } from "@ts/slate.types"
 import { reverse } from 'lodash'
 import { HistoryEditor } from 'slate-history'
+import { useRef } from 'react'
 
 export const useAmberpadEditor = () => {
   return useSlate() as AmberpadEditor
@@ -113,8 +114,8 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     }
   }
 
-  const toJSON = () => {
-    return JSON.stringify(editor.children)
+  const toJSON = (replacer=undefined, space=undefined) => {
+    return JSON.stringify(editor.children, replacer, space)
   }
 
   const fromJSON = (value: string): DescendantType[] => {
@@ -196,20 +197,22 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     if (selection && Range.isCollapsed(selection)) {
       const stack = Array.from(getAncestorsStack(selection.anchor.path, { includeCeiling: true }))
 
+      //console.log('LIST', stack)
+
       if (
+        // If is type list and the content of the list is a paragraph block
         stack.length >= 2 && 
         stack[0][0].type === 'paragraph' &&
         context.listItems.includes(stack[1][0].type)
       ) {
+        // When break is inserted a paragraph is inserted inside the list item node
         const previuos = [
           SlateNode.get(editor, Path.previous(stack[0][1])), 
           Path.previous(stack[0][1])
         ] as NodeEntry<EditorType | ElementType>
-
         if (
           SlateNode.string(previuos[0]) === '' &&
-          // If previous is the first element in list dont close the list
-          Path.hasPrevious(previuos[1])
+          SlateNode.string(stack[0][0]) === ''
         ) {
           // If the last empty list item has no text the next paragraph 
           // is created out of list
@@ -521,7 +524,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   const setCheckListItemValue = (element: ElementType, value) => {
     const path = ReactEditor.findPath(editor as any, element)
     Transforms.setNodes<ElementType>(editor, { checked: value }, { at: path })
-    updateContentHash()
+    notifyContentUpdate()
   }
 
   /****************************************************************************
@@ -650,14 +653,14 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   * Visualizer content
   ****************************************************************************/
 
-  const visualizerContentHash = { value: 0 }
-
-  const updateContentHash = () => {
-    visualizerContentHash.value += 1
+  const visualizerContext = { contentUpdateCallbackRef: undefined }
+  const notifyContentUpdate = () => {
+    const callback = visualizerContext.contentUpdateCallbackRef
+    callback && callback(toJSON())
   }
 
-  const onVisualizerContentUpdate = (callback: (contentHash: { value: number}) => void) => {
-    return callback(visualizerContentHash)
+  const onVisualizerContentUpdate = (callback: (content: string) => void) => {
+    visualizerContext.contentUpdateCallbackRef = callback
   }
 
   // Return editor reference with aggregated functions
@@ -692,8 +695,6 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     removeHoveredLink,
     setCheckListItemValue,
     // Visualizer content commands
-    visualizerContentHash,
-    updateContentHash,
     onVisualizerContentUpdate,
   })
 }

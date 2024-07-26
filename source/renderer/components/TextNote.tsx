@@ -20,14 +20,14 @@ function TextNote (
 ) {
   const { show } = useAlert()
 
-  const onTextNodeUpdate = useCallback((content) => {
+  const onTextNodeUpdate = useCallback((content: string) => {
     store.dispatch(updateNoteThunk({
       value: {
         ...data,
         content: content
       },
     })).then(() => {
-      show('Note updated successfully', 'success')
+      show('Note updated successfully', 'success', 'short')
     })
   }, [])
 
