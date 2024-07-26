@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Box, Card, Flex, Heading } from '@radix-ui/themes'
 
 import store from '@renderer/utils/redux-store'
@@ -15,7 +15,7 @@ export default function SelectedPage ({
 }) {
   const [context, setContext] = useState({
     pages: {
-      selectedPage: undefined,
+      selectedPage: null,
       loading: false,
     }
   })
@@ -27,30 +27,48 @@ export default function SelectedPage ({
         loading: state.pages.loadingSelectedPage
       }), 
       (state) => {
-        setContext({
+        setContext((prev) => ({
           pages: {
-            selectedPage: state.pages.selectedPage,
+            // Selected is hidden for default, this will ignore any seting of undefined value
+            // until setting an not undefined value
+            selectedPage: (
+              prev.pages.selectedPage === null && 
+              !state.pages.selectedPage ?
+                null :
+                state.pages.selectedPage
+            ),
             loading: state.pages.loadingSelectedPage
           }
-        })
+        }))
       },
     )
   }, [])
 
   const selectedPage = context.pages.selectedPage
-  const hasSelectedPage = selectedPage !== undefined
+  const hasSelectedPage = selectedPage !== undefined && selectedPage !== null
   return (
     <Box
-      data-testid='selected-page'
-      py='6'
       {...boxProps}
-      className={css`
-        max-height: 150px;
-        ${!hasSelectedPage || !isSidebarOpen ? 
-          'animation: slide-out-blurred-left 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;':
-          'animation: slide-in-blurred-left 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;'
+      data-testid='selected-page'
+      className={(() => {
+        if (selectedPage === null) {
+          return css`
+            max-height: 150px;
+            display: none;
+          `
+        } else if (hasSelectedPage && isSidebarOpen) {
+          return css`
+            max-height: 150px;
+            animation: slide-in-blurred-left 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;
+          `
+        } else {
+          return css`
+            max-height: 150px;
+            animation: slide-out-blurred-left 0.45s cubic-bezier(0.755, 0.050, 0.855, 0.060) both;
+            height: 0;
+          `
         }
-      `}
+      })()}
     >
       <Card
         className={css`

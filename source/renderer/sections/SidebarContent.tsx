@@ -117,7 +117,7 @@ function SidebarContent(props: BoxProps) {
       <Flex
         height='100%'
         direction='column'
-        gap='0'
+        gap='4'
         px='4'
         py='4'
         justify='start'

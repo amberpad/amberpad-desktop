@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEllipsisV } from '@fortawesome/free-solid-svg-icons'
 import { faClipboard, faTrashCan } from '@fortawesome/free-regular-svg-icons'
 
+import { useAlert } from "@renderer/providers/Alert"
 import DropdownMenu from "@renderer/primitives/DropdownMenu"
 import TextNote from "@renderer/components/TextNote"
 import DeleteNote from "@renderer/dialogs/DeleteNote"
@@ -23,11 +24,13 @@ function Note (
     isDeleteNoteOpen: false,
   })
   const editorRef = useRef<AmberpadEditor>()
+  const { show } = useAlert()
 
   const copyClipboard = () => {
     if (editorRef) {
       const editor = editorRef.current
       navigator.clipboard.writeText(SlateNode.string(editor));
+      show('Content copied to clipboard')
     }
     // Show alert
   }

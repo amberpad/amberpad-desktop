@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Flex, Section, Box, Separator } from '@radix-ui/themes'
+import { Flex, Section, Box, Separator, Callout } from '@radix-ui/themes'
 import { css } from '@emotion/css'
 
 import store from '@renderer/utils/redux-store'
-import commonsSlice from '@renderer/actions/commons.slice'
 import pagesSlice, { fetchSelectedPageThunk } from '@renderer/actions/pages.slice'
 import { fetchNotesThunk } from '@renderer/actions/notes.slice'
 import { fetchNotepadsThunk } from '@renderer/actions/notepads.slice'
 import Sidebar from '@renderer/sections/Sidebar'
 import AddNote from '@renderer/sections/AddNote'
 import NotesBoard from '@renderer/sections/NotesBoard'
+import Alert from '@renderer/components/Alert'
 import Header from '@renderer/sections/Header'
 
 export default function Home() {
@@ -42,26 +42,9 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    // Fetch selected page
-    /*
-    let promise: any = undefined
-    if (context.pages.selectedPageID === undefined) {
-      const { setSelectedPage } = pagesSlice.actions
-      store.dispatch(setSelectedPage({ value: undefined }))
-    } else {
-      store.dispatch(fetchSelectedPageThunk({
-        pageID: context.pages.selectedPageID
-      }))
-    }
-    */
     store.dispatch(fetchSelectedPageThunk({
       pageID: context.pages.selectedPageID
     }))
-    /*
-    return () => {
-      promise && promise.abort()
-    }
-    */
   }, [context.pages.selectedPageID])
 
   useEffect(() => {
@@ -92,17 +75,6 @@ export default function Home() {
   /****************************************************************************
   * Local storage
   ****************************************************************************/
-
-  /*
-  useEffect(() => {
-    if (context.pages.selectedPageID !== undefined) {
-      window.electronAPI.store.set({ 
-        key: 'selectedPageID',
-        value: context.pages.selectedPageID,
-      })
-    }
-  }, [context.pages.selectedPageID])
-  */
 
   useEffect(() => {
     window.electronAPI.store
@@ -154,6 +126,17 @@ export default function Home() {
           align='stretch'
           flexGrow='1'
         >
+          <Flex
+            data-testid='content-header'
+            mt='2'
+            mx='4'
+            direction='row'
+            justify='end'
+          >
+            <Alert />
+          </Flex>
+
+
           <NotesBoard 
             width='100%'
             minHeight='0'

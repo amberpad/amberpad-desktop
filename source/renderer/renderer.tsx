@@ -8,17 +8,10 @@ import { Theme } from '@radix-ui/themes'
 import store from '@renderer/utils/redux-store'
 import { Router } from '@renderer/routes'
 import '@radix-ui/themes/styles.css'
-import './renderer.css'
+import AlertProvider from '@renderer/providers/Alert'
+import '@renderer/renderer.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
-
-/*
-Object.defineProperty(window, 'Text', {
-  value: window.Text,
-  writable: false,
-});
-*/
-
 
 const ThemeWrapper = ({ children }) => {
   return (
@@ -38,9 +31,11 @@ const ThemeWrapper = ({ children }) => {
 root.render(
   <React.StrictMode>
     <ReduxProvider store={store} >
-      <ThemeWrapper>
-        <Router />
-      </ThemeWrapper>
+      <AlertProvider>
+        <ThemeWrapper>
+          <Router />
+        </ThemeWrapper>
+      </AlertProvider>
     </ReduxProvider>
   </React.StrictMode>
 )

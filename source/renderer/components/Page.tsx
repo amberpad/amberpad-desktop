@@ -109,7 +109,7 @@ function Page ({
           >
             <Button
               className={css`
-                color: var(--accent-a9);
+                color: var(--amber-a9);
 
                 :hover {
                   background-color: transparent;
