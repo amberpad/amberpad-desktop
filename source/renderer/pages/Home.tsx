@@ -115,6 +115,9 @@ export default function Home() {
 
         />
         <Flex
+          className={css`
+            position: relative;
+          `}
           data-testid='home-content'
           minWidth='0'
           minHeight='0'
@@ -127,6 +130,12 @@ export default function Home() {
           flexGrow='1'
         >
           <Flex
+            className={css`
+              position: absolute;
+              top: 0;
+              right: 0;
+              z-index: 12;
+            `}
             data-testid='content-header'
             mt='2'
             mx='4'
@@ -135,7 +144,6 @@ export default function Home() {
           >
             <Alert />
           </Flex>
-
 
           <NotesBoard 
             width='100%'

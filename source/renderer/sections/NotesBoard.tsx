@@ -8,6 +8,8 @@ import Note from '@renderer/sections/Note'
 
 import type { BoxProps } from '@radix-ui/themes'
 import { NoteType } from '@ts/models/Notes.types'
+import Alert from '@renderer/components/Alert'
+import { css } from '@emotion/css'
 
 function NotesBoard (props: BoxProps) {
   const [context, setContext] = useState({ 

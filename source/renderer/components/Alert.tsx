@@ -63,10 +63,8 @@ const iconsMap = {
 
 function Alert (
   {
-    //alertType='info',
     ...flexProps
   }: FlexProps & {
-    //alertType?: AlertType
   }
 ) {
   const { content, type: alertType, isActive } = useAlert()
@@ -93,9 +91,13 @@ function Alert (
       asChild={true}
     >
       <Callout.Root
+        className={css`
+          background-color: var(--accent-2);
+        `}
         color={colorMap[alertType] as any}
         role={roleMap[alertType]}
         size='1'
+        variant="surface"
       >
         <Callout.Icon >
           {iconsMap[alertType]}
