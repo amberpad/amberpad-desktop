@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react'
 import { 
   Dialog, 
   Flex, 
@@ -10,65 +10,76 @@ import {
 import store from "@renderer/utils/redux-store"
 import { useAlert } from "@renderer/providers/AlertProvider"
 import { updatePageThunk } from "@renderer/actions/notepads.slice"
+import AlertDialog, { AlertDialogProps }  from './AlertDialog'
 
 import type { PageType } from "@ts/models/Pages.types"
 
-function UpdatePageContent(
+export default function UpdatePage (
   {
     page,
-    ...aditionalProps
-  }: Parameters<typeof Dialog.Content>[0] & {
+    children=undefined,
+    ...dialogProps
+  }: {
     page: PageType,
-  }
+    children?: ReactNode
+  } & AlertDialogProps
 ) {
-  const [state, setState] = useState({
-    name: '',
-  })
   const { show } = useAlert()
+  const [form, setForm] = useState({
+    name: ''
+  })
+  const [state, setState] = useState({
+    open: dialogProps.open,
+  })
+  const open = (
+    dialogProps.onOpenChange ? 
+      dialogProps.open :
+      state.open
+  )
 
-  const setFormValues = () => {
-    setState({
-      name: page.name,
-    })
-  }
+  useEffect(() => {
+    if (page || open) {
+      setForm({
+        name: page.name,
+      })
+    }
+  },[page, open])
 
-  const clearForm = () => {
-    setState({
-      name: '',
+  const close = () => {
+    setForm({
+      name: ''
     })
+    dialogProps.onOpenChange ?
+      dialogProps.onOpenChange(false) :
+      setState({ open: false })
   }
 
   const updatePage = () => {
     store.dispatch(updatePageThunk({
       value: {
         ...page,
-        name: state.name,
+        name: form.name,
       }
     })).then(() => {
       show('Page updated successfully', 'success')
     })
   }
 
-  const _onCancel = () => {
-    clearForm()
-  }
-
-  const _onSuccess = () => {
-    updatePage()
-    clearForm()
-  }
-
   return (
-    <Dialog.Content
-      aria-describedby={undefined}
-      onOpenAutoFocus={() => setFormValues()}
-      {...aditionalProps}
-    >
-      <Dialog.Title size='2'>
-        Update page
-      </Dialog.Title>
-
-      <Flex 
+    <AlertDialog
+      {...dialogProps}
+      title='Edit page'
+      open={open}
+      onOpenChange={(open) => setState({ open })}
+      onCancel={() => {
+        close()
+      }}
+      onSuccess={() => {
+        updatePage()
+        close()
+      }}
+      content={
+        <Flex 
         direction='column'
         gap='3'
       >
@@ -78,35 +89,14 @@ function UpdatePageContent(
           </Text>
           <TextField.Root 
             size='2'
-            value={state.name}
-            onChange={(event) => setState({ name: event.target.value })}
+            value={form.name}
+            onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
           />
         </label>
       </Flex>
-
-      <Flex gap="3" mt="4" justify="end">
-        <Dialog.Close>
-          <Button
-            variant="soft"
-            color="gray"
-            onClick={_onCancel}
-          >
-            Cancel
-          </Button>
-        </Dialog.Close>
-        <Dialog.Close>
-          <Button
-            onClick={_onSuccess}
-          >
-            Save
-          </Button>
-        </Dialog.Close>
-      </Flex>
-    </Dialog.Content>
+      }
+    >
+      {children}
+    </AlertDialog>
   )
-}
-
-export default {
-  ...Dialog,
-  Content: UpdatePageContent,
 }

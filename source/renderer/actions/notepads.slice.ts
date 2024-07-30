@@ -151,7 +151,7 @@ export const fetchPagesThunk = createAsyncThunk(
   'notepads/fetchPages',
   async (
     payload: { 
-      notepads: NotepadIDType[], 
+      notepads: NotepadType[], 
       search: string,
     }, 
     thunkAPI
@@ -159,12 +159,12 @@ export const fetchPagesThunk = createAsyncThunk(
     const state = (thunkAPI.getState() as any).notepads as NotepadsSliceState
 
     const notepads = payload.notepads
-      .filter((notepadID) => 
-        state.paginationMap[notepadID].hasNext
-      ).map((notepadID) => ({
-        id: notepadID,
-        page: state.paginationMap[notepadID] ?
-          state.paginationMap[notepadID].page :
+      .filter((notepad) => 
+        state.paginationMap[notepad.id].hasNext
+      ).map((notepad) => ({
+        id: notepad.id,
+        page: state.paginationMap[notepad.id] ?
+          state.paginationMap[notepad.id].page :
           2
       }))
     if (!notepads) 
@@ -426,20 +426,20 @@ const notepadsSlice = createSlice({
     })
     builder.addCase(fetchPagesThunk.pending, (state, action) => {
       action.meta.arg.notepads
-        .filter((notepadID) => 
-          state.paginationMap[notepadID].hasNext
-        ).forEach((notepadID) => {
-          state.paginationMap[notepadID].page += 1
-          state.paginationMap[notepadID].isLoading = true
+        .filter((notepad) => 
+          state.paginationMap[notepad.id].hasNext
+        ).forEach((notepad) => {
+          state.paginationMap[notepad.id].page += 1
+          state.paginationMap[notepad.id].isLoading = true
         })
     })
     builder.addCase(fetchPagesThunk.rejected, (state, action) => {
       action.meta.arg.notepads
-        .filter((notepadID) => 
-          state.paginationMap[notepadID].hasNext
-        ).forEach((notepadID) => {
-          state.paginationMap[notepadID].page -= 1
-          state.paginationMap[notepadID].isLoading = false
+        .filter((notepad) => 
+          state.paginationMap[notepad.id].hasNext
+        ).forEach((notepad) => {
+          state.paginationMap[notepad.id].page -= 1
+          state.paginationMap[notepad.id].isLoading = false
         })
     })
     builder.addCase(fetchPagesThunk.fulfilled, (state, action) => {
@@ -451,8 +451,8 @@ const notepadsSlice = createSlice({
       })
 
       action.meta.arg.notepads
-        .forEach((notepadID) => {
-          state.paginationMap[notepadID].isLoading = false
+        .forEach((notepad) => {
+          state.paginationMap[notepad.id].isLoading = false
         })
 
     })

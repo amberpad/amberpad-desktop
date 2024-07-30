@@ -42,26 +42,24 @@ function Notepad ({
   return (
     <>
       <>
-        <CreatePage.Root
+        <CreatePage
+          notepad={data}
           open={state.isCreatePageOpen}
           onOpenChange={(isOpen) => setState((prev) => ({...prev, isCreatePageOpen: isOpen}))}
-        >
-          <CreatePage.Content notepad={data} />
-        </CreatePage.Root>
-        <UpdateNotepad.Root
+        />
+        <UpdateNotepad
+          notepad={data}
           open={state.isUpdateNotepadOpen}
           onOpenChange={(isOpen) => setState((prev) => ({...prev, isUpdateNotepadOpen: isOpen}))}
-        >
-          <UpdateNotepad.Content notepad={data} />
-        </UpdateNotepad.Root>
-        <DeleteNotepad.Root
+        />
+        <DeleteNotepad
+          notepad={data}
           open={state.isDeleteNotepadOpen}
           onOpenChange={(isOpen) => setState((prev) => ({...prev, isDeleteNotepadOpen: isOpen}))}
-        >
-          <DeleteNotepad.Content notepad={data} />
-        </DeleteNotepad.Root>
+        />
       </>
       <Flex
+        data-testid='notepad'
         direction='column'
         gap='2'
         justify='start'
@@ -90,6 +88,7 @@ function Notepad ({
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <IconButton
+                data-testid='notepad-options-button'
                 className={'notepad-lavr8Nx04e__options'}
                 size='1'
                 variant='ghost'
@@ -100,8 +99,11 @@ function Notepad ({
                 />
               </IconButton>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
+            <DropdownMenu.Content
+              data-testid='notepad-options-menu'
+            >
               <DropdownMenu.Item
+                data-testid='notepad-options-create-page-button'
                 onClick={() => setState((prev) => ({...prev, isCreatePageOpen: true}))}
               >
                 Add page

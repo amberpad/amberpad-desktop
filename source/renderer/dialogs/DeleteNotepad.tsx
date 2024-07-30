@@ -1,25 +1,39 @@
-import React, { useState } from 'react'
-import { 
-  AlertDialog,
-  Button,
-  Flex, 
-} from '@radix-ui/themes'
+import React, { useState, ReactNode } from 'react'
+import isHotkey from 'is-hotkey'
 
 import store from "@renderer/utils/redux-store"
 import { useAlert } from "@renderer/providers/AlertProvider"
 import { destroyNotepadThunk } from "@renderer/actions/notepads.slice"
+import AlertDialog, { AlertDialogProps } from './AlertDialog'
 
 import type { NotepadType } from "@ts/models/Notepads.types"
 
-function DeleteNotepadContent(
+
+export default function DeleteNotepad (
   {
     notepad,
-    ...aditionalProps
-  }: Parameters<typeof AlertDialog.Content>[0] & {
+    children=undefined,
+    ...dialogProps
+  }: {
     notepad: NotepadType,
-  }
+    children?: ReactNode,
+  } & AlertDialogProps
 ) {
   const { show } = useAlert()
+  const [state, setState] = useState({
+    open: dialogProps.open,
+  })
+  const open = (
+    dialogProps.onOpenChange ? 
+      dialogProps.open :
+      state.open
+  )
+
+  const close = () => {
+    dialogProps.onOpenChange ?
+      dialogProps.onOpenChange(false) :
+      setState({ open: false })
+  }
 
   const destroyNotepad = () => {
     store.dispatch(destroyNotepadThunk({ value: notepad })).then(() => {
@@ -27,48 +41,22 @@ function DeleteNotepadContent(
     })
   }
 
-  const _onCancel = () => {
-  }
-
-  const _onSuccess = () => {
-    destroyNotepad()
-  }
-
   return (
-    <AlertDialog.Content
-      {...aditionalProps}
+    <AlertDialog
+      {...dialogProps}
+      title='Delete notepad'
+      description='Are you sure? all the notes and pages associated with this notepad will also be deleted.'
+      open={open}
+      onOpenChange={(open) => setState({ open })}
+      onCancel={() => {
+        close()
+      }}
+      onSuccess={() => {
+        destroyNotepad()
+        close()
+      }}
     >
-      <AlertDialog.Title size='2'>
-        Delete notepad
-      </AlertDialog.Title>
-      <AlertDialog.Description size="2">
-        Are you sure? all the notes and pages associated with this notepad will also be deleted.
-      </AlertDialog.Description>
-      <Flex gap="3" mt="4" justify="end">
-        <AlertDialog.Cancel>
-          <Button 
-            variant="soft" 
-            color="gray"
-            onClick={_onCancel}
-          >
-            Cancel
-          </Button>
-        </AlertDialog.Cancel>
-        <AlertDialog.Action>
-          <Button 
-            variant="solid" 
-            color="red"
-            onClick={_onSuccess}
-          >
-            Delete
-          </Button>
-        </AlertDialog.Action>
-      </Flex>
-    </AlertDialog.Content>
+      {children}
+    </AlertDialog>
   )
-}
-
-export default {
-  ...AlertDialog,
-  Content: DeleteNotepadContent,
 }

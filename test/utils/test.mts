@@ -4,7 +4,7 @@ import { _electron } from 'playwright';
 import { test as base } from '@playwright/test';
 import knex from 'knex'
 
-import seed from './seed';
+import seed from './seed.mts';
 
 import type {Page} from '@playwright/test';
 

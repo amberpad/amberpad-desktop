@@ -550,13 +550,13 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   * URL mark commands
   ****************************************************************************/
 
-  const toggleLinkMark = (url: string) => {
+  const toggleLinkMark = (link: string) => {
     const isActive = isMarkActive('link')
 
     if (isActive) {
       Editor.removeMark(editor, 'link')
     } else {
-      Editor.addMark(editor, 'link', url)
+      Editor.addMark(editor, 'link', link)
     }
   }
 
@@ -590,6 +590,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
           !!node._hovered
       }
     )
+    return true
   }
 
   const removeHoveredLink = () => {
@@ -609,6 +610,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
           !!node._hovered
       }
     )
+    return true
   }
 
   const hoveredLink = { value: false }

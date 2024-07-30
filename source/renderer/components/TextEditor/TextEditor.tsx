@@ -1,15 +1,15 @@
-import React, { useMemo, useCallback, useEffect } from 'react'
+import React, { useMemo, useCallback, useEffect, useState } from 'react'
 import { BaseEditor, Descendant, Node as SlateNode, createEditor } from 'slate'
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { Box, Card, Flex } from '@radix-ui/themes'
+import isHotkey from 'is-hotkey'
+import { css } from '@emotion/css'
 
 import { AmberpadEditor, widthAmberpadEditor } from '@renderer/utils/slate'
 import TextEditorToolbar from './Toolbar'
 import Element from './Element'
 import Leaf from './Leaf'
-
-import { css } from '@emotion/css'
 
 /******************************************************************************
 * Render text editor
@@ -19,12 +19,17 @@ function TextEditor (
   {
     slateEditorRef=undefined,
     onIsEmptyChange=undefined,
+    onHotkeyEvent=undefined,
+    hotkeys=['mod+enter'],
     ...slateProps
   }: Omit<Parameters<typeof Slate>[0], 'editor' | 'initialValue' | 'children'> & {
     slateEditorRef?: React.MutableRefObject<AmberpadEditor>,
-    onIsEmptyChange?: (value: Boolean) => void
+    onIsEmptyChange?: (value: Boolean) => void,
+    onHotkeyEvent?: (string) => void,
+    hotkeys?: string[],
   }
 ) {
+  const [isFocused, setIsFocused] = useState({})
   const renderElement = useCallback(props => <Element {...props} />, [])
   const renderLeaf = useCallback(props => <Leaf {...props} />, [])
   const editor = useMemo(() => {
@@ -33,6 +38,14 @@ function TextEditor (
       slateEditorRef.current = editor
     }
     return editor
+  }, [])
+
+
+  const onKeyDown = useCallback((event) => {
+    const hotkey = hotkeys.find((item) => isHotkey(item, event))
+    if (hotkey && onHotkeyEvent) {
+      onHotkeyEvent(hotkey)
+    }
   }, [])
 
   return (
@@ -88,13 +101,17 @@ function TextEditor (
             overflowX='clip'
             overflowY='auto'
           >
-            <Editable 
+            <Editable
+              data-testid='add-note-textarea'
               className={css`
                 padding: var(--space-2);
                 outline: none;
               `}
               renderElement={renderElement}
               renderLeaf={renderLeaf}
+              onKeyDown={isFocused && onKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
             />
           </Box>
         </Flex>

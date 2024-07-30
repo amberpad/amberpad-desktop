@@ -1,25 +1,39 @@
-import React, { useState } from 'react'
-import { 
-  AlertDialog,
-  Button,
-  Flex, 
-} from '@radix-ui/themes'
+import React, { useState, ReactNode } from 'react'
+import isHotkey from 'is-hotkey'
 
 import store from "@renderer/utils/redux-store"
 import { useAlert } from "@renderer/providers/AlertProvider"
 import { destroyNoteThunk } from "@renderer/actions/notes.slice"
+import AlertDialog, { AlertDialogProps } from './AlertDialog'
 
 import type { NoteType } from "@ts/models/Notes.types"
 
-function DeleteNoteContent(
+
+export default function DeleteNote (
   {
     note,
-    ...aditionalProps
-  }: Parameters<typeof AlertDialog.Content>[0] & {
+    children=undefined,
+    ...dialogProps
+  }: {
     note: NoteType,
-  }
+    children?: ReactNode,
+  } & AlertDialogProps
 ) {
   const { show } = useAlert()
+  const [state, setState] = useState({
+    open: dialogProps.open,
+  })
+  const open = (
+    dialogProps.onOpenChange ? 
+      dialogProps.open :
+      state.open
+  )
+
+  const close = () => {
+    dialogProps.onOpenChange ?
+      dialogProps.onOpenChange(false) :
+      setState({ open: false })
+  }
 
   const destroyNote = () => {
     store.dispatch(destroyNoteThunk({ value: note })).then(() => {
@@ -27,48 +41,22 @@ function DeleteNoteContent(
     })
   }
 
-  const _onCancel = () => {
-  }
-
-  const _onSuccess = () => {
-    destroyNote()
-  }
-
   return (
-    <AlertDialog.Content
-      {...aditionalProps}
+    <AlertDialog
+      {...dialogProps}
+      title='Delete note'
+      description='Are you sure? this action cannot be undone.'
+      open={open}
+      onOpenChange={(open) => setState({ open })}
+      onCancel={() => {
+        close()
+      }}
+      onSuccess={() => {
+        destroyNote()
+        close()
+      }}
     >
-      <AlertDialog.Title size='2'>
-        Delete note
-      </AlertDialog.Title>
-      <AlertDialog.Description size="2">
-        Are you sure? this action cannot be undone.
-      </AlertDialog.Description>
-      <Flex gap="3" mt="4" justify="end">
-        <AlertDialog.Cancel>
-          <Button 
-            variant="soft" 
-            color="gray"
-            onClick={_onCancel}
-          >
-            Cancel
-          </Button>
-        </AlertDialog.Cancel>
-        <AlertDialog.Action>
-          <Button 
-            variant="solid" 
-            color="red"
-            onClick={_onSuccess}
-          >
-            Delete
-          </Button>
-        </AlertDialog.Action>
-      </Flex>
-    </AlertDialog.Content>
+      {children}
+    </AlertDialog>
   )
-}
-
-export default {
-  ...AlertDialog,
-  Content: DeleteNoteContent,
 }

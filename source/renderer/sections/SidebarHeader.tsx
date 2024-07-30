@@ -66,6 +66,33 @@ function SidebarHeader({
           Notepads / Pages
         </Heading>
       </Box>
+      
+      <CreateNotepad>
+        <Box
+          className={!isSidebarOpen && css`
+            display: none;
+          `}
+          asChild={true}
+        >
+          <IconButton
+            size='1'
+            variant='ghost'
+          >
+            <FontAwesomeIcon
+              size='1x'
+              icon={faPlus}
+            />
+          </IconButton>
+        </Box>
+      </CreateNotepad>
+
+    </Flex>
+  )
+}
+
+export default SidebarHeader
+
+/*
       <CreateNotepad.Root>
         <CreateNotepad.Trigger>
           <Box
@@ -89,8 +116,4 @@ function SidebarHeader({
           maxWidth='520px'
         />
       </CreateNotepad.Root>
-    </Flex>
-  )
-}
-
-export default SidebarHeader
+*/

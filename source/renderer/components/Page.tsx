@@ -74,20 +74,19 @@ function Page ({
   return (
     <>
       <>
-        <UpdatePage.Root
+        <UpdatePage
+          page={data}
           open={state.isUpdatePageOpen}
           onOpenChange={(isOpen) => setState((prev) => ({...prev, isUpdatePageOpen: isOpen}))}
-        >
-          <UpdatePage.Content page={data} />
-        </UpdatePage.Root>
-        <DeletePage.Root
+        />
+        <DeletePage
+          page={data}
           open={state.isDeletePageOpen}
           onOpenChange={(isOpen) => setState((prev) => ({...prev, isDeletePageOpen: isOpen}))}
-        >
-          <DeletePage.Content page={data} />
-        </DeletePage.Root>
+        />
       </>
-      <Flex 
+      <Flex
+        data-testid='page'
         className='page-YBdupuKlEX'
         direction='row'
         gap='4'
@@ -131,6 +130,7 @@ function Page ({
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
               <IconButton
+                data-testid='page-options-button'
                 className='page-YBdupuKlEX__options'
                 size='1'
                 variant='ghost'
@@ -141,8 +141,11 @@ function Page ({
                 />
               </IconButton>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
+            <DropdownMenu.Content
+              data-testid='page-options-menu'
+            >
               <DropdownMenu.Item
+                data-testid='page-options-edit-page-button'
                 onClick={() => setState((prev) => ({...prev, isUpdatePageOpen: true}))}
               >
                 Rename
@@ -152,6 +155,7 @@ function Page ({
                 />
               </DropdownMenu.Item>
               <DropdownMenu.Item 
+                data-testid='page-options-delete-page-button'
                 color="red"
                 onClick={() => setState((prev) => ({...prev, isDeletePageOpen: true}))}
               >

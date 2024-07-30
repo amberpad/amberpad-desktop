@@ -58,7 +58,7 @@ export const electronAPI = {
       return ipcRenderer.invoke('notepads.getAll', payload)
     }) as ModelQueryInvokerType<NotepadsFiltersPayloadType, NotepadType>,
     getPages: ((payload: NotepadsPagesFiltersPayloadType) => {
-      return ipcRenderer.invoke('notepads.pages.get', payload)
+      return ipcRenderer.invoke('notepads.pages.all', payload)
     }) as QueryInvokerType<NotepadsPagesFiltersPayloadType, {
       values: {
         id: NotepadIDType,

@@ -1,7 +1,13 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/test';
+import { test } from './utils/test.mts';
 
-import { createNotepad, updateNotepad, deleteNotepad, countNotepads } from './operations/notepads'
+import { createNotepad, updateNotepad, deleteNotepad, countNotepads } from './operations/notepads.mts'
+
+/*
+  test ids:
+    notepad
+    notepad-pages-scrolling-area
+*/
 
 test('Notepad is added it\'s container when created #EnnXQW3AYD', async ({ launchElectron }) => {
   for await (const page of launchElectron()) {
@@ -10,7 +16,7 @@ test('Notepad is added it\'s container when created #EnnXQW3AYD', async ({ launc
     expect(await page.locator(
       'xpath=' + 
       `//*[contains(text(),'${name}')]` +
-      `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+      `//ancestor::div[@data-testid='notepad']`
     )).toBeDefined();
   }
 });
@@ -24,17 +30,17 @@ test('Notepad is modified from it\'s container when updated #KR3ZMLAgsk', async 
     await page.locator(
       'xpath=' + 
       `//*[contains(text(),'${originalName}')]` +
-      `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+      `//ancestor::div[@data-testid='notepad']`
     ).waitFor({ state: 'detached' });
     expect(await page.locator(
       'xpath=' + 
       `//*[contains(text(),'${originalName}')]` +
-      `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+      `//ancestor::div[@data-testid='notepad']`
     ).count()).toEqual(0);
     expect(await page.locator(
       'xpath=' + 
       `//*[contains(text(),'${updatedName}')]` +
-      `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+      `//ancestor::div[@data-testid='notepad']`
     )).toBeDefined();
   }
 });
@@ -46,12 +52,12 @@ test('Notepad is removed from it\'s container when deleted #qgZ84s8G0C', async (
     await page.locator(
       'xpath=' + 
       `//*[contains(text(),'${name}')]` +
-      `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+      `//ancestor::div[@data-testid='notepad']`
     ).waitFor({ state: 'detached' });
     expect(await page.locator(
       'xpath=' + 
       `//*[contains(text(),'${name}')]` +
-      `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+      `//ancestor::div[@data-testid='notepad']`
     ).count()).toEqual(0);
   }
 });
@@ -64,7 +70,7 @@ test('Notepad container should paginate when there is too many items #5MG57jsx1u
     ).waitFor({state: 'visible'});
     expect(await countNotepads(page)).toEqual(20);
     // Scroll to bottom
-    await page.locator(`xpath=//*[@id='id:notepad-list-container:7MLMomsYBt']`).evaluate((node) => {
+    await page.locator(`xpath=//*[@data-testid='notepad-pages-scrolling-area']`).evaluate((node) => {
       node.scrollTo(0, node.scrollHeight);
     });
     await page.locator(

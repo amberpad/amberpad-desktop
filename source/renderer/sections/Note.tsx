@@ -30,21 +30,21 @@ function Note (
     if (editorRef) {
       const editor = editorRef.current
       navigator.clipboard.writeText(SlateNode.string(editor));
-      show('Content copied to clipboard')
+      show('Content copied to clipboard', 'success')
     }
   }
 
   return (
     <>
       <>
-        <DeleteNote.Root
+        <DeleteNote
+          note={data}
           open={state.isDeleteNoteOpen}
           onOpenChange={(isOpen) => setState((prev) => ({...prev, isDeleteNoteOpen: isOpen}))}
-        >
-          <DeleteNote.Content note={data} />
-        </DeleteNote.Root>
+        />
       </>
       <Box
+        data-testid='note'
         maxWidth='100%'
         {...containerProps}
       >
@@ -81,6 +81,7 @@ function Note (
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                   <IconButton
+                    data-testid='note-options-button'
                     variant="ghost"
                     size='1'
                   >
@@ -90,7 +91,9 @@ function Note (
                     />
                   </IconButton>
                 </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
+                <DropdownMenu.Content
+                  data-testid='note-options-menu'
+                >
                   <DropdownMenu.Item
                     onClick={copyClipboard}
                   >
@@ -101,7 +104,8 @@ function Note (
                     />
                   </DropdownMenu.Item>
                   <DropdownMenu.Separator />
-                  <DropdownMenu.Item 
+                  <DropdownMenu.Item
+                    data-testid='note-options-delete-button' 
                     color="red"
                     onClick={() => setState((prev) => ({...prev, isDeleteNoteOpen: true}))}
                   >

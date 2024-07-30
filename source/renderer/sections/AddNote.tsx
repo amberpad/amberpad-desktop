@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { Box, Flex, IconButton, TextArea } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
@@ -89,6 +89,12 @@ function AddNote ({
     }))
   }
 
+  const onHotkeyEvent = useCallback((hotkey) => {
+    if (hotkey === 'mod+enter') {
+      createNote()
+    }
+  }, [])
+
   return (
     <Box
       width='100%'
@@ -136,7 +142,9 @@ function AddNote ({
               flexGrow='1'
             >
               <TextEditor 
+                data-testid=''
                 slateEditorRef={slateEditorRef}
+                onHotkeyEvent={onHotkeyEvent}
               />
             </Box>
             <Flex
@@ -146,6 +154,7 @@ function AddNote ({
               align='center'
             >
               <IconButton
+                data-testid='add-note-send-button'
                 data-radius='full'
                 size='2'
                 disabled={state.isTextEditorEmpty}

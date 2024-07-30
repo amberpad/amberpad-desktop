@@ -1,6 +1,12 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/test';
-import { createPage, updatePage, deletePage, countPages } from './operations/pages';
+import { test } from './utils/test.mts';
+import { createPage, updatePage, deletePage, countPages } from './operations/pages.mts';
+
+/*
+  test ids:
+    page
+    notepad-pages-scrolling-area
+*/
 
 test('Page is added it\'s container when created #0Yu8lf8Q20', async ({ launchElectron }) => {
   for await (const page of launchElectron('0Yu8lf8Q20')) {
@@ -9,7 +15,7 @@ test('Page is added it\'s container when created #0Yu8lf8Q20', async ({ launchEl
     await createPage(page, notepadName, pageName);
     expect(await page.locator(
       'xpath=' + 
-      `//*[contains(@class, 'class:page:8o3bzP8yoT')]` +
+      `//*[@data-testid='page']` +
       `//descendant::*[contains(text(), '${pageName}')]`
     )).toBeDefined();
   }
@@ -22,17 +28,17 @@ test('Page is modified from it\'s container when updated #k8Rzma7uDj', async ({ 
     await updatePage(page, originalName, updatedName);
     await page.locator(
       'xpath=' + 
-      `//*[contains(@class, 'class:page:8o3bzP8yoT')]` +
+      `//*[@data-testid='page']` +
       `//descendant::*[contains(text(), '${originalName}')]`
     ).waitFor({ state: 'detached' });
     expect(await page.locator(
       'xpath=' + 
-      `//*[contains(@class, 'class:page:8o3bzP8yoT')]` +
+      `//*[@data-testid='page']` +
       `//descendant::*[contains(text(), '${originalName}')]`
     ).count()).toEqual(0);
     expect(await page.locator(
       'xpath=' + 
-      `//*[contains(@class, 'class:page:8o3bzP8yoT')]` +
+      `//*[@data-testid='page']` +
       `//descendant::*[contains(text(), '${updatedName}')]`
     )).toBeDefined();
   }
@@ -44,12 +50,12 @@ test('Page is removed from it\'s container when deleted #CofA5PWDDT', async ({ l
     await deletePage(page, pageName);
     await page.locator(
       'xpath=' + 
-      `//*[contains(@class, 'class:page:8o3bzP8yoT')]` +
+      `//*[@data-testid='page']` +
       `//descendant::*[contains(text(), '${pageName}')]`
     ).waitFor({ state: 'detached' });
     expect(await page.locator(
       'xpath=' + 
-      `//*[contains(@class, 'class:page:8o3bzP8yoT')]` +
+      `//*[@data-testid='page']` +
       `//descendant::*[contains(text(), '${pageName}')]`
     ).count()).toEqual(0);
   }
@@ -57,21 +63,16 @@ test('Page is removed from it\'s container when deleted #CofA5PWDDT', async ({ l
 
 test('Page containers should paginate when there is too many items #RE7WsTQyCx', async ({ launchElectron }) => {
   for await (const page of launchElectron('RE7WsTQyCx')) {
-    await page.locator(
-      'xpath=' +
-      `//*[@id='id:notepad-list-container:7MLMomsYBt']` +
-      `//descendant::*[contains(text(),'text:c2852ca76b')]`
-    ).waitFor({state: 'visible'});
-    expect(await countPages(page)).toEqual(50);
+    // Wait until there is at least one page in the list
+    await expect(async () => {
+      await expect(await countPages(page)).toEqual(50)
+    }).toPass();
     // Scroll to bottom
-    await page.locator(`xpath=//*[@id='id:notepad-list-container:7MLMomsYBt']`).evaluate((node) => {
+    await page.locator(`xpath=//*[@data-testid='notepad-pages-scrolling-area']`).evaluate((node) => {
       node.scrollTo(0, node.scrollHeight);
     });
-    await page.locator(
-      'xpath=' +
-      `//*[@id='id:notepad-list-container:7MLMomsYBt']` +
-      `//descendant::*[contains(text(),'text:269dc6a2b6')]`
-    ).waitFor({state: 'visible'});
-    expect(await countPages(page)).toEqual(75);
+    await expect(async () => {
+      await expect(await countPages(page)).toEqual(75)
+    }).toPass();
   }
 });

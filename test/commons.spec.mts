@@ -1,10 +1,10 @@
 import { expect } from '@playwright/test';
-import { test } from './utils/test';
+import { test } from './utils/test.mts';
 import type { Page } from '@playwright/test';
 
-import { countNotes } from './operations/notes';
-import { countNotepads } from './operations/notepads';
-import { countPages } from './operations/pages';
+import { countNotes } from './operations/notes.mts';
+import { countNotepads } from './operations/notepads.mts';
+import { countPages } from './operations/pages.mts';
 
 const search = async (
   page: Page,

@@ -45,34 +45,38 @@ app.on('ready', () => {
         ])
         .from(knex.raw(
           `(SELECT 
-            ROW_NUMBER () OVER (
-                PARTITION BY "notepads"."id"
-                ORDER BY "pages"."updated_at" DESC) AS rowNumber,
-            ${notepadsColumns.map(item => `"notepads"."${item}" as "${item}"`).join(',\n')},
-            ${pagesColumns.map(item => `"pages"."${item}" as "pages:${item}"`).join(',\n')}
-        FROM "notepads"
-        LEFT OUTER JOIN "pages" ON "notepads"."id"="pages"."notepadID"
-        WHERE
-            IIF(
-                ?='""',
-                "notepads"."id" IN (
-                    SELECT id
-                    FROM "notepads"
-                    ORDER BY updated_at DESC
-                    LIMIT ?
-                    OFFSET ?
-                ),
-                "pages"."id" IN (
-                    SELECT pageId
-                    FROM "notes"
-                    WHERE id IN (
-                        SELECT noteID
-                        FROM searches
-                        WHERE noteContent MATCH ?
+              ROW_NUMBER () OVER (
+                  PARTITION BY "notepads"."id"
+                  ORDER BY 
+                    "pages"."updated_at" DESC,
+                    "pages"."name" ASC
+              ) AS rowNumber,
+              ${notepadsColumns.map(item => `"notepads"."${item}" as "${item}"`).join(',\n')},
+              ${pagesColumns.map(item => `"pages"."${item}" as "pages:${item}"`).join(',\n')}
+            FROM "notepads"
+            LEFT OUTER JOIN "pages" ON "notepads"."id"="pages"."notepadID"
+            WHERE
+                IIF(
+                    ?='""',
+                    "notepads"."id" IN (
+                        SELECT id
+                        FROM "notepads"
+                        ORDER BY updated_at DESC
+                        LIMIT ?
+                        OFFSET ?
+                    ),
+                    "pages"."id" IN (
+                        SELECT pageId
+                        FROM "notes"
+                        WHERE id IN (
+                            SELECT noteID
+                            FROM searches
+                            WHERE noteContent MATCH ?
+                        )
+                        ORDER BY updated_at DESC
                     )
-                    ORDER BY updated_at DESC
-                )
-            ))`,
+                ))
+            `,
             [
               `"${options.search}"`,
               options.paginationOffset,
@@ -99,7 +103,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'notepads.pages.get',
+    'notepads.pages.all',
     async function getAll (_, payload) {
       const options = Object.assign({
         page: 1,
@@ -112,36 +116,29 @@ app.on('ready', () => {
       const pagesColumns = Object.keys(await knex('pages').columnInfo())
       var data = []
       if (options.notepads.length > 0) {
-        data = await knex
-          .select([
-            'id',
-            ...(pagesColumns.map((item) => ({[`pages.${item}`]: `pages:${item}`})))
-          ])
-          .from(
-            knex.union(function () {
-              options.notepads.map((notepad) => {
-                this
-                  .select('*')
-                  .from(function () {
-                    this
-                      .rowNumber('rowNumber', 'id')
-                      .select([
-                        ...(pagesColumns.map((item) => ({[`pages:${item}`]: `pages.${item}`}))),
-                        {'id': `pages.notepadID`}
-                      ])
-                      .from('pages')
-                      .where('notepadID', notepad.id)
-                  })
-                  .where(knex.raw(
-                    `rowNumber > ? AND rowNumber <= ?`,
-                    [
-                      options.paginationOffset * (notepad.page - 1),
-                      options.paginationOffset * (notepad.page)
-                    ]
-                  ))
-              })
-            })
-          )
+        data = await knex.raw(`
+          ${
+            options.notepads.map((notepad) => (`
+              SELECT
+                "pages"."notepadID" as "id",
+                ${pagesColumns.map(item => `"pages"."${item}" as "pages.${item}"`).join(',\n')}
+              FROM "pages"
+              WHERE "notepadID" = ?
+              ORDER BY 
+                "pages"."updated_at" DESC,
+                "pages"."name" ASC
+              LIMIT ?
+              OFFSET ?
+            `)).join(' UNION ')
+          }
+        `, [
+          ...options.notepads.reduce((previus, current) => [
+            ...previus,
+            current.id,
+            options.paginationOffset,
+            options.paginationOffset * (current.page - 1)  
+          ], [])
+        ])
       }
 
       const unflattened = (unflatten({ref: data}) as any).ref
@@ -176,7 +173,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'notepads:update',
+    'notepads.update',
     async function update (_, payload) {
       try {
         const knex = await database.getManager()

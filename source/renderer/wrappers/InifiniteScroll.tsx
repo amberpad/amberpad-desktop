@@ -1,30 +1,35 @@
 import React, { 
   useRef, 
   useEffect,
-  useImperativeHandle
+  useImperativeHandle,
+  ReactNode
 } from "react"
 import { css } from "@emotion/css"
+import { current } from "@reduxjs/toolkit"
 
 type ScrolledOverHash = string | number
+type ElementID = number | string
 
 interface InifiniteScrollPropsType {
+  data?: any[]
   hasMore?: boolean,
   loading?: boolean,
   loadingElement?: React.ReactNode,
-  inverse?: boolean,
+  inverse?: boolean, // Normal flow from top to bottom, inverser from bottom to top
   scrollThreshold?: number,
   adjustScrollHash?: string,
   scrollBeginingHash?: string,
   scrollEndHash?: string,
   scrolledOverHashMap?: {[key: string]: string | number},
-  getItemIdentifier?: (...args: any[]) => string,
-  scrolledOverToID?: (element: HTMLElement) => ScrolledOverHash,
+  renderItem: (item: any) => ReactNode
+  getItemID: (item: any) => ElementID
   next?: (...args: any[]) => any,
-  scrolledOver?: (scrolledOver: (string | number)[], ...args: any[]) => any,
+  scrolledOver?: (values: any[]) => void,
 }
 
 export default React.forwardRef(function InifiniteScroll (
   {
+    data=undefined,
     children=undefined,
     hasMore=false,
     loading=false,
@@ -35,8 +40,8 @@ export default React.forwardRef(function InifiniteScroll (
     scrollBeginingHash=undefined,
     scrollEndHash=undefined,
     scrolledOverHashMap={},
-    getItemIdentifier=(item) => item.key === undefined ? item.toString() : item.key,
-    scrolledOverToID=(item) => item.id,
+    renderItem,
+    getItemID,
     next=()=>{},
     scrolledOver=null,
     ...aditionalProps
@@ -128,11 +133,12 @@ export default React.forwardRef(function InifiniteScroll (
   }, [scrollEndHash])
 
   const lastScrollHeightRef = useRef<number>(0)
-  const itemsHash = JSON.stringify(children.map(getItemIdentifier))  
+  //const itemsHash = JSON.stringify(children.map(getItemIdentifier))  
   const ListenToScrollEnd = () => {
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current
 
     lastScrollHeightRef.current = scrollHeight
+
     if (
       (inverse && scrollTop <= scrollThreshold) ||
       (!inverse && scrollTop + clientHeight >= scrollHeight - scrollThreshold)  
@@ -155,7 +161,7 @@ export default React.forwardRef(function InifiniteScroll (
     return () => containerRef.current?.removeEventListener('scroll', ListenToScrollEnd)
   }, [
     containerRef.current, 
-    itemsHash,
+    //itemsHash,
     hasMore
   ])
 
@@ -188,12 +194,17 @@ export default React.forwardRef(function InifiniteScroll (
         }
 
         const scrolledOverItems = references
-          .map(scrolledOverToID)
-          .filter((id) => {
-            const lastHash = lockHashMap.current.get(id)
-            const hash = scrolledOverHashMap[id]
-            lockHashMap.current.set(id, hash)
-            return lastHash !== hash
+          .map((element) => {
+            const found = nodeRefs.current.find(([ref, data]) => ref.current === element)
+            return found && found[1]
+          })
+          .filter((values) => {
+            if (values) {
+              const lastHash = lockHashMap.current.get(values.id)
+              const hash = scrolledOverHashMap[values.id]
+              lockHashMap.current.set(values.id, hash)
+              return lastHash !== hash
+            }
           })
 
         if (scrolledOverItems.length > 0) {
@@ -204,7 +215,33 @@ export default React.forwardRef(function InifiniteScroll (
     containerRef.current.addEventListener(
       'scroll', listener, {passive: true})
     return () => containerRef.current?.removeEventListener('scroll', listener)
-  }, [containerRef.current, JSON.stringify(scrolledOverHashMap)])
+  }, [
+    containerRef.current, 
+    JSON.stringify(scrolledOverHashMap),
+  ])
+
+  const nodeRefs = useRef<any[]>()
+  nodeRefs.current = []
+  const elements = data && data.map((item) => {
+    const id = getItemID && getItemID(item)
+    if (id && renderItem) {
+      const itemRef = { current: undefined }
+      nodeRefs.current.push([itemRef, item])
+      return (
+        <div
+          className={css`
+            all: unset;
+          `}
+          ref={itemRef}
+          key={id}
+        >
+          {renderItem(item)}
+        </div>
+      )
+    }
+    return undefined
+  })
+  .filter(item => item)
 
   return (
     <div
@@ -232,7 +269,8 @@ export default React.forwardRef(function InifiniteScroll (
       `}`}
     >
       { loading && inverse ? loadingElement : null }
-      { children }
+      { elements }
+      {/* children */}
       { loading && !inverse ? loadingElement : null }
     </div>
   )

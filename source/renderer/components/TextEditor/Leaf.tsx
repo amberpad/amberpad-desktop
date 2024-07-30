@@ -4,6 +4,7 @@ import { faClipboard } from '@fortawesome/free-regular-svg-icons'
 import { faPen, faLinkSlash } from '@fortawesome/free-solid-svg-icons'
 import { Box, Code, Em, Flex, HoverCard, IconButton, Link, Strong, Text, Tooltip } from '@radix-ui/themes'
 
+import { useAlert } from "@renderer/providers/AlertProvider"
 import UpdateLink from "@renderer/dialogs/UpdateLink"
 import { useAmberpadEditor } from '@renderer/utils/slate'
 import { css } from '@emotion/css'
@@ -12,10 +13,11 @@ function LinkLeaf (props) {
   let { attributes, children, leaf } = props;
   const link = leaf['link']
   const editor = useAmberpadEditor()
+  const { show } = useAlert()
 
   const copyClipboard = () => {
     navigator.clipboard.writeText(leaf['link'])
-    // Show alert
+    show('Link copied to clipboard')
   }
 
   return (
@@ -80,30 +82,30 @@ function LinkLeaf (props) {
                 />
               </IconButton>
             </Tooltip>
-            <UpdateLink.Root>
-              <UpdateLink.Trigger>
-                <Flex>
-                  <Tooltip
-                    content='Edit link'
+            <UpdateLink
+              initial={{ link }}
+              onConfirm={(link) => {
+                editor.updateHoveredLink(link) &&
+                show('Link updated successfully', 'success')
+              }}
+            >
+              <Flex>
+                <Tooltip
+                  content='Edit link'
+                >
+                  <IconButton
+                    className='text-color'
+                    variant='ghost'
+                    size='2'
                   >
-                    <IconButton
-                      className='text-color'
-                      variant='ghost'
-                      size='2'
-                    >
-                      <FontAwesomeIcon
-                        size='xs'
-                        icon={faPen}
-                      />
-                    </IconButton>
-                  </Tooltip>
-                </Flex>
-              </UpdateLink.Trigger>
-              <UpdateLink.Content 
-                initial={{ link }}
-                onSuccess={(link) => editor.updateHoveredLink(link)}
-              />
-            </UpdateLink.Root>
+                    <FontAwesomeIcon
+                      size='xs'
+                      icon={faPen}
+                    />
+                  </IconButton>
+                </Tooltip>
+              </Flex>
+            </UpdateLink>
 
             <Tooltip
               content='Remove link'
@@ -112,7 +114,10 @@ function LinkLeaf (props) {
                 className='text-color'
                 variant='ghost'
                 size='2'
-                onMouseDown={() => editor.removeHoveredLink()}
+                onMouseDown={() => {
+                  editor.removeHoveredLink() &&
+                  show('Link removed successfully', 'success')
+                }}
               >
                 <FontAwesomeIcon
                   size='xs'

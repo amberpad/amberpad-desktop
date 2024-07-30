@@ -101,7 +101,7 @@ app.on('ready', () => {
         const instance = payload.value
         instance.updatedAt = knex.fn.now()
 
-        const columns = Object.keys(await knex('notes').columnInfo())
+        const columns = Object.keys(await knex('pages').columnInfo())
         const data = await knex('pages')
           .where({ id: instance.id })
           .update(lodash.pick(instance, columns), '*')

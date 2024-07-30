@@ -21,6 +21,7 @@ import UpdateLink from "@renderer/dialogs/UpdateLink"
 import { useAmberpadEditor } from "@renderer/utils/slate"
 
 import type { FlexProps, IconButtonProps } from "@radix-ui/themes"
+import { useAlert } from "@renderer/providers/AlertProvider"
 
 const FONTAWESOME_ICON_SIZE = 'xs'
 
@@ -92,26 +93,24 @@ const URLMarkButton = (
   iconButtonProps: IconButtonProps
 ) => {
   const editor = useAmberpadEditor()
+  const { show } = useAlert()
 
   const applyMark = (link) => {
     editor.toggleLinkMark(link)
+    show('Link added successfully', 'success')
   }
 
   const isButtonEnabled = editor.isLinkButtonEnabled()
   return (
-    <UpdateLink.Root 
+    <UpdateLink 
+      onConfirm={applyMark}
       open={isButtonEnabled ? undefined : false}
     >
-      <UpdateLink.Trigger>
-        <ToolbarButton
-          disabled={!isButtonEnabled}
-          {...iconButtonProps }
-        />
-      </UpdateLink.Trigger>
-      <UpdateLink.Content 
-        onSuccess={applyMark}
+      <ToolbarButton
+        disabled={!isButtonEnabled}
+        {...iconButtonProps }
       />
-    </UpdateLink.Root>
+    </UpdateLink>
   )
 }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Flex, ScrollArea, } from '@radix-ui/themes'
+import { Box, Flex } from '@radix-ui/themes'
 import _ from 'lodash'
 import { css } from '@emotion/css'
 
@@ -97,18 +97,21 @@ function SidebarContent(props: BoxProps) {
     }))   
   }
 
-  const paginateOverScrolledOver = (elements: any[]) => {
-    const forPagination = elements
+  const paginateOverScrolledOver = (values: any[]) => {
     store.dispatch(fetchPagesThunk({
-      notepads: forPagination,
+      notepads: values,
       search: '',
     }))
   }
 
-  // If context isOpen is undefined fallback to intial value
-  const isOpen =  context.commons.isSidebarOpen === undefined ?
+  let isOpen =  context.commons.isSidebarOpen === undefined ?
     context.commons.initialIsSidebarOpen :
     context.commons.isSidebarOpen
+  if (globals.ENVIRONMENT === 'testing') {
+    // on testing enviroment should always be open
+    isOpen = true
+  }
+
   return (
     <Box
       { ...props }
@@ -146,30 +149,28 @@ function SidebarContent(props: BoxProps) {
           asChild={true}
         >
           <InifiniteScroll
+            data-testid='notepad-pages-scrolling-area'
+            data={context.notepads.values}
+            renderItem={(item) => (
+              <Notepad
+                data={item}
+                loading={context.notepads.paginationMap[item.id].isLoading}
+              />
+            )}
+            getItemID={(item) => item.id}
             hasMore={context.notepads.hasNextPage}
             next={onScrollNext}
             loading={context.notepads.loading}
             adjustScrollHash={`${context.notepads.adjustScrollHash}`}
             scrollEndHash={`${context.notepads.scrollEndHash}`}
             scrolledOver={paginateOverScrolledOver}
-            scrolledOverToID={(item) => parseInt(item.id)}
             scrolledOverHashMap={
               _.mapValues(
                 context.notepads.paginationMap, 
                 (object: any) => object.hash
               )
             }
-          >
-            {
-              context.notepads.values.map((item: any, key: number) => (
-                <Notepad 
-                  key={key}
-                  data={item}
-                  loading={context.notepads.paginationMap[item.id].isLoading}
-                />
-              ))
-            }
-          </InifiniteScroll>
+          />
         </Flex>
       </Flex>
     </Box>

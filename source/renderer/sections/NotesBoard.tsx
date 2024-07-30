@@ -94,22 +94,18 @@ function NotesBoard (props: BoxProps) {
         asChild={true}
       >
         <InifiniteScroll
+          data={context.notes.values}
+          renderItem={(item) => (
+            <Note data={item} />
+          )}
+          getItemID={(item) => item.id}
           hasMore={context.notes.hasNextPage}
           inverse={true}
           loading={context.notes.loading}
           next={onScrollNext}
           scrollBeginingHash={`${context.notes.scrollBeginingHash}`}
           adjustScrollHash={`${context.notes.adjustScrollHash}`}
-        >
-          {
-            context.notes.values.map((item: NoteType) => (
-              <Note
-                key={item.id}
-                data={item}
-              />
-            ))
-          }
-        </InifiniteScroll>
+        />
       </Flex>
     </Box>
   )

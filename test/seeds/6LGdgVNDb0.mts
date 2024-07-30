@@ -16,10 +16,10 @@ export default async function (queries: knex.Knex<any, unknown[]>) {
     {id: 5, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', name: 'text:9kAG80tFZt', notepadID: 5},
   ])
   await queries('notes').insert([
-    {id: 1, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: 'text:jq7UI8KMvB', pageID: 1},
-    {id: 2, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: 'text:gej4OfeeNQ', pageID: 2},
-    {id: 3, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: 'text:l5oTPErF7j', pageID: 3},
-    {id: 4, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: 'text:OAs5IYIKU8', pageID: 4},
-    {id: 5, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: 'text:04v3yu51Hh', pageID: 5},
+    {id: 1, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: '[{"type":"paragraph","children":[{"text":"text:jq7UI8KMvB"}]}]', pageID: 1},
+    {id: 2, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: '[{"type":"paragraph","children":[{"text":"text:gej4OfeeNQ"}]}]', pageID: 2},
+    {id: 3, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: '[{"type":"paragraph","children":[{"text":"text:l5oTPErF7j"}]}]', pageID: 3},
+    {id: 4, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: '[{"type":"paragraph","children":[{"text":"text:OAs5IYIKU8"}]}]', pageID: 4},
+    {id: 5, created_at: '2024-05-29 05:43:35', updated_at: '2024-05-29 05:43:35', content: '[{"type":"paragraph","children":[{"text":"text:04v3yu51Hh"}]}]', pageID: 5},
   ])
 }

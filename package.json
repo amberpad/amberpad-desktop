@@ -36,6 +36,7 @@
     "start:electron": "electron ./.package",
     "start": "cross-env AMBERPAD_ENVIRONMENT=development npm run build:prebuild && concurrently --kill-others --kill-others-on-fail \"npm run start:electron\" \"cross-env AMBERPAD_ENVIRONMENT=development babel-node -- renderer.esbuild.mjs --watch\"",
     "test:build": "cross-env AMBERPAD_ENVIRONMENT=testing npm run build:prebuild",
+    "test:build:debug": "cross-env AMBERPAD_ENVIRONMENT=testing; AMBERPAD_DEBUG=true; npm run build:prebuild",
     "test:start": "playwright test --config=./playwright.config.ts",
     "test": "npm run test:build && npm run test:start"
   },
@@ -70,6 +71,7 @@
     "esbuild-style-plugin": "^1.6.3",
     "fast-deep-equal": "^3.1.3",
     "icon-gen": "^4.0.0",
+    "is-hotkey": "^0.2.0",
     "marked": "^12.0.2",
     "mkdirp": "^3.0.1",
     "quill": "^2.0.2",
