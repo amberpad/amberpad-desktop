@@ -2,12 +2,6 @@ import { expect } from '@playwright/test';
 import { test } from './utils/test.mts';
 import { createPage, updatePage, deletePage, countPages } from './operations/pages.mts';
 
-/*
-  test ids:
-    page
-    notepad-pages-scrolling-area
-*/
-
 test('Page is added it\'s container when created #0Yu8lf8Q20', async ({ launchElectron }) => {
   for await (const page of launchElectron('0Yu8lf8Q20')) {
     const notepadName = 'text:oqaTyRWhj5';
@@ -68,7 +62,11 @@ test('Page containers should paginate when there is too many items #RE7WsTQyCx',
       await expect(await countPages(page)).toEqual(50)
     }).toPass();
     // Scroll to bottom
-    await page.locator(`xpath=//*[@data-testid='notepad-pages-scrolling-area']`).evaluate((node) => {
+    await page.locator(
+      `xpath=` + 
+      `//*[@data-testid='notepads']` +
+      `//descendant-or-self::*[@data-testid='inifinite-scroll']`
+    ).evaluate((node) => {
       node.scrollTo(0, node.scrollHeight);
     });
     await expect(async () => {

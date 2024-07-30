@@ -6,20 +6,38 @@ import { countNotes } from './operations/notes.mts';
 import { countNotepads } from './operations/notepads.mts';
 import { countPages } from './operations/pages.mts';
 
+/*
+  data-testid:
+    - searchbar-input
+    - searchbar-send-button
+    - searchbar-clear-button
+*/
+
 const search = async (
   page: Page,
   content: string,
 ) => {
   // Set search text into search bar
-  await page.locator(`xpath=//*[@id='id:searchbar-input:aPNkesepop']`).fill(content);
+  await page.locator(
+    `xpath=` + 
+    `//*[contains(@data-testid, 'searchbar')]` +
+    `//descendant-or-self::input`
+  ).fill(content);
   // Click search button
-  await page.locator(`xpath=//*[@id='id:searchbar-send-button:OGUB40c5DM']`).click();
+  await page.locator(
+    `xpath=` + 
+    `//*[contains(@data-testid, 'searchbar-send-button')]`
+  ).click();
 }
 
 const clearSearch = async (
   page: Page,
 ) => {
-  await page.locator(`xpath=//*[@id='id:searchbar-clear-button:KlsiLQF3zr']`).click();
+  // Click clear search button
+  await page.locator(
+    `xpath=` + 
+    `//*[contains(@data-testid, 'searchbar-clear-button')]`
+  ).click();
 }
 
 test('Search should filter items by its keywords #6LGdgVNDb0', async ({ launchElectron }) => {

@@ -1,19 +1,32 @@
 import type { Page } from '@playwright/test';
 
+/*
+  data-testid:
+    - create-notepad-button
+    - notepad-modal-name-input
+    - modal-confirm-button
+
+    - notepad-options-button
+    - notepad-options-edit-notepad-button
+    - notepad-options-delete-notepad-button
+*/
+
+
 export const createNotepad = async (
   page: Page,
   name: string,
 ) => {
-  // Click create notepad button
-  await page.locator(`xpath=//*[@id='id:create-notepad-button:f9CFxx4pON']`).click();
-  // Fill notepad name input
   await page.locator(
     'xpath=' +
-    '//div[contains(@class, \'class:create-notepad-name-input:hWmi28rONe\')]' +
-    '//descendant::input'
+    `//*[@data-testid='create-notepad-button']`
+  ).click();
+  await page.locator(
+    'xpath=' +
+    `//*[@data-testid='notepad-modal-name-input']` +
+    `//descendant-or-self::input`
   ).fill(name);
   // Click confirm button
-  await page.locator(`xpath=//*[contains(@class, 'class:modal-confirm-button:fHIbu0jVfe')]`).click();
+  await page.locator(`xpath=//*[@data-testid='modal-confirm-button']`).click();
 };
 
 export const updateNotepad = async (
@@ -21,50 +34,45 @@ export const updateNotepad = async (
   name: string,
   newName: string,
 ) => {
-  // Click specific notepad options button
   await page.locator(
     'xpath=' +
-    `//*[contains(text(), '${name}')]` +
-    `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]` +
-    `//descendant::*[contains(@class, 'class:notepad-options-button:GrWzrbooC9')]`
+    `//*[contains(text(), '${name}')]` + // Notepad text element
+    `//ancestor::*[@data-testid='notepad']` + // Notepad element
+    `//descendant::*[@data-testid='notepad-options-button']` // Options button
   ).click();
-  // Click edit option
+  // Click create page option
   await page.locator(
     'xpath=' +
-    `//*[contains(text(), '${name}')]` +
-    `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]` +
-    `//descendant::*[contains(@class, 'class:notepad-options-edit-button:OJSSF5T46S')]`
+    `//ancestor::*[@data-testid='notepad-options-menu']` +
+    `//descendant::*[@data-testid='notepad-options-edit-notepad-button']`
   ).click();
-  // Set new name on name's input
   await page.locator(
     'xpath=' +
-    `//div[contains(@class, 'class:create-notepad-name-input:hWmi28rONe')]` +
-    `//descendant::input`
+    `//*[@data-testid='notepad-modal-name-input']` +
+    `//descendant-or-self::input`
   ).fill(newName);
   // Click confirm button
-  await page.locator(`xpath=//*[contains(@class, 'class:modal-confirm-button:fHIbu0jVfe')]`).click();
+  await page.locator(`xpath=//*[@data-testid='modal-confirm-button']`).click();
 };
 
 export const deleteNotepad = async (
   page: Page,
   name: string,
 ) => {
-  // Click specific notepad options button
   await page.locator(
     'xpath=' +
-    `//*[contains(text(), '${name}')]` +
-    `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]` +
-    `//descendant::*[contains(@class, 'class:notepad-options-button:GrWzrbooC9')]`
+    `//*[contains(text(), '${name}')]` + // Notepad text element
+    `//ancestor::*[@data-testid='notepad']` + // Notepad element
+    `//descendant::*[@data-testid='notepad-options-button']` // Options button
   ).click();
-  // Click delete option
+  // Click create page option
   await page.locator(
     'xpath=' +
-    `//*[contains(text(), '${name}')]` +
-    `//ancestor::div[contains(@class, 'class:notepad:8iwbWkd5Y1')]` +
-    `//descendant::*[contains(@class, 'class:notepad-options-delete-button:r6ukcuDrQL')]`
+    `//ancestor::*[@data-testid='notepad-options-menu']` +
+    `//descendant::*[@data-testid='notepad-options-delete-notepad-button']`
   ).click();
   // Click confirm button
-  await page.locator(`xpath=//*[contains(@class, 'class:modal-confirm-button:fHIbu0jVfe')]`).click();
+  await page.locator(`xpath=//*[@data-testid='modal-confirm-button']`).click();
 };
 
 export const countNotepads = async (
@@ -72,7 +80,8 @@ export const countNotepads = async (
 ) => {
   return await page.locator(
     `xpath=` +
-    `//*[@id='id:notepad-list-container:7MLMomsYBt']` +
-    `//descendant::*[contains(@class, 'class:notepad:8iwbWkd5Y1')]`
+    `//*[@data-testid='notepads']` +
+    `//descendant-or-self::*[@data-testid='inifinite-scroll']` +
+    `//descendant::*[@data-testid='notepad']`
   ).count();
 };

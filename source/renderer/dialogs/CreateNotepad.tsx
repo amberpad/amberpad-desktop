@@ -74,6 +74,7 @@ export default function CreateNotepad (
               Name
             </Text>
             <TextField.Root
+              data-testid='notepad-modal-name-input'
               size='2'
               value={form.name}
               onChange={(event) => setForm({ name: event.target.value })}

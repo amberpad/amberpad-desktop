@@ -38,21 +38,18 @@ test('Note is deleted when delete\'s operation is confirmed #HbHdvSxtjY', async 
 
 test('Notes board should paginate when there is too many items #E1qQS4raeE', async ({ launchElectron }) => {
   for await (const page of launchElectron('E1qQS4raeE')) {
+    await expect(async () => {
+      await expect(await countNotes(page)).toEqual(20)
+    }).toPass();
     await page.locator(
-      'xpath=' +
+      `xpath=` + 
       `//*[@data-testid='notes-board']` +
-      `//descendant::*[contains(text(),'text:teoGsC8JN6')]`
-    ).waitFor({state: 'visible'});
-    expect(await countNotes(page)).toEqual(20);
-    // Scroll to bottom
-    await page.locator(`xpath=//*[@data-testid='notes-board']`).evaluate((node) => {
+      `//descendant-or-self::*[@data-testid='inifinite-scroll']`
+    ).evaluate((node) => {
       node.scrollTo(0, 0);
     });
-    await page.locator(
-      'xpath=' +
-      `//*[@data-testid='notes-board']` +
-      `//descendant::*[contains(text(),'text:V5BfHdvxKv')]`
-    ).waitFor({state: 'visible'});
-    expect(await countNotes(page)).toEqual(25);
+    await expect(async () => {
+      await expect(await countNotes(page)).toEqual(25)
+    }).toPass();
   }
 });

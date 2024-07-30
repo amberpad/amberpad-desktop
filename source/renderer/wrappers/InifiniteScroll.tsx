@@ -257,12 +257,12 @@ export default React.forwardRef(function InifiniteScroll (
 
   return (
     <div
-      data-testid='inifinite-scroll'
       onLoad={(event) => {
         console.log('onLoad', event)
       }}
       ref={containerRef}
       {...aditionalProps}
+      data-testid='inifinite-scroll'
       className={`${aditionalProps.className || ''} ${css`
         --scrollarea-scrollbar-size: var(--space-1);
         --scrollarea-scrollbar-border-radius: max(var(--radius-1), var(--radius-full));

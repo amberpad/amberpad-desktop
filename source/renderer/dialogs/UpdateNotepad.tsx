@@ -87,7 +87,8 @@ export default function UpdateNotepad (
           <Text as="div" size="2" mb="1" weight="bold">
             Name
           </Text>
-          <TextField.Root 
+          <TextField.Root
+            data-testid='notepad-modal-name-input'
             size='2'
             value={form.name}
             onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}

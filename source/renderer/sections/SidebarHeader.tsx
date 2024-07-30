@@ -75,6 +75,7 @@ function SidebarHeader({
           asChild={true}
         >
           <IconButton
+            data-testid='create-notepad-button'
             size='1'
             variant='ghost'
           >

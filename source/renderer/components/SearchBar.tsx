@@ -61,6 +61,7 @@ const Searchbar = () => {
     state.search  !== context.commons.search;
   return (
     <TextField.Root
+      data-testid='searchbar'
       variant='soft'
       placeholder='Search'
       value={state.search}
@@ -73,6 +74,7 @@ const Searchbar = () => {
         {
           sendSearchFlag ?
             <IconButton
+              data-testid='searchbar-send-button'
               variant="ghost"
               onClick={() => sendSearch(state.search)}
             >
@@ -83,6 +85,7 @@ const Searchbar = () => {
             </IconButton>
           :          
             <IconButton 
+              data-testid='searchbar-clear-button'
               variant="ghost"
               style={{cursor: 'pointer'}}
               onClick={() => clearSearch()}

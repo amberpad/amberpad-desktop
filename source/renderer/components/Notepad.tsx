@@ -114,6 +114,7 @@ function Notepad ({
               </DropdownMenu.Item>
               <DropdownMenu.Separator />
               <DropdownMenu.Item
+                data-testid='notepad-options-edit-notepad-button'
                 onClick={() => setState((prev) => ({...prev, isUpdateNotepadOpen: true}))}
               >
                 Rename
@@ -123,6 +124,7 @@ function Notepad ({
                 />
               </DropdownMenu.Item>
               <DropdownMenu.Item 
+                data-testid='notepad-options-delete-notepad-button'
                 color="red"
                 onClick={() => setState((prev) => ({...prev, isDeleteNotepadOpen: true}))}
               >

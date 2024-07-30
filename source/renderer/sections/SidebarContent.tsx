@@ -118,6 +118,7 @@ function SidebarContent(props: BoxProps) {
       className={`${props.className || ''}`}
     >
       <Flex
+        data-testid='notepads'
         height='100%'
         direction='column'
         gap='4'
@@ -149,7 +150,7 @@ function SidebarContent(props: BoxProps) {
           asChild={true}
         >
           <InifiniteScroll
-            data-testid='notepad-pages-scrolling-area'
+            //data-testid='notepad-pages-scrolling-area'
             data={context.notepads.values}
             renderItem={(item) => (
               <Notepad
