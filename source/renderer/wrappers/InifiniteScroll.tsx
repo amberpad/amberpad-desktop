@@ -2,7 +2,8 @@ import React, {
   useRef, 
   useEffect,
   useImperativeHandle,
-  ReactNode
+  ReactNode,
+  useState
 } from "react"
 import { css } from "@emotion/css"
 import { current } from "@reduxjs/toolkit"
@@ -114,26 +115,31 @@ export default React.forwardRef(function InifiniteScroll (
     }
   }
 
+  const adjustScrollHashBuffer = useRef<typeof adjustScrollHash>()
   useEffect(() => {
-    if (children.length > 0) {
+    if (adjustScrollHashBuffer.current !== undefined) {
       adjustScroll()
     }
+    adjustScrollHashBuffer.current = adjustScrollHash
   }, [adjustScrollHash])
 
+  const scrollBeginingHashBuffer = useRef<typeof scrollBeginingHash>()
   useEffect(() => {
-    if (children.length > 0) {
+    if (scrollBeginingHashBuffer.current !== undefined) {
       scrollBegining()
     }
+    scrollBeginingHashBuffer.current = scrollBeginingHash
   }, [scrollBeginingHash])
 
+  const scrollEndHashBuffer = useRef<typeof scrollEndHash>()
   useEffect(() => {
-    if (children.length > 0) {
+    if (scrollEndHashBuffer.current !== undefined) {
       scrollEnd()
     }
+    scrollEndHashBuffer.current = scrollEndHash    
   }, [scrollEndHash])
 
   const lastScrollHeightRef = useRef<number>(0)
-  //const itemsHash = JSON.stringify(children.map(getItemIdentifier))  
   const ListenToScrollEnd = () => {
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current
 
@@ -243,9 +249,18 @@ export default React.forwardRef(function InifiniteScroll (
   })
   .filter(item => item)
 
+  useEffect(() => {
+    if (containerRef.current && inverse) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
+    }
+  }, [containerRef.current, inverse])
+
   return (
     <div
       data-testid='inifinite-scroll'
+      onLoad={(event) => {
+        console.log('onLoad', event)
+      }}
       ref={containerRef}
       {...aditionalProps}
       className={`${aditionalProps.className || ''} ${css`
