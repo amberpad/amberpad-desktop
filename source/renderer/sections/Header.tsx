@@ -2,7 +2,8 @@ import React, {} from 'react'
 import { Flex, Section, Box, SectionProps } from '@radix-ui/themes';
 import { css } from '@emotion/css';
 
-import Searchbar from '@renderer/components/Searchbar'
+/* @ts-ignore */
+import SearchBar from '@renderer/components/SearchBar'
 
 export default function Header(
   sectionProps: SectionProps
@@ -25,7 +26,7 @@ export default function Header(
           flexGrow='1'
           maxWidth='768px'
         >
-          <Searchbar />
+          <SearchBar />
         </Box>
       </Flex>
     </Section>

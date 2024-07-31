@@ -6,7 +6,7 @@ import { faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
 import store from "@renderer/utils/redux-store"
 import commonsSlice from "@renderer/actions/commons.slice"
 
-const Searchbar = () => {
+const SearchBar = () => {
   const [state, setState] = useState({
     search: '',
   })
@@ -102,4 +102,4 @@ const Searchbar = () => {
   )
 }
 
-export default Searchbar;
+export default SearchBar;
