@@ -1,14 +1,15 @@
 import React, { createContext, ReactNode, useContext, useRef, useState } from 'react'
 import lodash from 'lodash'
 
-export type AlertType = 'info' | 'success' | 'alert' | 'warning' | 'system'
-export type AlertDuration = 'short' | 'regular' | 'long'
+export type AlertType = 'info' | 'success' | 'error' | 'warning' | 'system'
+export type AlertDuration = 'short' | 'regular' | 'long' | 'extra-long'
 
 // Milliseconds
 const durationMap: Map<AlertDuration, number> = new Map([
-  ['short', 15 * 60],
-  ['regular', 30 * 60],
-  ['long', 45 * 60],
+  ['short', 1 * 1000],
+  ['regular', 2.5 * 1000],
+  ['long', 5 * 1000],
+  ['extra-long', 10 * 1000],
 ])
 
 interface AlertState {

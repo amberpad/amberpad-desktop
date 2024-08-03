@@ -4,6 +4,7 @@ import { css } from '@emotion/css';
 
 /* @ts-ignore */
 import SearchBar from '@renderer/components/SearchBar'
+import VersionUpdate from '@renderer/components/VersionUpdate'
 
 export default function Header(
   sectionProps: SectionProps
@@ -17,16 +18,22 @@ export default function Header(
       <Flex
         display='flex'
         direction='row'
-        gap='1'
+        gap='3'
         justify='center'
         align='center'
         px='6'
       >
         <Box
           flexGrow='1'
-          maxWidth='768px'
+          maxWidth='720px'
         >
           <SearchBar />
+        </Box>
+
+        <Box
+          asChild={true}
+        >
+          <VersionUpdate />
         </Box>
       </Flex>
     </Section>

@@ -21,8 +21,8 @@ import type {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'notepads.getAll',
-    async function getAll (_, payload) {
+    'notepads.get-all',
+    async function (_, payload) {
       /* -- Raw query
 
       */
@@ -104,7 +104,7 @@ app.on('ready', () => {
 app.on('ready', () => {
   ipcMain.handle(
     'notepads.pages.all',
-    async function getAll (_, payload) {
+    async function (_, payload) {
       const options = Object.assign({
         page: 1,
         search: '',

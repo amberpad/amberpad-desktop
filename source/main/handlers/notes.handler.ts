@@ -18,8 +18,8 @@ import type {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'notes.getAll',
-    async function getAll (_, payload) {
+    'notes.get-all',
+    async function (_, payload) {
       /* 
         -- Raw query
         -- pageID or 0

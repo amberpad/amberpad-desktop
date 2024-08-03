@@ -25,8 +25,8 @@ import {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'pages.getAll',
-    async function getAll (_, payload) {
+    'pages.get-all',
+    async function (_, payload) {
       const options = Object.assign({
         page: 1,
         paginationOffset: globals.ASSOCIATED_PAGES_PAGINATION_OFFSET,
@@ -63,9 +63,10 @@ app.on('ready', () => {
         .where({ 'pages.id': payload.pageID })
 
       if (data.length === 0) {
-        throw('Row could not been got from database')
+        return { value: undefined }
+        //throw('Row could not been got from database')
       }
-      return {value: unflatten(data[0])}
+      return { value: unflatten(data[0]) }
     }  as QueryHandlerType<{ pageID: PageIDType}, { value: PageType & { notepad: NotepadType } }>
   )
 })

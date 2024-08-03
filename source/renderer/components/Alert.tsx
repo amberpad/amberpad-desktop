@@ -10,7 +10,7 @@ import type { AlertType } from '@renderer/providers/AlertProvider'
 const colorMap = {
   'info': 'yellow',
   'success': 'grass', 
-  'alert': 'red', 
+  'error': 'red', 
   'warning': 'orange',
   'system': 'gray',
 }
@@ -18,7 +18,7 @@ const colorMap = {
 const roleMap = {
   'info': 'status',
   'success': 'status', 
-  'alert': 'alert', 
+  'error': 'alert', 
   'warning': 'status',
   'system': 'status'
 }
@@ -40,7 +40,7 @@ const iconsMap = {
   ), 
   'alert': (
     <FontAwesomeIcon
-      color={`var(--${colorMap['alert']}-12)`}
+      color={`var(--${colorMap['error']}-12)`}
       size='sm'
       icon={faXmark}
     />

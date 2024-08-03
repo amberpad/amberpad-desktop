@@ -27,6 +27,17 @@ import type {
   NotepadsPagesFiltersPayloadType, 
   NotepadIDType
 } from '@ts/models/Notepads.types'
+import { UpdateInfo, UpdateDownloadedEvent, ProgressInfo } from 'electron-updater'
+
+const UPDATER_EVENT_TYPES = [
+  'checking-for-update',
+  'update-available',
+  'update-not-available',
+  'error',
+  'download-progress',
+  'update-downloaded'  
+] as const
+type UpdaterEventType = (typeof UPDATER_EVENT_TYPES)[number]
 
 export const electronAPI = {
   general: {
@@ -41,7 +52,7 @@ export const electronAPI = {
   },
   notes: {
     getAll: ((payload) => {
-      return ipcRenderer.invoke('notes.getAll', payload)
+      return ipcRenderer.invoke('notes.get-all', payload)
     }) as ModelQueryInvokerType<NotesFiltersPayloadType, NoteType>,
     create: ((payload) => {
       return ipcRenderer.invoke('notes.create', payload)
@@ -55,7 +66,7 @@ export const electronAPI = {
   },
   notepads: {
     getAll: ((payload: NotepadsFiltersPayloadType) => {
-      return ipcRenderer.invoke('notepads.getAll', payload)
+      return ipcRenderer.invoke('notepads.get-all', payload)
     }) as ModelQueryInvokerType<NotepadsFiltersPayloadType, NotepadType>,
     getPages: ((payload: NotepadsPagesFiltersPayloadType) => {
       return ipcRenderer.invoke('notepads.pages.all', payload)
@@ -77,7 +88,7 @@ export const electronAPI = {
   },
   pages: {
     getAll: ((payload: PagesFiltersPayloadType) => {
-      return ipcRenderer.invoke('pages.getAll', payload)
+      return ipcRenderer.invoke('pages.get-all', payload)
     }) as QueryInvokerType<PagesFiltersPayloadType, {
       values: {
         id: NotepadIDType,
@@ -99,9 +110,54 @@ export const electronAPI = {
     moveTop: ((payload: { value: PageIDType }): Promise<boolean> => {
       return ipcRenderer.invoke('pages.moveTop', payload)
     }),
+  },
+  updater: {
+    onCheckingForUpdate: (
+      callback: () => void
+    ) => {
+      return ipcRenderer.on(`updater.checking-for-update`, (_event, payload) => callback())
+    },
+    onUpdateAvailable: (
+      callback: (payload: UpdateInfo) => void
+    ) => {
+      return ipcRenderer.on(`updater.update-available`, (_event, payload) => callback(payload))
+    },
+    onUpdateNotAvailable: (
+      callback: (payload: UpdateInfo) => void
+    ) => {
+      return ipcRenderer.on(`updater.update-not-available`, (_event, payload) => callback(payload))
+    },
+    onError: (
+      callback: (payload: Error) => void
+    ) => {
+      return ipcRenderer.on(`updater.error`, (_event, payload) => callback(payload))
+    },
+    onDownloadProgress: (
+      callback: (payload: ProgressInfo) => void
+    ) => {
+      return ipcRenderer.on(`updater.download-progress`, (_event, payload) => callback(payload))
+    },
+    onUpdateDownloaded: (
+      callback: (payload: UpdateDownloadedEvent) => void
+    ) => {
+      return ipcRenderer.on(`updater.update-downloaded`, (_event, payload) => callback(payload))
+    },
+    
+    checkForUpdates: (): Promise<UpdateInfo | null> => {
+      return ipcRenderer.invoke('updater.check-for-updates')
+    },
+    // @returns {Promise<Array<string>>} Paths to downloaded files.
+    downloadUpdate: (): Promise<Array<string>> => {
+      return ipcRenderer.invoke('updater.download-update')
+    },
+    cancelDownloadUpdate: (): Promise<void> => {
+      return ipcRenderer.invoke('updater.cancel-download-update')
+    },
+    quitAndInstall: (): Promise<void> => {
+      return ipcRenderer.invoke('updater.quit-and-install')
+    },
   }
 }
 
 export type ElectronAPI = typeof electronAPI
-
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)

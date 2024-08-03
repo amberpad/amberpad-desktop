@@ -131,7 +131,7 @@ function AddNote ({
             height='100%'
             direction='row'
             gap='2'
-            justify='end'
+            justify='center'
             align='stretch'
             onFocus={() => onFocusChange(true)}
             onBlur={() => onFocusChange(false)}
@@ -140,6 +140,7 @@ function AddNote ({
             <Box 
               minWidth='0'
               flexGrow='1'
+              maxWidth='720px'
             >
               <TextEditor 
                 data-testid=''
