@@ -1,6 +1,6 @@
 import React, { ReactNode, useCallback, createContext, useContext, useEffect, useState } from 'react'
 
-import type { UpdateInfo } from 'electron-updater'
+import type { UpdateInfo, ProgressInfo } from 'electron-updater'
 import { useAlert } from './AlertProvider'
 
 export interface AppUpdaterContext {
@@ -12,9 +12,10 @@ export interface AppUpdaterContext {
     'update-downloaded' | 
     'cancelled' | 
     'error',
-  percent: number,
   info: UpdateInfo,
+  progress: ProgressInfo,
 
+  cancelUpdate: () => void,
   downloadUpdate: () => void,
   quitAndInstall: () => void,
   cancelDownloadUpdate: () => void,
@@ -22,8 +23,9 @@ export interface AppUpdaterContext {
 
 const appUpdaterContext = createContext<AppUpdaterContext>({
   status: 'idle',
-  percent: 0,
   info: undefined,
+  progress: undefined,
+  cancelUpdate: () => undefined,
   downloadUpdate: () => undefined,
   quitAndInstall: () => undefined,
   cancelDownloadUpdate: () => undefined,
@@ -43,11 +45,11 @@ export default function AppUpdaterProvider (
   const [state, setState] = useState<{
     status: AppUpdaterContext['status']
     info: AppUpdaterContext['info'],
-    percent: AppUpdaterContext['percent'],
+    progress: AppUpdaterContext['progress'],
   }>({
     status: 'idle',
     info: undefined,
-    percent: 0,
+    progress: undefined,
   })
   const { show } = useAlert()
 
@@ -97,6 +99,7 @@ export default function AppUpdaterProvider (
     updater.onDownloadProgress((payload) => {
       setState((prev) => ({ 
         ...prev,
+        progress: payload,
         percent: payload.percent,
       }))
     })
@@ -128,10 +131,20 @@ export default function AppUpdaterProvider (
     }))
   }, [])
 
+  const cancelUpdate = useCallback(() => {
+    const { updater } = window.electronAPI
+    updater.cancelDownloadUpdate()
+    setState(prev => ({
+      ...prev,
+      status: 'cancelled'
+    }))
+  }, [])
+
   return (
     <appUpdaterContext.Provider
       value={{
         ...state,
+        cancelUpdate,
         downloadUpdate,
         quitAndInstall,
         cancelDownloadUpdate,

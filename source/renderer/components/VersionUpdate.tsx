@@ -1,7 +1,8 @@
 import { Box, Button, Flex, Heading, IconButton, Popover, Progress, ScrollArea, Text } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRotate, faCircle, faCircleUp } from '@fortawesome/free-solid-svg-icons'
+import { faRotate, faCircle, faCircleUp, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { css } from '@emotion/css'
+import {filesize} from "filesize"
 import React, { forwardRef, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { BoxProps, FlexProps } from '@radix-ui/themes'
@@ -17,9 +18,6 @@ export default function VersionUpdate (
   }
 ) {
   const updater = useAppUpdater()
-
-  console.log('STATUS', updater.status)
-  updater.status = 'dowloading-update'
 
   return (
     <Popover.Root>
@@ -100,7 +98,6 @@ const VersionUpdateButton = forwardRef(function VersionUpdateButton (
           icon={faRotate}
         />
 
-        {
         <FontAwesomeIcon
           className={css`
             display: ${
@@ -113,10 +110,23 @@ const VersionUpdateButton = forwardRef(function VersionUpdateButton (
             top: 4px;
             right: 4px;
           `}
-          size='2xs'
           icon={faCircle}
         />
-        }
+
+        <FontAwesomeIcon
+          className={css`
+            display: ${
+              ["update-downloaded"].includes(status) ?
+                'block' : 'none'
+            };
+            color: var(--accent-a9);
+            font-size: 0.65em;
+            position: absolute;
+            top: 4px;
+            right: 4px;
+          `}
+          icon={faCircleUp}
+        />
       </IconButton>
     </Box>
   )
@@ -130,7 +140,7 @@ function VersionUpdateUpdateAvailable (
     updater: AppUpdaterContext
   }
 ) {
-  const { info } = updater
+  const { info, cancelUpdate, downloadUpdate } = updater
   const { version, releaseNotes } = info
 
   // If there are files in info files sum them if not return 0
@@ -194,7 +204,7 @@ function VersionUpdateUpdateAvailable (
             >
               Amberpad&nbsp;
               { version }&nbsp;
-              { filesSize ? `/ ${filesSize}MB` : '' }
+              { filesSize ? `(${filesize(filesSize, {standard: "jedec"})})` : '' }
             </Heading>
             {((): ReactNode => { 
               if (typeof releaseNotes === 'string') {
@@ -209,14 +219,6 @@ function VersionUpdateUpdateAvailable (
                 return ''
               }
             })()}
-            <ul>
-              <li>Updates UI</li>
-              <li>More methods to save images</li>
-              <li>Fixed bug when closing the app</li>
-              <li>Fixed bug when closing the app</li>
-              <li>Fixed bug when closing the app</li>
-              <li>Fixed bug when closing the app</li>
-            </ul>
             </Text>
           </ScrollArea>
       </Box>
@@ -231,12 +233,14 @@ function VersionUpdateUpdateAvailable (
         <Button
           variant='ghost'
           color='gray'
+          onClick={() => cancelUpdate()}
         >
           <Text size='1'>Maybe later</Text>
         </Button>
         <Button
           variant='ghost'
           color='amber'
+          onClick={() => downloadUpdate()}
         >
           <Text size='1'>Download</Text>
         </Button>
@@ -321,7 +325,7 @@ function VersionUpdateDownloading (
     updater: AppUpdaterContext,
   }
 ) {
-  const { info }  = updater;
+  const { info, progress, cancelUpdate }  = updater;
   const [isCanceling, setIsCanceling] = useState(false)
 
   const onCancel = useCallback(() => {
@@ -331,7 +335,10 @@ function VersionUpdateDownloading (
   if (isCanceling) {
     return (
       <VersionUpdateCancelDownload 
-        onConfirm={() => setIsCanceling(false)}
+        onConfirm={() => {
+          setIsCanceling(false)
+          cancelUpdate()
+        }}
         onReject={() => {
           setIsCanceling(false)
         }}
@@ -366,7 +373,7 @@ function VersionUpdateDownloading (
         <Heading
           size='1'
         >
-          Downloading version: Amberpad 1.234.0 / 23MB
+          Downloading version: Amberpad {info.version} ({filesize(progress.total, {standard: "jedec"})})
         </Heading>
       </Flex>
 
@@ -379,7 +386,7 @@ function VersionUpdateDownloading (
       >
         <Box maxWidth="360px">
           <Progress 
-            value={0}
+            value={progress.percent}
             size='3'
           />
         </Box>
@@ -412,8 +419,13 @@ function VersionUpdateQuitAndInstall (
     updater: AppUpdaterContext
   }
 ) {
+  const { info, quitAndInstall }  = updater;
 
-
+  // If there are files in info files sum them if not return 0
+  const filesSize = info.files ?
+    info.files.reduce((acc, file) => {
+      return acc + file.size
+    }, 0) : 0
   return (
     <Flex
       {...flexProps}
@@ -441,7 +453,9 @@ function VersionUpdateQuitAndInstall (
         <Heading
           size='1'
         >
-          Amberpad 1.234.0 / 23MB ready to install, do you want to close the application and install?
+          Amberpad&nbsp;
+          { info.version }&nbsp;
+          { filesSize ? `(${filesize(filesSize, {standard: "jedec"})})` : '' } ready to install, do you want to close the application and install?
         </Heading>
       </Flex>
 
@@ -455,8 +469,9 @@ function VersionUpdateQuitAndInstall (
         <Button
           variant='ghost'
           color='amber'
+          onClick={() => quitAndInstall()}
         >
-          <Text size='1'>Close and Install</Text>
+          <Text size='1'>Quit and install</Text>
         </Button>
       </Flex>
     </Flex>
