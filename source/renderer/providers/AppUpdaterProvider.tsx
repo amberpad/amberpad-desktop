@@ -72,6 +72,7 @@ export default function AppUpdaterProvider (
     })
 
     updater.checkForUpdates().then((result) => {
+      console.log('UPDATE INFO', result)
       if (result !== null) {
         setState(prev => ({
           ...prev,
@@ -100,7 +101,6 @@ export default function AppUpdaterProvider (
       setState((prev) => ({ 
         ...prev,
         progress: payload,
-        percent: payload.percent,
       }))
     })
     

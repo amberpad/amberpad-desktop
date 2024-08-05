@@ -30,6 +30,7 @@
     "build:win32": "npm run build:prebuild && npm run build:icons:win32 && electron-builder build --config electron-builder.config.js --projectDir ./.package --win",
     "build:icons:linux": "npm run build:icons:darwin",
     "build:linux": "npm run build:prebuild && npm run build:icons:linux && electron-builder build --config electron-builder.config.js --projectDir ./.package --linux",
+    "build": "cross-env AMBERPAD_ENVIRONMENT=development npm run build:prebuild && electron-builder build --config electron-builder.config.js --projectDir ./.package",    
     "publish:darwin": "npm run build:prebuild && npm run build:icons:darwin && electron-builder build --config electron-builder.config.js --projectDir ./.package --mac -p \"onTagOrDraft\"",
     "publish:win32": "npm run build:prebuild && npm run build:icons:win32 && electron-builder build --config electron-builder.config.js --projectDir ./.package --win -p \"onTagOrDraft\"",
     "publish:linux": "npm run build:prebuild && npm run build:icons:linux && electron-builder build --config electron-builder.config.js --projectDir ./.package --linux -p \"onTagOrDraft\"",

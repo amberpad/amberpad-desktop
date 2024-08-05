@@ -1,4 +1,4 @@
-const { readFileSync } = require('node:fs')
+const { readFileSync } = require('node:fs');
 const { resolve } = require('node:path')
 
 const pkg = JSON.parse(readFileSync(resolve('./package.json'), { encoding: 'utf8' }));
@@ -16,6 +16,7 @@ module.exports = {
     owner: "maxkalavera",
     repo: "amberpad"
   }],
+  
   linux: {
     icon: "./resources/icons/icon.icns", // Build icons in .png format from icon.icns file
     target: [
@@ -38,6 +39,10 @@ module.exports = {
     target: [
       {
         target: 'dmg',
+        arch: pkg.build.architectures.mac
+      },
+      {
+        target: 'zip',
         arch: pkg.build.architectures.mac
       }
     ],

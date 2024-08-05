@@ -141,7 +141,7 @@ function VersionUpdateUpdateAvailable (
   }
 ) {
   const { info, cancelUpdate, downloadUpdate } = updater
-  const { version, releaseNotes } = info
+  const { version, releaseNotes, files } = info
 
   // If there are files in info files sum them if not return 0
   const filesSize = info.files ?
@@ -208,11 +208,14 @@ function VersionUpdateUpdateAvailable (
             </Heading>
             {((): ReactNode => { 
               if (typeof releaseNotes === 'string') {
-                return releaseNotes
+                return <p dangerouslySetInnerHTML={{__html: releaseNotes}} />
               } else if (Array.isArray(releaseNotes)) {
                 return (
                   <ul>
-                    {releaseNotes.map((item, index) => <li key={index}>{item.note}</li>)}
+                    {
+                      releaseNotes.map((item, index) => 
+                        <li key={index}><p dangerouslySetInnerHTML={{__html: item.note}} /></li>)
+                    }
                   </ul>
                 )
               } else {
@@ -346,6 +349,12 @@ function VersionUpdateDownloading (
     )
   }
 
+  const filesSize = info.files ?
+  info.files.reduce((acc, file) => {
+    return acc + file.size
+  }, 0) : 0
+  console.log('progress', progress)
+  // ({filesize(progress.total, {standard: "jedec"})})
   return (
     <Flex
       {...flexProps}
@@ -373,7 +382,9 @@ function VersionUpdateDownloading (
         <Heading
           size='1'
         >
-          Downloading version: Amberpad {info.version} ({filesize(progress.total, {standard: "jedec"})})
+        Amberpad&nbsp;
+        { info.version }&nbsp;
+        { filesSize ? `(${filesize(filesSize, {standard: "jedec"})})` : '' }
         </Heading>
       </Flex>
 
@@ -386,7 +397,7 @@ function VersionUpdateDownloading (
       >
         <Box maxWidth="360px">
           <Progress 
-            value={progress.percent}
+            value={progress ? progress.percent : 0}
             size='3'
           />
         </Box>
