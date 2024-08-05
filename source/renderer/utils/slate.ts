@@ -53,10 +53,13 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
 
   const context = new (function AmberpadEditorContext() {
     this.toString = () => JSON.stringify(this, undefined, 4)
-    this.paragraphTypes = [
+    this.headingTypes = [
       'heading-one',
       'heading-two',
       'heading-three',
+    ]
+    this.paragraphTypes = [
+      ...this.headingTypes,
       'paragraph',
     ]
     this.paragraphWrapper = [
@@ -206,8 +209,11 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     if (selection && Range.isCollapsed(selection)) {
       const stack = Array.from(getAncestorsStack(selection.anchor.path, { includeCeiling: true }))
 
-      //console.log('LIST', stack)
-
+      if (context.headingTypes.includes(stack[0][0].type)) {
+        const [node, path] = stack[0]
+        Transforms.setNodes<ElementType>(editor, { type: 'paragraph' }, { at: path })
+      }
+      
       if (
         // If is type list and the content of the list is a paragraph block
         stack.length >= 2 && 
@@ -405,13 +411,6 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   * Text Block commands
   ****************************************************************************/
 
-  const TEXT_BLOCK_TYPES = [
-    'heading-one',
-    'heading-two',
-    'heading-three',
-    'paragraph',
-  ]
-
   const getTextTypes = (): NodeFormat[] => {
     const textBlocks =  Array.from(getLeaves())
       .map(([node, path]) => node) as ElementType[]
@@ -431,7 +430,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
       textTypes[0] === format
     ) ?
       'paragraph' :
-      TEXT_BLOCK_TYPES.find(item => item === format) || 'paragraph'
+      context.paragraphTypes.find(item => item === format) || 'paragraph'
 
     for (let [node, path] of leaves) {
       Transforms.setNodes<ElementType>(editor, { type }, { at: path })

@@ -27,7 +27,7 @@ module.exports = {
     ],
     category: "Utility",
     synopsis: pkg.package,
-    artifactName: pkg.productName + "${productName}-${os}-${arch}.${ext}",
+    artifactName: "${productName}-${os}-${arch}.${ext}",
     desktop: {
       Name: pkg.productName,
       Type: "Application",

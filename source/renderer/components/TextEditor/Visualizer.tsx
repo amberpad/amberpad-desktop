@@ -48,10 +48,7 @@ function Visualizer (
     slateContent = editor.buildContentFromString('')
     isContentValid = true
   }
-  console.log('VISUALIZER')
-  console.log('content', content)
-  console.log('slateContent', slateContent)
-  console.log('isContentValid', isContentValid)
+
   return (
     <Box
       width='100%'
