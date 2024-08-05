@@ -2,15 +2,12 @@ import React, { useMemo, useCallback, useEffect } from 'react'
 import { BaseEditor, Descendant, Node as SlateNode, createEditor } from 'slate'
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react'
 import { Box, Card, Flex } from '@radix-ui/themes'
+import { css } from '@emotion/css'
 
 import { AmberpadEditor, widthAmberpadEditor } from '@renderer/utils/slate'
-import TextEditorToolbar from './Toolbar'
 import Element from './Element'
 import Leaf from './Leaf'
-
-import { css } from '@emotion/css'
 import { DescendantType } from '@ts/slate.types'
-import { current } from '@reduxjs/toolkit'
 
 /******************************************************************************
 * Render text editor
@@ -42,6 +39,19 @@ function Visualizer (
     }
   }, [editor, onContentChange])
 
+  let slateContent: DescendantType[]
+  let isContentValid: boolean
+  try {
+    slateContent = editor.fromJSON(content)
+    isContentValid = SlateNode.isNodeList(slateContent)
+  } catch (error) {
+    slateContent = editor.buildContentFromString('')
+    isContentValid = true
+  }
+  console.log('VISUALIZER')
+  console.log('content', content)
+  console.log('slateContent', slateContent)
+  console.log('isContentValid', isContentValid)
   return (
     <Box
       width='100%'
@@ -50,9 +60,10 @@ function Visualizer (
       <Slate 
         {...slateProps}
         editor={editor}
-        initialValue={content !== undefined ? 
-          editor.fromJSON(content) :
-          editor.initialValue 
+        initialValue={
+          content !== undefined && isContentValid ? 
+            editor.fromJSON(content) :
+            editor.buildContentFromString(content) 
         }
       >
         <Box

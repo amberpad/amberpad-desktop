@@ -64,7 +64,7 @@ function TextEditor (
       <Slate 
         {...slateProps}
         editor={editor} 
-        initialValue={editor.initialValue}
+        initialValue={editor.buildContentFromString('')}
       >
         <Flex
           width='100%'

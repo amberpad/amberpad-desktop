@@ -26,13 +26,18 @@ import type {
   NodeFormat, 
   DescendantType 
 } from "@ts/slate.types"
-import { reverse } from 'lodash'
 import { HistoryEditor } from 'slate-history'
-import { useRef } from 'react'
 
 export const useAmberpadEditor = () => {
   return useSlate() as AmberpadEditor
 }
+
+export const INITIAL_SLATE_STATE: DescendantType[] = [
+  {
+    "type": "paragraph",
+    "children": [{ "text": "" }]
+  },
+]
 
 /******************************************************************************
 * Slate's Amberpad plugin
@@ -83,10 +88,14 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   * Utils commands
   ****************************************************************************/
 
-  const initialValue: DescendantType[] = [{
-    "type": "paragraph",
-    "children": [{ "text": "" }]
-  }]
+  const buildContentFromString = (value: string): DescendantType[] => {
+    return [
+      {
+        "type": "paragraph",
+        "children": [{ "text": value }]
+      },
+    ]
+  }
 
   const isEmpty = () => {
     let isComposing = false
@@ -107,7 +116,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
     for(let i = 0; i < editor.children.length; i++) {
       editor.delete({at: [i]})
     }
-    editor.insertNodes(initialValue, {at: [0]})
+    editor.insertNodes(buildContentFromString(''), {at: [0]})
     // Reset history if exist
     if ((editor as unknown as HistoryEditor).history !== undefined) {
       (editor as unknown as HistoryEditor).history = { undos: [], redos: [] }
@@ -669,7 +678,7 @@ export function widthAmberpadEditor<T extends BaseEditor, P> (
   /*****************************************************************************/
   return Object.assign(editor, {
     type: 'editor',
-    initialValue,
+    buildContentFromString,
     clear,
     isEmpty,
     toJSON,

@@ -72,7 +72,6 @@ export default function AppUpdaterProvider (
     })
 
     updater.checkForUpdates().then((result) => {
-      console.log('UPDATE INFO', result)
       if (result !== null) {
         setState(prev => ({
           ...prev,

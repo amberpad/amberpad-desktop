@@ -14,7 +14,6 @@ app.on('ready', () => {
       console.error(error)
       return null
     }
-
   })
   // @returns {Promise<Array<string>>} Paths to downloaded files.
   ipcMain.handle('updater.download-update', async (_event, payload): Promise<Array<string>> => {

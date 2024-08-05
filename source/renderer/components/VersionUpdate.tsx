@@ -145,9 +145,9 @@ function VersionUpdateUpdateAvailable (
 
   // If there are files in info files sum them if not return 0
   const filesSize = info.files ?
-    info.files.reduce((acc, file) => {
+    (info.files.reduce((acc, file) => {
       return acc + file.size
-    }, 0) : 0
+    }, 0)) / info.files.length : 0
   return (
     <Flex
       {...flexProps}
@@ -204,7 +204,7 @@ function VersionUpdateUpdateAvailable (
             >
               Amberpad&nbsp;
               { version }&nbsp;
-              { filesSize ? `(${filesize(filesSize, {standard: "jedec"})})` : '' }
+              { filesSize ? `(~${filesize(filesSize, {standard: "jedec"})})` : '' }
             </Heading>
             {((): ReactNode => { 
               if (typeof releaseNotes === 'string') {
@@ -350,11 +350,9 @@ function VersionUpdateDownloading (
   }
 
   const filesSize = info.files ?
-  info.files.reduce((acc, file) => {
-    return acc + file.size
-  }, 0) : 0
-  console.log('progress', progress)
-  // ({filesize(progress.total, {standard: "jedec"})})
+    (info.files.reduce((acc, file) => {
+      return acc + file.size
+    }, 0)) / info.files.length : 0
   return (
     <Flex
       {...flexProps}
@@ -384,7 +382,7 @@ function VersionUpdateDownloading (
         >
         Amberpad&nbsp;
         { info.version }&nbsp;
-        { filesSize ? `(${filesize(filesSize, {standard: "jedec"})})` : '' }
+        { filesSize ? `(~${filesize(filesSize, {standard: "jedec"})})` : '' }
         </Heading>
       </Flex>
 
@@ -434,9 +432,9 @@ function VersionUpdateQuitAndInstall (
 
   // If there are files in info files sum them if not return 0
   const filesSize = info.files ?
-    info.files.reduce((acc, file) => {
+    (info.files.reduce((acc, file) => {
       return acc + file.size
-    }, 0) : 0
+    }, 0)) / info.files.length : 0
   return (
     <Flex
       {...flexProps}
@@ -466,7 +464,7 @@ function VersionUpdateQuitAndInstall (
         >
           Amberpad&nbsp;
           { info.version }&nbsp;
-          { filesSize ? `(${filesize(filesSize, {standard: "jedec"})})` : '' } ready to install, do you want to close the application and install?
+          { filesSize ? `(~${filesize(filesSize, {standard: "jedec"})})` : '' } ready to install, do you want to close the application and install?
         </Heading>
       </Flex>
 
