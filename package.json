@@ -95,13 +95,13 @@
     "redux": "^5.0.1",
     "rimraf": "^5.0.7",
     "sqlite3": "^5.1.7",
-    "stylus": "^0.63.0"
-  },
-  "dependencies": {
-    "better-sqlite3": "^9.6.0",
+    "stylus": "^0.63.0",
     "slate": "^0.103.0",
     "slate-history": "^0.100.0",
     "slate-react": "^0.107.1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.6.0"
   },
   "build": {
     "architectures": {
