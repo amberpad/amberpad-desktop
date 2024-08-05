@@ -63,5 +63,5 @@ async function init() {
 
 function destroy() {
   app.quit();
-  appContext.database.destroy();
+  appContext.database?.destroy();
 }

@@ -17,12 +17,28 @@ app.on('ready', () => {
   })
   // @returns {Promise<Array<string>>} Paths to downloaded files.
   ipcMain.handle('updater.download-update', async (_event, payload): Promise<Array<string>> => {
-    return await autoUpdater.downloadUpdate(cancellationToken)
+    try {
+      return await autoUpdater.downloadUpdate(cancellationToken)
+    } catch (error) {
+      console.error(error)
+      return []
+    }
   })
   ipcMain.handle('updater.cancel-download-update', (_event, payload) => {
-    return cancellationToken.cancel()
+    try {
+      return cancellationToken.cancel()
+    } catch (error) {
+      console.error(error)
+      return
+    }
   })
   ipcMain.handle('updater.quit-and-install', (_event, payload) => {
-    return autoUpdater.quitAndInstall();
+    try {
+      return autoUpdater.quitAndInstall()
+    } catch (error) {
+      console.error(error)
+      return
+    }
+
   })
 })

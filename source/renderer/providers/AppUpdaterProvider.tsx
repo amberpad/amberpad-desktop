@@ -14,6 +14,7 @@ export interface AppUpdaterContext {
     'error',
   info: UpdateInfo,
   progress: ProgressInfo,
+  updateDownloaded: boolean,
 
   cancelUpdate: () => void,
   downloadUpdate: () => void,
@@ -25,6 +26,7 @@ const appUpdaterContext = createContext<AppUpdaterContext>({
   status: 'idle',
   info: undefined,
   progress: undefined,
+  updateDownloaded: false,
   cancelUpdate: () => undefined,
   downloadUpdate: () => undefined,
   quitAndInstall: () => undefined,
@@ -46,10 +48,12 @@ export default function AppUpdaterProvider (
     status: AppUpdaterContext['status']
     info: AppUpdaterContext['info'],
     progress: AppUpdaterContext['progress'],
+    updateDownloaded: AppUpdaterContext['updateDownloaded'],
   }>({
     status: 'idle',
     info: undefined,
     progress: undefined,
+    updateDownloaded: false,
   })
   const { show } = useAlert()
 
@@ -107,7 +111,7 @@ export default function AppUpdaterProvider (
       setState((prev) => ({ 
         ...prev,
         status: 'update-downloaded',
-        percent: 100,
+        updateDownloaded: true,
       }))
     })
   }, [])
@@ -139,6 +143,7 @@ export default function AppUpdaterProvider (
     }))
   }, [])
 
+  console.log('Updater', state)
   return (
     <appUpdaterContext.Provider
       value={{
