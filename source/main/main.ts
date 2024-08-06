@@ -31,8 +31,14 @@ app.on('window-all-closed', () => {
   }
 });
 
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    launch()
+  }
+})
+
 app.whenReady()
-  .then(init)
+  .then(launch)
   .then(() => {
     if (['development'].some((item) => item === globals.ENVIRONMENT)) {
       installExtension(REACT_DEVELOPER_TOOLS)
@@ -43,7 +49,7 @@ app.whenReady()
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-async function init() {
+async function launch() {
   let windows = BrowserWindow.getAllWindows();
   if (windows.length === 0) {
     appContext.mainWindow = createMainWindow();
