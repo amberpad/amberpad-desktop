@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider as ReduxProvider } from 'react-redux'
 import { Theme } from '@radix-ui/themes'
+import { HashRouter } from "react-router-dom"
 
 import store from '@renderer/utils/redux-store'
 import { Router } from '@renderer/routes'
@@ -32,13 +33,15 @@ const ThemeWrapper = ({ children }) => {
 root.render(
   <React.StrictMode>
     <ReduxProvider store={store} >
-      <AlertProvider>
-        <AppUpdaterProvider>
-          <ThemeWrapper>
-            <Router />
-          </ThemeWrapper>
-        </AppUpdaterProvider>
-      </AlertProvider>
+      <HashRouter future={{ v7_startTransition: true }}>
+        <AlertProvider>
+          <AppUpdaterProvider>
+            <ThemeWrapper>
+              <Router />
+            </ThemeWrapper>
+          </AppUpdaterProvider>
+        </AlertProvider>
+      </HashRouter>
     </ReduxProvider>
   </React.StrictMode>
 )

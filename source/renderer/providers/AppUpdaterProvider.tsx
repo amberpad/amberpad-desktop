@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback, createContext, useContext, useEffect, useState } from 'react'
-
-import type { UpdateInfo, ProgressInfo } from 'electron-updater'
+import { useNavigate } from "react-router-dom";
 import { useAlert } from './AlertProvider'
+import type { UpdateInfo, ProgressInfo } from 'electron-updater'
 
 export interface AppUpdaterContext {
   status: 'idle' | 
@@ -10,6 +10,7 @@ export interface AppUpdaterContext {
     'update-not-available' |
     'dowloading-update' | 
     'update-downloaded' | 
+    'installing' |
     'cancelled' | 
     'error',
   info: UpdateInfo,
@@ -56,6 +57,7 @@ export default function AppUpdaterProvider (
     updateDownloaded: false,
   })
   const { show } = useAlert()
+  const navigate = useNavigate() 
 
   useEffect(() => {
     const { updater } = window.electronAPI
@@ -116,15 +118,6 @@ export default function AppUpdaterProvider (
     })
   }, [])
 
-  const quitAndInstall = useCallback(() => {
-    const { updater } = window.electronAPI
-    updater.quitAndInstall()
-    setState(prev => ({
-      ...prev,
-      status: 'idle'
-    }))
-  }, [])
-
   const cancelDownloadUpdate = useCallback(() => {
     const { updater } = window.electronAPI
     updater.cancelDownloadUpdate()
@@ -142,6 +135,31 @@ export default function AppUpdaterProvider (
       status: 'cancelled'
     }))
   }, [])
+
+  /**************************************************************************** 
+  * Installing utilities
+  ****************************************************************************/
+  
+  const quitAndInstall = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      status: 'installing'
+    }))
+  }, [])
+
+  useEffect(() => {
+    if (state.status === 'installing') {
+      navigate('/updating')
+      const { updater } = window.electronAPI
+      updater.quitAndInstall()
+    }
+  }, [state.status])
+
+  /*
+  useEffect(() => {
+    navigate('/updating')
+  }, [])
+  */
 
   return (
     <appUpdaterContext.Provider
