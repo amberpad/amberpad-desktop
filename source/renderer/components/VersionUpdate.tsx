@@ -19,21 +19,21 @@ export default function VersionUpdate (
 ) {
   const updater = useAppUpdater()
 
+  if ([
+    'idle', 
+    'error',
+    'update-not-available', 
+    'cancelled'
+  ].includes(updater.status)) {
+    return <></>
+  }
+
   return (
-    <Popover.Root>
+    <Popover.Root
+      data-testid='version-update-popover-root'
+    >
       <Popover.Trigger>
-        <VersionUpdateButton  
-          className={css`
-            display: ${
-              [
-                'idle', 
-                'error',
-                'update-not-available', 
-                'cancelled'
-              ].includes(updater.status) ?
-                'none' : 'block'
-            };
-          `}
+        <VersionUpdateButton
           updater={updater}
         />
       </Popover.Trigger>
