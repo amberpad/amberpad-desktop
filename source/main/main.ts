@@ -31,10 +31,8 @@ app.on('window-all-closed', () => {
   }
 });
 
-
 app.whenReady()
   .then(init)
-  //.then(setUpdaterMainHandlers)
   .then(() => {
     if (['development'].some((item) => item === globals.ENVIRONMENT)) {
       installExtension(REACT_DEVELOPER_TOOLS)
@@ -56,9 +54,6 @@ async function init() {
   }
   await database.init();
   setAppUpdaterHandlers(appContext.mainWindow)
-
-  console.log('---------------------------------')
-  console.log('version', app.getVersion())
 }
 
 function destroy() {

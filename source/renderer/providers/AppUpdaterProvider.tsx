@@ -143,7 +143,6 @@ export default function AppUpdaterProvider (
     }))
   }, [])
 
-  console.log('Updater', state)
   return (
     <appUpdaterContext.Provider
       value={{

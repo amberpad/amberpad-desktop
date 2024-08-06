@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'node:url';
 
 export function getPreloadEntry () {
   /* @ts-ignore */
