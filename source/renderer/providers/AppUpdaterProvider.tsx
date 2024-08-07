@@ -155,12 +155,6 @@ export default function AppUpdaterProvider (
     }
   }, [state.status])
 
-  /*
-  useEffect(() => {
-    navigate('/updating')
-  }, [])
-  */
-
   return (
     <appUpdaterContext.Provider
       value={{

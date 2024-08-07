@@ -1,9 +1,11 @@
-import { app, ipcMain } from 'electron'
+import { app, ipcMain, BrowserWindow } from 'electron'
 import AppUpdater, { CancellationToken } from 'electron-updater'
+import util from 'node:util'
 
 import type { UpdateInfo } from 'electron-updater'
 
 const { autoUpdater } = AppUpdater 
+
 const cancellationToken = new CancellationToken()
 app.on('ready', () => {
   ipcMain.handle('updater.check-for-updates', async (_event, payload): Promise<UpdateInfo | null> => {
@@ -32,9 +34,23 @@ app.on('ready', () => {
       return
     }
   })
-  ipcMain.handle('updater.quit-and-install', (_event, payload) => {
+  ipcMain.handle('updater.quit-and-install', async (_event, payload) => {    
     try {
-      return autoUpdater.quitAndInstall()
+      let windows = BrowserWindow.getAllWindows();
+      windows.forEach(window => {
+        window.setMovable(false)
+        window.setResizable(false)
+        window.setEnabled(false)
+        window.setFullScreenable(false)
+        window.setMinimizable(false)
+        window.setMaximizable(false)
+        window.setProgressBar(0.5)
+        window.setHasShadow(true)
+        window.setIgnoreMouseEvents(true)
+        window.removeMenu()
+      })
+      autoUpdater.quitAndInstall(true, true)
+      return 
     } catch (error) {
       console.error(error)
       return

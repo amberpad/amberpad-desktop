@@ -5,7 +5,6 @@ export default function setAppUpdaterHandlers (
   mainWindow: BrowserWindow
 ) {
   const { autoUpdater } = AppUpdater 
-  autoUpdater.autoDownload = false
   /****************************************************************************
   * Updater listeners for when there is an update
   ****************************************************************************/

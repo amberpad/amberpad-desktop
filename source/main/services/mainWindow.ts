@@ -9,6 +9,7 @@ export default function createMainWindow () {
     width: 1080,
     // If testing and not debuging mode run in headless mode, in background
     show: globals.ENVIRONMENT !== 'testing' || globals.DEBUG === true,
+    hasShadow: true,
     webPreferences: {
       preload: getPreloadEntry(),
     },

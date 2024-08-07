@@ -6,7 +6,7 @@ const pkg = JSON.parse(readFileSync(resolve('./package.json'), { encoding: 'utf8
 module.exports = {
   appId: pkg.name,
   productName: pkg.productName,
-  asar: false, // TODO change to true
+  asar: true,
   npmRebuild: true,
   directories: {
     output: "distribution/"

@@ -4,10 +4,17 @@ import { app, BrowserWindow, ipcMain } from "electron"
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import setAppUpdaterHandlers from './services/appUpdater'
+import AppUpdater from 'electron-updater'
 
 import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
 import '@main/handlers/index'
+
+// Updater settings
+const { autoUpdater } = AppUpdater 
+autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = false
+autoUpdater.autoRunAppAfterInstall = true
 
 var appContext: {
   mainWindow: BrowserWindow,
@@ -29,6 +36,9 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     destroy();
   }
+});
+
+app.on('before-quit', () => {
 });
 
 app.on('activate', () => {
@@ -57,6 +67,7 @@ async function launch() {
   } else {
     windows[0].show();
     windows[0].focus();
+    windows[0].removeMenu();
   }
   await database.init();
   setAppUpdaterHandlers(appContext.mainWindow)
