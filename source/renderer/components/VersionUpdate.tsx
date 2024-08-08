@@ -8,8 +8,6 @@ import React, { forwardRef, ReactNode, useCallback, useState } from 'react'
 import type { BoxProps, FlexProps } from '@radix-ui/themes'
 import { useAppUpdater, AppUpdaterContext } from '@renderer/providers/AppUpdaterProvider'
 
-console.log('SHOW UPDATER', globals.ALLOW_VERSION_UPDATE.includes(globals.platform))
-
 
 export default function VersionUpdate (
   {
@@ -26,8 +24,7 @@ export default function VersionUpdate (
       'error',
       'update-not-available', 
       'cancelled'
-    ].includes(updater.status) &&
-    globals.ALLOW_VERSION_UPDATE.includes(globals.platform)
+    ].includes(updater.status)
   ) {
     return <></>
   }
@@ -51,6 +48,7 @@ export default function VersionUpdate (
             "update-available": <VersionUpdateUpdateAvailable updater={updater} />,
             "dowloading-update": <VersionUpdateDownloading updater={updater} />,
             "update-downloaded": <VersionUpdateQuitAndInstall updater={updater} />,
+            "notifying-update-available": <VersionUpdateNotify updater={updater} />,
             "idle": undefined,
             "cancelled": undefined, 
             "error": undefined,
@@ -90,7 +88,8 @@ const VersionUpdateButton = forwardRef(function VersionUpdateButton (
                 [
                   "update-available", 
                   "dowloading-update", 
-                  "update-downloaded"
+                  "update-downloaded", 
+                  "notifying-update-available",
                 ].includes(status) ?
                  'var(--accent-9)' : 'var(--gray-9)'
               } ;
@@ -105,8 +104,10 @@ const VersionUpdateButton = forwardRef(function VersionUpdateButton (
         <FontAwesomeIcon
           className={css`
             display: ${
-              ["update-available"].includes(status) ?
-                'block' : 'none'
+              [
+                "update-available",
+                "notifying-update-available",
+              ].includes(status) ? 'block' : 'none'
             };
             color: var(--accent-a9);
             font-size: 0.5em;
@@ -500,7 +501,6 @@ function VersionUpdateCheckingForUpdates (
   }
 ) {
 
-
   return (
     <Flex
       {...flexProps}
@@ -530,6 +530,67 @@ function VersionUpdateCheckingForUpdates (
         >
           Checking if there are updates available...
         </Heading>
+      </Flex>
+    </Flex>
+  )
+}
+
+function VersionUpdateNotify (
+  {
+    updater,
+    ...flexProps
+  }: FlexProps & {
+    updater: AppUpdaterContext,
+  }
+) {
+  const { info, progress, dismiss }  = updater;
+
+  return (
+    <Flex
+    {...flexProps}
+      direction='column'
+      justify='start'
+      align='stretch'
+      gap='2'
+      width='320px'
+      maxHeight='220px'
+    >
+      <Flex
+        data-tesid='update-version-popover-header'
+        direction='row'
+        justify='start'
+        align='center'
+        gap='4'
+      >
+        <FontAwesomeIcon
+          className={css`
+            color: var(--accent-a9);
+          `}
+          size='2x'
+          icon={faCircleUp}
+        />
+        <Heading
+          size='1'
+        >
+          A new version of Amberpad { info ? `(${info.version})` : ''} is now available. 
+          Visit the app's website and download it to ensure you don't miss out on any new features.
+        </Heading>
+      </Flex>
+
+      <Flex
+        data-tesid='update-version-popover-options'
+        direction='row'
+        justify='end'
+        align='center'
+        gap='4'
+      >
+        <Button
+          variant='ghost'
+          color='amber'
+          onClick={() => dismiss()}
+        >
+          <Text size='1'>Dismiss</Text>
+        </Button>
       </Flex>
     </Flex>
   )

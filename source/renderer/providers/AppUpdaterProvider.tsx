@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useAlert } from './AlertProvider'
 import type { UpdateInfo, ProgressInfo } from 'electron-updater'
 
+const IS_VERSION_UPDATE_ALLOWED = globals.ALLOW_VERSION_UPDATE.includes(globals.platform)
+
 export interface AppUpdaterContext {
   status: 'idle' | 
     'checking-for-updates' |
     'update-available' |
+    'notifying-update-available' |
     'update-not-available' |
     'dowloading-update' | 
     'update-downloaded' | 
@@ -21,6 +24,7 @@ export interface AppUpdaterContext {
   downloadUpdate: () => void,
   quitAndInstall: () => void,
   cancelDownloadUpdate: () => void,
+  dismiss: () => void,
 }
 
 const appUpdaterContext = createContext<AppUpdaterContext>({
@@ -32,6 +36,7 @@ const appUpdaterContext = createContext<AppUpdaterContext>({
   downloadUpdate: () => undefined,
   quitAndInstall: () => undefined,
   cancelDownloadUpdate: () => undefined,
+  dismiss: () => undefined,
 })
 
 export const useAppUpdater = () => {
@@ -81,7 +86,8 @@ export default function AppUpdaterProvider (
       if (result !== null) {
         setState(prev => ({
           ...prev,
-          status: 'update-available',
+          status: IS_VERSION_UPDATE_ALLOWED ? 
+            'update-available' : 'notifying-update-available',
           info: result
         }))
       } else {
@@ -136,6 +142,13 @@ export default function AppUpdaterProvider (
     }))
   }, [])
 
+  const dismiss = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      status: 'idle'
+    }))
+  }, [])
+
   /**************************************************************************** 
   * Installing utilities
   ****************************************************************************/
@@ -163,6 +176,7 @@ export default function AppUpdaterProvider (
         downloadUpdate,
         quitAndInstall,
         cancelDownloadUpdate,
+        dismiss,
       }}
     >
       {children}
