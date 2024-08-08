@@ -1,3 +1,5 @@
+const PREFIX = 'AMBERPAD_';
+
 /******************************************************************************
 * Utils
 ******************************************************************************/
@@ -42,6 +44,14 @@ export function buildProcessedValues (envs, configs) {
   }))
 }
 
+function filteredEnviromentByPrefix (environment, prefix=PREFIX) {
+  return Object.fromEntries( 
+    Object.entries(environment)
+      .filter(([key, value]) => key.startsWith(prefix))
+      .map(([key, value]) => [key.replace(prefix, ''), value])
+  )
+} 
+
 /******************************************************************************
 * Environments
 ******************************************************************************/
@@ -52,7 +62,7 @@ export function buildProcessedValues (envs, configs) {
   verifier: regex
 */
 var configs = {
-  ENV_PREFIX: { default: prefix },
+  ENV_PREFIX: { default: PREFIX },
   ENVIRONMENT: { 
     default: 'production', 
     verifier: /^(production|development|testing)$/i,
@@ -89,15 +99,8 @@ var configs = {
   }
 }
 
-const prefix = 'AMBERPAD_';
-// Filter envs by prefix
-const filteredEnviroments = Object.fromEntries( 
-  Object.entries(process.env)
-    .filter(([key, value]) => key.startsWith(prefix))
-    .map(([key, value]) => [key.replace(prefix, ''), value])
-);
-
-// Set default values to variables
+// Extends config dictionary with default values
 var configs = setConfigsDefaults(configs)
+const filteredEnviroments = filteredEnviromentByPrefix(process.env)
 const validated = validate(filteredEnviroments, configs)
 export default validated
