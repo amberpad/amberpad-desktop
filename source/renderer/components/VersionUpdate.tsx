@@ -1,13 +1,14 @@
 import { Box, Button, Flex, Heading, IconButton, Popover, Progress, ScrollArea, Text } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faRotate, faCircle, faCircleUp, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { faRotate, faCircle, faCircleUp } from '@fortawesome/free-solid-svg-icons'
 import { css } from '@emotion/css'
 import {filesize} from "filesize"
-import React, { forwardRef, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import React, { forwardRef, ReactNode, useCallback, useState } from 'react'
 
 import type { BoxProps, FlexProps } from '@radix-ui/themes'
 import { useAppUpdater, AppUpdaterContext } from '@renderer/providers/AppUpdaterProvider'
-import { UpdateFileInfo, UpdateInfo } from 'electron-updater'
+
+console.log('SHOW UPDATER', globals.ALLOW_VERSION_UPDATE.includes(globals.platform))
 
 
 export default function VersionUpdate (
@@ -19,12 +20,15 @@ export default function VersionUpdate (
 ) {
   const updater = useAppUpdater()
 
-  if ([
-    'idle', 
-    'error',
-    'update-not-available', 
-    'cancelled'
-  ].includes(updater.status)) {
+  if (
+    [
+      'idle', 
+      'error',
+      'update-not-available', 
+      'cancelled'
+    ].includes(updater.status) &&
+    globals.ALLOW_VERSION_UPDATE.includes(globals.platform)
+  ) {
     return <></>
   }
 
