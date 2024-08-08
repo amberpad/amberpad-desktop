@@ -16,9 +16,7 @@ export default function createMainWindow () {
   })
 
   window.loadFile(path.join(getResourcesDir(), 'index.html'))
-  // Open the DevTools.
-  if (['development'].some((item) => item === globals.ENVIRONMENT)) {
-    window.webContents.openDevTools();
-  }
+  // If debug open dev tools
+  globals.DEBUG && window.webContents.openDevTools();
   return window
 }

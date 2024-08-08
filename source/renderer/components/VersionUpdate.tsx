@@ -572,7 +572,7 @@ function VersionUpdateNotify (
         <Heading
           size='1'
         >
-          A new version of Amberpad { info ? `(${info.version})` : ''} is now available. 
+          A new version of Amberpad { info ? `(v${info.version})` : ''} is now available. 
           Visit the app's website and download it to ensure you don't miss out on any new features.
         </Heading>
       </Flex>

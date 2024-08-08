@@ -1,6 +1,6 @@
 /// <reference path="../globals.d.ts" />
 
-import { app, BrowserWindow, ipcMain } from "electron"
+import { app, BrowserWindow, ipcMain, Menu } from "electron"
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import setAppUpdaterHandlers from './services/appUpdater'
@@ -8,7 +8,11 @@ import AppUpdater from 'electron-updater'
 
 import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
+import buildMenuTemplate from "./services/buildMenuTemplate"
 import '@main/handlers/index'
+
+const menu = Menu.buildFromTemplate(buildMenuTemplate())
+Menu.setApplicationMenu(menu)
 
 // Updater settings
 const { autoUpdater } = AppUpdater 
@@ -50,7 +54,7 @@ app.on('activate', () => {
 app.whenReady()
   .then(launch)
   .then(() => {
-    if (['development'].some((item) => item === globals.ENVIRONMENT)) {
+    if (globals.DEBUG) {
       installExtension(REACT_DEVELOPER_TOOLS)
         .then((name) => console.log(`Added Extension:  ${name}`))
         .catch((err) => console.log('An error occurred: ', err));
@@ -67,7 +71,6 @@ async function launch() {
   } else {
     windows[0].show();
     windows[0].focus();
-    windows[0].removeMenu();
   }
   await database.init();
   setAppUpdaterHandlers(appContext.mainWindow)

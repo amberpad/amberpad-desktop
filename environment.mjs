@@ -99,6 +99,8 @@ var configs = {
   }
 }
 
+console.log('process.env', filteredEnviromentByPrefix(process.env))
+
 // Extends config dictionary with default values
 var configs = setConfigsDefaults(configs)
 const filteredEnviroments = filteredEnviromentByPrefix(process.env)
