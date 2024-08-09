@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, IconButton, Popover, Progress, ScrollArea, Text } from '@radix-ui/themes'
+import { Box, Button, Card, Flex, Heading, IconButton, Popover, Progress, ScrollArea, Text } from '@radix-ui/themes'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRotate, faCircle, faCircleUp } from '@fortawesome/free-solid-svg-icons'
 import { css } from '@emotion/css'
@@ -7,7 +7,28 @@ import React, { forwardRef, ReactNode, useCallback, useState } from 'react'
 
 import type { BoxProps, FlexProps } from '@radix-ui/themes'
 import { useAppUpdater, AppUpdaterContext } from '@renderer/providers/AppUpdaterProvider'
+import { UpdateInfo } from 'electron-updater'
+import { useStore } from '@renderer/utils/redux-store'
 
+
+const COLORS = {
+  'light': {
+    'active': 'var(--accent-9)',
+    'passive': 'var(--accent-8)'
+  },
+  'dark': {
+    'active': 'var(--accent-9)',
+    'passive': 'var(--accent-8)'
+  }
+}
+
+const ICON_STYLE = css`
+  color: ${COLORS.light.active};
+
+  @media (prefers-color-scheme: dark) {
+    color: ${COLORS.dark.active};
+  }
+`
 
 export default function VersionUpdatePopover (
   {
@@ -16,7 +37,11 @@ export default function VersionUpdatePopover (
 
   }
 ) {
+  const context = useStore((state) => ({
+    commons: { theme: state.commons.theme }
+  }))
   const updater = useAppUpdater()
+  updater.status = 'update-available'
 
   if (
     [
@@ -68,7 +93,15 @@ const VersionUpdateTriggerButton = forwardRef(function (
   },
   ref: React.LegacyRef<any>,
 )  {
+  const context = useStore((state) => ({
+    commons: { theme: state.commons.theme }
+  }))
   const { status } = updater
+
+  const activeColor = context.commons.theme === 'light' ? 
+    COLORS.light.active : COLORS.dark.active
+  const pasiveColor = context.commons.theme === 'light' ? 
+    COLORS.light.passive : COLORS.dark.passive
   return (
     <Box
       {...boxProps}
@@ -91,7 +124,7 @@ const VersionUpdateTriggerButton = forwardRef(function (
                   "update-downloaded", 
                   "notifying-update-available",
                 ].includes(status) ?
-                 'var(--accent-9)' : 'var(--gray-9)'
+                  activeColor : pasiveColor
               } ;
             ` + ' ' + 
             (["checking-for-updates", "dowloading-update"].includes(status) ? 
@@ -109,7 +142,7 @@ const VersionUpdateTriggerButton = forwardRef(function (
                 "notifying-update-available",
               ].includes(status) ? 'block' : 'none'
             };
-            color: var(--accent-a9);
+            color: ${activeColor};
             font-size: 0.5em;
             position: absolute;
             top: 4px;
@@ -124,7 +157,7 @@ const VersionUpdateTriggerButton = forwardRef(function (
               ["update-downloaded"].includes(status) ?
                 'block' : 'none'
             };
-            color: var(--accent-a9);
+            color: ${activeColor};
             font-size: 0.65em;
             position: absolute;
             top: 4px;
@@ -146,13 +179,14 @@ function VersionUpdateUpdateAvailable (
   }
 ) {
   const { info, cancelUpdate, downloadUpdate } = updater
-  const { version, releaseNotes, files } = info
+  const { version, releaseNotes, files } = info ? 
+    info : { version: '', releaseNotes: '', files: []} as unknown as UpdateInfo
 
   // If there are files in info files sum them if not return 0
-  const filesSize = info.files ?
-    (info.files.reduce((acc, file) => {
+  const filesSize = files ?
+    (files.reduce((acc, file) => {
       return acc + file.size
-    }, 0)) / info.files.length : 0
+    }, 0)) / files.length : 0
   return (
     <Flex
       {...flexProps}
@@ -172,9 +206,7 @@ function VersionUpdateUpdateAvailable (
 
       >
         <FontAwesomeIcon
-          className={css`
-            color: var(--amber-10);
-          `}
+          className={ICON_STYLE}
           size='xl'
           icon={faCircleUp}
         />
@@ -187,48 +219,58 @@ function VersionUpdateUpdateAvailable (
 
       <Box
         data-tesid='update-version-popover-content'
-        className={css`
-          background-color: var(--gray-6);
-        `}
-        p='2'
+        p='3'
         flexBasis='1'
         flexShrink='1'
         asChild={true}
       >
-        <ScrollArea
-          scrollbars='vertical'
-          type='auto'
-          size='1'
-          m='0'
+        <Card
+          data-radius='none'
+          className={css`
+            width: 100%
+            height: 100%;
+
+            @media (prefers-color-scheme: dark) {
+              background-color: var(--gray-6);
+            }
+          `}
+          asChild={true}
         >
-          <Text
+          <ScrollArea
+            scrollbars='vertical'
+            type='auto'
             size='1'
+            m='0'
           >
-            <Heading
+            <Text
               size='1'
             >
-              Amberpad&nbsp;
-              { version }&nbsp;
-              { filesSize ? `(~${filesize(filesSize, {standard: "jedec"})})` : '' }
-            </Heading>
-            {((): ReactNode => { 
-              if (typeof releaseNotes === 'string') {
-                return <p dangerouslySetInnerHTML={{__html: releaseNotes}} />
-              } else if (Array.isArray(releaseNotes)) {
-                return (
-                  <ul>
-                    {
-                      releaseNotes.map((item, index) => 
-                        <li key={index}><p dangerouslySetInnerHTML={{__html: item.note}} /></li>)
-                    }
-                  </ul>
-                )
-              } else {
-                return ''
-              }
-            })()}
-            </Text>
-          </ScrollArea>
+              <Heading
+                size='1'
+              >
+                Amberpad&nbsp;
+                { version }&nbsp;
+                { filesSize ? `(~${filesize(filesSize, {standard: "jedec"})})` : '' }
+              </Heading>
+              {((): ReactNode => { 
+                if (typeof releaseNotes === 'string') {
+                  return <p dangerouslySetInnerHTML={{__html: releaseNotes}} />
+                } else if (Array.isArray(releaseNotes)) {
+                  return (
+                    <ul>
+                      {
+                        releaseNotes.map((item, index) => 
+                          <li key={index}><p dangerouslySetInnerHTML={{__html: item.note}} /></li>)
+                      }
+                    </ul>
+                  )
+                } else {
+                  return ''
+                }
+              })()}
+              </Text>
+            </ScrollArea>
+          </Card>
       </Box>
 
       <Flex
@@ -247,7 +289,6 @@ function VersionUpdateUpdateAvailable (
         </Button>
         <Button
           variant='ghost'
-          color='amber'
           onClick={() => downloadUpdate()}
         >
           <Text size='1'>Download</Text>
@@ -286,9 +327,7 @@ function VersionUpdateCancelDownload (
         gap='4'
       >
         <FontAwesomeIcon
-          className={css`
-            color: var(--amber-10);
-          `}
+          className={ICON_STYLE}
           size='xl'
           icon={faCircleUp}
         />
@@ -315,7 +354,6 @@ function VersionUpdateCancelDownload (
         </Button>
         <Button
           variant='ghost'
-          color='amber'
           onClick={() => onConfirm && onConfirm()}
         >
           <Text size='1'>Cancel</Text>
@@ -376,9 +414,7 @@ function VersionUpdateDownloading (
         gap='4'
       >
         <FontAwesomeIcon
-          className={css`
-            color: var(--amber-10);
-          `}
+          className={ICON_STYLE}
           size='xl'
           icon={faCircleUp}
         />
@@ -415,7 +451,6 @@ function VersionUpdateDownloading (
       >
         <Button
           variant='ghost'
-          color='amber'
           onClick={() => onCancel && onCancel()}
         >
           <Text size='1'>Cancel</Text>
@@ -458,9 +493,7 @@ function VersionUpdateQuitAndInstall (
         gap='4'
       >
         <FontAwesomeIcon
-          className={css`
-            color: var(--amber-10);
-          `}
+          className={ICON_STYLE}
           size='xl'
           icon={faCircleUp}
         />
@@ -482,7 +515,6 @@ function VersionUpdateQuitAndInstall (
       >
         <Button
           variant='ghost'
-          color='amber'
           onClick={() => quitAndInstall()}
         >
           <Text size='1'>Quit and install</Text>
@@ -519,9 +551,7 @@ function VersionUpdateCheckingForUpdates (
         gap='2'
       >
         <FontAwesomeIcon
-          className={css`
-            color: var(--gray-10);
-          `}
+          className={ICON_STYLE}
           size='1x'
           icon={faCircleUp}
         />
@@ -563,9 +593,7 @@ function VersionUpdateNotify (
         gap='4'
       >
         <FontAwesomeIcon
-          className={css`
-            color: var(--accent-a9);
-          `}
+          className={ICON_STYLE}
           size='2x'
           icon={faCircleUp}
         />
@@ -586,7 +614,6 @@ function VersionUpdateNotify (
       >
         <Button
           variant='ghost'
-          color='amber'
           onClick={() => dismiss()}
         >
           <Text size='1'>Dismiss</Text>

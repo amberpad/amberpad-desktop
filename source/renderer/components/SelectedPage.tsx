@@ -13,46 +13,14 @@ export default function SelectedPage ({
   isSidebarOpen?: boolean 
 }) {
   const context = useStore((state) => ({
+    commons: {
+      theme: state.commons.theme
+    },
     pages: {
       selectedPage: state.pages.selectedPage,
       loading: state.pages.loadingSelectedPage
     }
   }))
-  /*
-  const [context, setContext] = useState(() => {
-    const initialState = store.getState()
-    return {
-      pages: {
-        selectedPage: initialState.pages.selectedPage,
-        loading: false,
-      }
-    }
-  })
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        selectedPage: state.pages.selectedPage,
-        loading: state.pages.loadingSelectedPage
-      }), 
-      (state) => {
-        setContext((prev) => ({
-          pages: {
-            // Selected is hidden by default, this will ignore any seting of undefined value
-            // until setting an not undefined value
-            selectedPage: (
-              prev.pages.selectedPage === null && 
-              !state.pages.selectedPage ?
-                null :
-                state.pages.selectedPage
-            ),
-            loading: state.pages.loadingSelectedPage
-          }
-        }))
-      },
-    )
-  }, [])
-  */
 
   const selectedPage = context.pages.selectedPage
   const hasSelectedPage = selectedPage !== undefined && selectedPage !== null
@@ -78,20 +46,27 @@ export default function SelectedPage ({
             height: 0;
           `
         }
-      })() + ' ' + css`
-        overflow: clip;
-      `}
+      })()}
     >
       <Card
         className={css`
-          background-color: var(--color-background);
-          box-shadow: 0 0 2px 0 color-mix(in oklab, var(--accent-a5), var(--accent-5) 25%);
+          @media (prefers-color-scheme: light) {
+            background-color: var(--accent-a2);
+            border: 1px solid var(--gray-a3);
+            box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+          }
+
+          @media (prefers-color-scheme: dark) {
+            border: 1px solid var(--accent-a5);
+            background-color: var(--color-background);
+            box-shadow: inset var(--accent-a5) 0px 0px var(--space-2) -3px; 
+          }
 
           ::before, ::after {
             content: none;
           }
         `}
-        data-radius='none'
+        data-radius={context.commons.theme === 'light' ? 'small' : 'none'}
         variant='surface'
       >
         <Flex

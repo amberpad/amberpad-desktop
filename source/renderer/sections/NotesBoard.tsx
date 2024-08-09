@@ -26,64 +26,6 @@ function NotesBoard (props: BoxProps) {
     }
   }))
 
-  /*
-  const [context, setContext] = useState({ 
-    commons: {
-      search: '',
-    },
-    notes: {
-      values: [],
-      page: 1,
-      hasNextPage: true,
-      adjustScrollHash: 0,
-      scrollBeginingHash: 0,
-      loading: false,
-    },
-    pages: {
-      selectedPageID: undefined,
-    }
-  })
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        commons: { 
-          search: state.commons.search,
-        },
-        notes: {
-          values: state.notes.values,
-          page: state.notes.page,
-          hasNextPage: state.notes.hasNextPage,
-          adjustScrollHash: state.notes.adjustScrollHash,
-          scrollBeginingHash: state.notes.scrollBeginingHash,
-          loading: state.notes.loading
-        },
-        pages: {
-          selectedPageID: state.pages.selectedPageID,
-        }
-      }),
-      (state) => {
-        setContext({
-          commons: { 
-            search: state.commons.search,
-          },
-          notes: {
-            values: state.notes.values,
-            page: state.notes.page,
-            hasNextPage: state.notes.hasNextPage,
-            adjustScrollHash: state.notes.adjustScrollHash,
-            scrollBeginingHash: state.notes.scrollBeginingHash,
-            loading: state.notes.loading
-          },
-          pages: {
-            selectedPageID: state.pages.selectedPageID
-          }
-        })
-      } 
-    )
-  }, [])
-  */
-
   const onScrollNext = () => {
     store.dispatch(fetchNotesThunk({
       page: context.notes.page + 1,

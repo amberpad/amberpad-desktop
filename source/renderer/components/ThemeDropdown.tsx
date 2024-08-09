@@ -30,7 +30,9 @@ export default function ThemeDropdown () {
           />
         </IconButton>
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content>
+      <DropdownMenu.Content
+        data-accent='gray'
+      >
         <DropdownMenu.Item
           className={css`
             border: ${context.themeSource === 'system' ? '1px solid var(--gray-a8)' : ''} 

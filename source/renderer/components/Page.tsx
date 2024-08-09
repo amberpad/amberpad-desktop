@@ -15,21 +15,46 @@ import type { FlexProps } from '@radix-ui/themes'
 import type { PageType } from "@ts/models/Pages.types"
 
 injectGlobal`
-  .page-YBdupuKlEX__options {
+  .page__options {
     opacity: 0.0;
   }
-  .page-YBdupuKlEX:hover .page-YBdupuKlEX__options {
+  .page:hover .page__options {
     opacity: 1.0;
   }
 
-  .page-YBdupuKlEX__separator {
+  .page__bullet {
     width: 3px;
-    height: 100%;
+    border-left: 2px solid var(--gray-a5);
+  }
+
+  .page:hover .page__bullet {
     border-left: 2px solid var(--accent-a3);
   }
 
-  .page-YBdupuKlEX:hover .page-YBdupuKlEX__separator {
-    border-left: 2px solid var(--accent-a9);
+  @media (prefers-color-scheme: light) {
+    .page {
+      padding-left: var(--space-3);
+    }
+
+    .page:hover {
+      background-color: var(--accent-a3);
+      text-decoration-line: underline;
+    }
+
+    .page__bullet {
+      display: none;
+    } 
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .page__bullet {
+      width: 3px;
+      border-left: 3px solid var(--accent-a5);
+    }
+
+    .page:hover .page__bullet {
+      border-left: 3px solid var(--accent-a9);
+    }
   }
 `
 
@@ -48,24 +73,6 @@ function Page ({
     isUpdatePageOpen: false,
     isDeletePageOpen: false,
   })
-  /*
-  const [context, setContext] = useState({
-    selectedPageID: undefined,
-  })
-
-  useLayoutEffect(() => {
-    store.monitor(
-      (state) => ({
-        selectedPageID: state.pages.selectedPageID
-      }), 
-      (state) => {
-        setContext({
-          selectedPageID: state.pages.selectedPageID
-        })
-      }
-    )
-  }, [])
-  */
 
   const onPageClick = () => {
     const { setSelectedPageID } = pagesSlice.actions
@@ -92,20 +99,22 @@ function Page ({
       </>
       <Flex
         data-testid='page'
-        className='page-YBdupuKlEX'
+        className='page'
         direction='row'
         gap='4'
         justify='start'
-        align='center'
+        align='stretch'
         {...flexProps}
       >
         <div
-          data-testid='page-separator'
-          className='page-YBdupuKlEX__separator'
+          className='page__bullet'
         />
-        <Box
+        <Flex
           flexBasis='1'
+          py='1'
           overflow='clip'
+          align='center'
+          justify='center'
         >
           <Box
             maxWidth='100%'
@@ -113,17 +122,21 @@ function Page ({
           >
             <Button
               className={css`
-                color: var(--amber-a9);
-
+                color: var(--gray-11);
+                
                 :hover {
                   background-color: transparent;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                  color: var(--gray-12);
                 }
               `}
               variant='ghost'
               onClick={onPageClick}
             >
               <Text 
-                size='2' 
+                size='1' 
                 weight='medium'
                 truncate={true}
               >
@@ -131,12 +144,16 @@ function Page ({
               </Text>
             </Button>
           </Box>
-        </Box>
+        </Flex>
+        <Flex
+          justify='center'
+          align='center'
+        >
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
               <IconButton
                 data-testid='page-options-button'
-                className='page-YBdupuKlEX__options'
+                className='page__options'
                 size='1'
                 variant='ghost'
               >
@@ -172,6 +189,7 @@ function Page ({
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>
+          </Flex>
       </Flex>
     </>
   )

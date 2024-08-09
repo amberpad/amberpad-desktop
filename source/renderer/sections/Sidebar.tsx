@@ -82,8 +82,11 @@ function Sidebar(boxProps: BoxProps) {
     <Box
       {...boxProps}
       className={css`
-        background-color: var(--accent-a2);
         z-index: 9;
+
+        @media (prefers-color-scheme: dark) {
+          background-color: var(--accent-a2);
+        }
       `}
       minHeight='0px'
       asChild={true}
@@ -109,10 +112,18 @@ function Sidebar(boxProps: BoxProps) {
           <div 
             className={css`
               height: 100%;
-              border-left: 1px solid var(--accent-a3);
+              border-left: 1px solid var(--gray-a8);
 
               :hover {
-                border-left: 3px solid var(--accent-a3);
+                border-left: 3px solid var(--gray-a8);
+              }
+
+              @media (prefers-color-scheme: dark) {
+                border-left: 1px solid var(--accent-a6);
+
+                :hover {
+                  border-left: 3px solid var(--accent-a6);
+                }
               }
             `}
           />

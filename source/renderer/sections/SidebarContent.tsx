@@ -34,84 +34,6 @@ function SidebarContent(props: BoxProps) {
       paginationMap: state.notepads.paginationMap,
     }
   }))
-  
-  /*
-  const [context, setContext] = useState({
-    commons: {
-      initialIsSidebarOpen: commonsSliceInitials.initialIsSidebarOpen,
-      isSidebarOpen: commonsSliceInitials.isSidebarOpen,
-      search: '',
-    },
-    pages: {
-      selectedPageID: undefined,
-    },
-    notepads: {
-      values: [],
-      page: 1,
-      hasNextPage: true,
-      adjustScrollHash: 0,
-      scrollEndHash: 0,
-      loading: false,
-      paginationMap: {} as {
-        [key: number]: {
-            page: number,
-            hasNext: boolean;
-            isLoading: boolean;
-            hash: number;
-        }
-      }
-    }
-  })
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        initialIsSidebarOpen: state.commons.initialIsSidebarOpen,
-        isSidebarOpen: state.commons.isSidebarOpen,
-        search: state.commons.search,
-        selectedPageID: state.pages.selectedPageID
-      }),
-      (state) => setContext((prev) => ({
-        ...prev,
-        commons: {
-          initialIsSidebarOpen: state.commons.initialIsSidebarOpen,
-          isSidebarOpen: state.commons.isSidebarOpen,
-          search: state.commons.search,
-        },
-        pages: {
-          selectedPageID: state.pages.selectedPageID
-        }
-      }))
-    )
-  }, [])
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        values: state.notepads.values,
-        page: state.notepads.values,
-        hasNextPage: state.notepads.hasNextPage,
-        adjustScrollHash: state.notes.adjustScrollHash,
-        scrollEndHash: state.notepads.scrollEndHash,
-        paginationMap: state.notepads.paginationMap,
-        loading: state.notepads.loading,
-      }),
-      (state) => setContext((prev) => ({
-        ...prev,
-        notepads: {
-          ...state.notepads,
-          values: state.notepads.values,
-          page: state.notepads.page,
-          hasNextPage: state.notepads.hasNextPage,
-          adjustScrollHash: state.notepads.adjustScrollHash,
-          scrollEndHash: state.notepads.scrollEndHash,
-          loading: state.notepads.loading,
-          paginationMap: state.notepads.paginationMap,
-        }
-      }))
-    )
-  })
-    */
 
   const onScrollNext = () => {
     store.dispatch(fetchNotepadsThunk({
@@ -173,7 +95,6 @@ function SidebarContent(props: BoxProps) {
           asChild={true}
         >
           <InifiniteScroll
-            //data-testid='notepad-pages-scrolling-area'
             data={context.notepads.values}
             renderItem={(item) => (
               <Notepad

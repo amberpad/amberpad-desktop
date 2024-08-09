@@ -54,11 +54,21 @@ function TextEditor (
       width='100%'
       height='100%'
       className={css`
-        border: 1px solid  var(--gray-a5);
         border-radius: var(--radius-1);
         padding: var(--space-2);
-        background-color: var(--color-background);
         z-index: -1;
+
+        @media (prefers-color-scheme: light) {
+          border: 1px solid  var(--gray-a8);
+          background-color: var(--color-background);
+          box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          border: 1px solid  var(--gray-a5);
+          background-color: var(--color-background);
+          box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+        }
       `}
     >
       <Slate 

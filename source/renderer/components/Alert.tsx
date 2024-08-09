@@ -69,6 +69,11 @@ function Alert (
 ) {
   const { content, type: alertType, isActive } = useAlert()
 
+  if (!isActive) {
+    return undefined
+  }
+
+
   return (
     <Flex
       {...flexProps}
@@ -77,10 +82,6 @@ function Alert (
          switch(isActive) {
           case true:
             return css`animation: fade-in 0.6s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;`
-          case false:
-            return css`animation: fade-out 0.5s ease-out both;`
-          default:
-            return css`display: none;`
          }
         })()
       }

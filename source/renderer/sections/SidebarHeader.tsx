@@ -94,29 +94,3 @@ function SidebarHeader({
 }
 
 export default SidebarHeader
-
-/*
-      <CreateNotepad.Root>
-        <CreateNotepad.Trigger>
-          <Box
-            className={!isSidebarOpen && css`
-              display: none;
-            `}
-            asChild={true}
-          >
-            <IconButton
-              size='1'
-              variant='ghost'
-            >
-              <FontAwesomeIcon
-                size='1x'
-                icon={faPlus}
-              />
-            </IconButton>
-          </Box>
-        </CreateNotepad.Trigger>
-        <CreateNotepad.Content
-          maxWidth='520px'
-        />
-      </CreateNotepad.Root>
-*/

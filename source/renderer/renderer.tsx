@@ -16,6 +16,10 @@ import '@radix-ui/themes/styles.css'
 import '@renderer/renderer.css'
 import pagesSlice from './actions/pages.slice'
 
+injectGlobal`
+
+`
+
 const ThemeWrapper = ({ children }) => {
   const context = useStore((state) => ({ 
     theme: state.commons.theme,
@@ -25,7 +29,7 @@ const ThemeWrapper = ({ children }) => {
     return (
       <Theme
         appearance='dark'
-        accentColor='yellow'
+        accentColor='amber'
         grayColor='sand'
         radius='large'
         scaling="105%"
@@ -38,7 +42,7 @@ const ThemeWrapper = ({ children }) => {
     return (
       <Theme
         appearance='light'
-        accentColor='amber'
+        accentColor='yellow'
         grayColor='gray'
         radius='large'
         scaling="105%"

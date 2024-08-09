@@ -5,11 +5,13 @@ import { faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 import store, { useStore } from "@renderer/utils/redux-store"
 import commonsSlice from "@renderer/actions/commons.slice"
+import { css } from "@emotion/css";
 
 const SearchBar = () => {
   const context = useStore((state) => ({
     commons:  {
       search: state.commons.search,
+      theme: state.commons.theme,
     },
     notes: {
       page: state.notes.page,
@@ -18,39 +20,6 @@ const SearchBar = () => {
   const [state, setState] = useState({
     search: '',
   })
-  /*
-  const [context, setContext] = useState({
-    commons: {
-      search: '',
-    },
-    notes: {
-      page: 1,
-    },
-  })
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        commons:  {
-          search: state.commons.search,
-        },
-        notes: {
-          page: state.notes.page
-        },
-      }), 
-      (state) => {
-        setContext({
-          commons:  {
-            search: state.commons.search,
-          },
-          notes: {
-            page: state.notes.page,
-          },
-        })
-      }
-    )
-  }, [])
-  */
 
   const sendSearch = (search: string) => {
     const { setSearch } = commonsSlice.actions
@@ -72,7 +41,7 @@ const SearchBar = () => {
   return (
     <TextField.Root
       data-testid='searchbar'
-      variant='soft'
+      variant={context.commons.theme === 'light' ? 'surface': 'soft'}
       placeholder='Search'
       value={state.search}
       onChange={(event) => onInputChange(event)}

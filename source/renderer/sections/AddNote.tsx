@@ -23,25 +23,6 @@ function AddNote ({
     isTextEditorEmpty: true,
     addNoteIsFocused: false,
   })
-  
-  /*
-  const [context, setContext] = useState({
-    selectedPageID: undefined,
-  })
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        selectedPageID: state.pages.selectedPageID
-      }), 
-      (state) => {
-        setContext({
-          selectedPageID: state.pages.selectedPageID
-        })
-      }
-    )
-  }, [])
-  */
 
   /**************************************************************************** 
   * SlateJS methods
@@ -113,10 +94,18 @@ function AddNote ({
           <div
             className={css`
               width: 100%;
-              border-bottom: 1px solid var(--accent-a3);
+              border-bottom: 1px solid var(--gray-a8);
 
               :hover {
-                border-bottom: 3px solid var(--accent-a3);
+                border-bottom: 3px solid var(--gray-a8);
+              }
+
+              @media (prefers-color-scheme: dark) {
+                border-bottom: 1px solid var(--accent-a6);
+
+                :hover {
+                  border-bottom: 3px solid var(--accent-a6);
+                }
               }
             `}
           />

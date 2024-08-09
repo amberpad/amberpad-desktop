@@ -78,7 +78,7 @@ export default function Home() {
     >
       <Header />
       <Separator 
-        color='yellow'
+        color={context.commons.theme === 'light' ? 'gray' : 'yellow'}
         orientation='horizontal'
         size='4'
       />
@@ -92,9 +92,7 @@ export default function Home() {
         flexGrow='1'
         flexShrink='1'
       >
-        <Sidebar 
-
-        />
+        <Sidebar />
         <Flex
           className={css`
             position: relative;
