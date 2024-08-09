@@ -11,7 +11,7 @@ import AddNote from '@renderer/sections/AddNote'
 import NotesBoard from '@renderer/sections/NotesBoard'
 import Alert from '@renderer/components/Alert'
 import Header from '@renderer/sections/Header'
-//import commonsSlice ,{ CommonsSliceState } from '@renderer/actions/commons.slice'
+import commonsSlice ,{ CommonsSliceState } from '@renderer/actions/commons.slice'
 
 export default function Home() {
   const context = useStore((state) => ({
@@ -59,23 +59,12 @@ export default function Home() {
     }
   }, [context.commons.search])
 
-  /****************************************************************************
-  * Local storage initial values
-  ****************************************************************************/
-
-  /*
   useEffect(() => {
-    window.electronAPI.store.getAll().then((initials) => {
-      // Selected page initial value
-      const { setSelectedPageID } = pagesSlice.actions
-      store.dispatch(setSelectedPageID({ value: initials.selectedPageID }))
-
-      // Initial theme value
+    window.electronAPI.theme.onThemeUpdate((theme) => {
       const { setTheme } = commonsSlice.actions
-      store.dispatch(setTheme({ value: initials.theme }))
-    }) 
-  })
-  */
+      store.dispatch(setTheme({ value: theme }))
+    })
+  }, [])
 
   return (
     <Flex

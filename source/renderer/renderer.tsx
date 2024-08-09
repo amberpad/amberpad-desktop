@@ -7,8 +7,8 @@ import { Theme } from '@radix-ui/themes'
 import { HashRouter } from "react-router-dom"
 import { css, injectGlobal } from '@emotion/css'
 
-import store from '@renderer/utils/redux-store'
-import { CommonsSliceState } from "@renderer/actions/commons.slice"
+import store, { useStore } from '@renderer/utils/redux-store'
+import commonsSlice, { CommonsSliceState } from "@renderer/actions/commons.slice"
 import { Router } from '@renderer/routes'
 import AlertProvider from '@renderer/providers/AlertProvider'
 import AppUpdaterProvider from '@renderer/providers/AppUpdaterProvider'
@@ -17,19 +17,11 @@ import '@renderer/renderer.css'
 import pagesSlice from './actions/pages.slice'
 
 const ThemeWrapper = ({ children }) => {
-  const [context, setContext] = useState<{ theme: CommonsSliceState['theme'] }>({
-    theme: 'os'
-  })
+  const context = useStore((state) => ({ 
+    theme: state.commons.theme,
+  }))
 
-  useEffect(() => {
-    store.monitor(
-      (state) => ({ theme: state.commons.theme }), 
-      (state) => setContext({ theme: state.commons.theme })
-    )
-  }, [])
-
-  const theme = context.theme
-  if (theme === 'dark') {
+  if (context.theme === 'dark') {
     return (
       <Theme
         appearance='dark'
@@ -63,6 +55,13 @@ window.electronAPI.getInitials().then((initials) => {
 
   const { setSelectedPageID } = pagesSlice.actions
   store.dispatch(setSelectedPageID({ value: initials.store.selectedPageID }))
+
+  const { setTheme } = commonsSlice.actions
+  store.dispatch(setTheme({ value: initials.theme.theme }))
+
+  const { setThemeSource } = commonsSlice.actions
+  store.dispatch(setThemeSource({ value: initials.theme.themeSource }))
+
   root.render(
     <React.StrictMode>
       <ReduxProvider store={store} >

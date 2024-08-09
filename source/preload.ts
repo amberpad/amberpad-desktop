@@ -51,7 +51,15 @@ export const electronAPI = {
   general: {
     openExternal: (payload: { url: string }) => 
       ipcRenderer.invoke('general.openExternal', payload),
-    getDefaultTheme: () => ipcRenderer.invoke('initials.getDefaultTheme'),
+  },
+  theme: {
+    onThemeUpdate: (
+      callback: (payload: 'dark' | 'light') => void
+    ) => {
+      return ipcRenderer.on('theme.onThemeUpdate', (_event, payload) => callback(payload))
+    },
+    setThemeSource: (payload: { theme: "system" | "light" | "dark" }) => 
+      ipcRenderer.invoke('theme.setThemeSource', payload),
   },
   store: {
     get: (payload: { key: string }) => 

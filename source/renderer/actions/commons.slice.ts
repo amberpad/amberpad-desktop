@@ -5,14 +5,16 @@ export interface CommonsSliceState {
   search: string,
   initialIsSidebarOpen: boolean,
   isSidebarOpen: boolean,
-  theme: 'dark' | 'light' | 'os',
+  theme: 'dark' | 'light',
+  themeSource: 'dark' | 'light' | 'system',
 }
 
 export const commonsSliceInitials: CommonsSliceState = {
   search: '',
   initialIsSidebarOpen: undefined,
   isSidebarOpen: undefined,
-  theme: 'os',
+  theme: 'light',
+  themeSource: 'system',
 }
 
 /******************************************************************************
@@ -68,11 +70,14 @@ function setTheme (
   action: PayloadAction<{ value: CommonsSliceState['theme'] }>
 ) {
   state.theme = action.payload.value
-  // Save in local storage
-  window.electronAPI.store.set({ 
-    key: 'theme',
-    value: action.payload.value,
-  })
+}
+
+function setThemeSource(
+  state: CommonsSliceState, 
+  action: PayloadAction<{ value: CommonsSliceState['themeSource'] }>
+) {
+  state.themeSource = action.payload.value
+  window.electronAPI.theme.setThemeSource({ theme: action.payload.value })
 }
 
 const commonsSlice = createSlice({
@@ -83,6 +88,7 @@ const commonsSlice = createSlice({
     setIsSidebarOpen,
     toggleIsSidebarOpen,
     setTheme,
+    setThemeSource,
   },
   extraReducers: (builder) => {
     builder.addCase(fetchInitialIsSidebarOpen.fulfilled, (state, action) => {

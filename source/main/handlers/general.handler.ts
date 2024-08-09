@@ -1,4 +1,6 @@
 import { app, ipcMain, shell , nativeTheme} from 'electron'
+import store from "@main/utils/electron-store"
+
 
 app.on('ready', () => {
   ipcMain.handle(
@@ -8,13 +10,6 @@ app.on('ready', () => {
       payload: { url: string }
     ): Promise<void> {
       shell.openExternal(payload.url)
-    }
-  )
-
-  ipcMain.handle(
-    'initials.defaultTheme',
-    function () {
-      return nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
     }
   )
 })

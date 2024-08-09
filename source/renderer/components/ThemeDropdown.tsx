@@ -10,24 +10,12 @@ import commonsSlice, { CommonsSliceState } from "@renderer/actions/commons.slice
 
 export default function ThemeDropdown () {
   const context = useStore((state) => ({ 
-    theme: state.commons.theme 
+    themeSource: state.commons.themeSource 
   }))
-  /*
-  const [context, setContext] = useState<{ theme: CommonsSliceState['theme'] }>({
-    theme: 'os'
-  })
 
-  useEffect(() => {
-    store.monitor(
-      (state) => ({ theme: state.commons.theme }), 
-      (state) => setContext({ theme: state.commons.theme })
-    )
-  }, [])
-  */
-
-  const setTheme = (theme: CommonsSliceState["theme"]) => {
-    const { setTheme } = commonsSlice.actions
-    store.dispatch(setTheme({ value: theme }))
+  const setTheme = (theme: CommonsSliceState['themeSource']) => {
+    const { setThemeSource } = commonsSlice.actions
+    store.dispatch(setThemeSource({ value: theme }))
   }
 
   return (
@@ -45,9 +33,9 @@ export default function ThemeDropdown () {
       <DropdownMenu.Content>
         <DropdownMenu.Item
           className={css`
-            border: ${context.theme === 'os' ? '1px solid var(--gray-a8)' : ''} 
+            border: ${context.themeSource === 'system' ? '1px solid var(--gray-a8)' : ''} 
           `}
-          onClick={() => setTheme('os')}
+          onClick={() => setTheme('system')}
         >
           <FontAwesomeIcon
             size='1x'
@@ -57,7 +45,7 @@ export default function ThemeDropdown () {
         </DropdownMenu.Item>
         <DropdownMenu.Item
           className={css`
-            border: ${context.theme === 'light' ? '1px solid var(--gray-a8)' : ''} 
+            border: ${context.themeSource === 'light' ? '1px solid var(--gray-a8)' : ''} 
           `}
           onClick={() => setTheme('light')}
         >
@@ -69,7 +57,7 @@ export default function ThemeDropdown () {
         </DropdownMenu.Item>
         <DropdownMenu.Item
           className={css`
-            border: ${context.theme === 'dark' ? '1px solid var(--gray-a8)' : ''} 
+            border: ${context.themeSource === 'dark' ? '1px solid var(--gray-a8)' : ''} 
           `}
           onClick={() => setTheme('dark')}
         >

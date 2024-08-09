@@ -37,7 +37,7 @@ function monitor (
 store.monitor = monitor
 
 export const useStore = (
-  extract: (context: ReturnType<typeof store.getState>) => any
+  extract: (context: ReturnType<typeof baseStore.getState>) => any
 ) => {
   const [context, useContext] = useState(() => {
     const initialState = store.getState()

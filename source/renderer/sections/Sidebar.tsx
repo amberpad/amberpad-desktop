@@ -24,31 +24,6 @@ function Sidebar(boxProps: BoxProps) {
     sidebarInitialAperture: undefined,
     aperture: undefined,
   })
-  /*
-  const [context, setContext] = useState({
-    commons: {
-      initialIsSidebarOpen: commonsSliceInitials.initialIsSidebarOpen,
-      isSidebarOpen: commonsSliceInitials.isSidebarOpen,
-    }
-  })
-
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        isSidebarOpen: state.commons.isSidebarOpen,
-        initialIsSidebarOpen: state.commons.initialIsSidebarOpen
-      }), 
-      (state) => {
-        setContext({
-          commons:  {
-            isSidebarOpen: state.commons.isSidebarOpen,
-            initialIsSidebarOpen: state.commons.initialIsSidebarOpen,
-          }
-        })
-      }
-    )
-  }, [])
-  */
 
   /******************************************************************************
   * Aperture sidebar context/localStorage setters
