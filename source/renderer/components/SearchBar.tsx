@@ -3,13 +3,22 @@ import { TextField, IconButton } from "@radix-ui/themes"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faXmark } from '@fortawesome/free-solid-svg-icons';
 
-import store from "@renderer/utils/redux-store"
+import store, { useStore } from "@renderer/utils/redux-store"
 import commonsSlice from "@renderer/actions/commons.slice"
 
 const SearchBar = () => {
+  const context = useStore((state) => ({
+    commons:  {
+      search: state.commons.search,
+    },
+    notes: {
+      page: state.notes.page,
+    },
+  }))
   const [state, setState] = useState({
     search: '',
   })
+  /*
   const [context, setContext] = useState({
     commons: {
       search: '',
@@ -41,6 +50,7 @@ const SearchBar = () => {
       }
     )
   }, [])
+  */
 
   const sendSearch = (search: string) => {
     const { setSearch } = commonsSlice.actions

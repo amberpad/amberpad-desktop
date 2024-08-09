@@ -13,7 +13,7 @@ export const validate = (environment, configs) => {
   }
 
   return Object.fromEntries(
-    Object.entries(processed).map(([name, values]) => [name, values.value]))
+    Object.entries(processed).map(([name, values]) => [name, values.parsed]))
 }
 
 export function setConfigsDefaults (configs) {
@@ -98,8 +98,6 @@ var configs = {
     )]
   }
 }
-
-console.log('process.env', filteredEnviromentByPrefix(process.env))
 
 // Extends config dictionary with default values
 var configs = setConfigsDefaults(configs)

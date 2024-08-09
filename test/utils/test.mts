@@ -4,6 +4,7 @@ import { _electron } from 'playwright';
 import { test as base } from '@playwright/test';
 import knex from 'knex'
 
+import { sleep } from './utils.mts';
 import seed from './seed.mts';
 
 import type {Page} from '@playwright/test';
@@ -38,9 +39,9 @@ const connectDatabase = async (id: string): Promise<DatabaseType> => {
 
 // Extend the Test object with electron connection and database utilities
 export const test = base.extend<{
-  launchElectron: (_id?: any) => AsyncGenerator<Page, void, unknown>
+  launchElectron: (_id?: any, options?: { windowTitle: string }) => AsyncGenerator<Page, void, unknown>
 }>({
-  launchElectron: async({}, use) => use(async function* (_id) {
+  launchElectron: async({}, use) => use(async function* (_id, options={ windowTitle: 'Amberpad' }) {
     // If not ID generate a random one
     const id = _id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
     const queries = await connectDatabase(id);
@@ -60,9 +61,33 @@ export const test = base.extend<{
         __TESTING_ENVRONMENT_DB_PATH: buildDatabasePath(id),
       }
     });
-    //electronApp.on('console', async msg => { console.log(msg); });
+
+    //console.log('#####################################')
+    //console.log('options.windowTitle', options.windowTitle)
+    var page = await electronApp.firstWindow()
+    //console.log( options.windowTitle )
+    //while (await page.title() === 'devtools') {
+    label:
+    while (options.windowTitle !== undefined) {
+      const windows = electronApp.windows()
+      for (let i = 0; i < windows.length; i++) {
+        const window = windows[i]
+        const title = await window.title()
+        //console.log('TITLES', title.toLocaleLowerCase(), options.windowTitle.toLocaleLowerCase())
+        if (title.toLocaleLowerCase() === options.windowTitle.toLocaleLowerCase()) {
+          page = window
+          break label
+        }
+      }
+      //await page.waitForTimeout(100)
+      await sleep(100);
+    }
+
+    //console.log('FOUND PAGE', await page.title())
+    //console.log('#####################################')
     try {
-      yield await electronApp.firstWindow();
+      await page.waitForLoadState('domcontentloaded')
+      yield page;
     } finally {
       await queries.destroy();
       unlink(

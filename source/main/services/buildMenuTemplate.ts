@@ -59,7 +59,17 @@ export default function buildMenuTemplate () {
       label: 'View',
       submenu: [
         { role: 'togglefullscreen' },
-        ...(globals.DEBUG ? [{ role: 'toggleDevTools' }] : [])
+        ...(globals.DEBUG ? [
+          { role: 'reload' },
+          { role: 'forceReload' },
+          { role: 'toggleDevTools' },
+          { type: 'separator' },
+          { role: 'resetZoom' },
+          { role: 'zoomIn' },
+          { role: 'zoomOut' },
+          { type: 'separator' },
+
+        ] : [])
       ]
     },
     {

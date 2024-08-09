@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { css } from '@emotion/css'
 
-import store from "@renderer/utils/redux-store"
+import store, { useStore } from "@renderer/utils/redux-store"
 import { createNoteThunk } from "@renderer/actions/notes.slice"
 import ResizableSide from '@renderer/wrappers/ResizableSide'
 import TextEditor from '@renderer/components/TextEditor/TextEditor'
@@ -12,17 +12,19 @@ import TextEditor from '@renderer/components/TextEditor/TextEditor'
 import type { FlexProps  } from '@radix-ui/themes'
 import type { AmberpadEditor } from '@renderer/utils/slate'
 
-/* @ts-ignore */
-const PLATFORM = navigator.userAgentData.platform
-
 function AddNote ({
   ...flexProps
 }: FlexProps & {
 }) {
+  const context = useStore((state) => ({
+    selectedPageID: state.pages.selectedPageID
+  }))
   const [state, setState] = useState({
     isTextEditorEmpty: true,
     addNoteIsFocused: false,
   })
+  
+  /*
   const [context, setContext] = useState({
     selectedPageID: undefined,
   })
@@ -39,6 +41,7 @@ function AddNote ({
       }
     )
   }, [])
+  */
 
   /**************************************************************************** 
   * SlateJS methods

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Box, Card, Flex, Heading } from '@radix-ui/themes'
-
-import store from '@renderer/utils/redux-store'
-
-import type { BoxProps } from '@radix-ui/themes'
 import { css } from '@emotion/css'
+
+import store, { useStore } from '@renderer/utils/redux-store'
+import type { BoxProps } from '@radix-ui/themes'
 
 export default function SelectedPage ({
   className='',
@@ -13,10 +12,20 @@ export default function SelectedPage ({
 }: BoxProps & { 
   isSidebarOpen?: boolean 
 }) {
-  const [context, setContext] = useState({
+  const context = useStore((state) => ({
     pages: {
-      selectedPage: null,
-      loading: false,
+      selectedPage: state.pages.selectedPage,
+      loading: state.pages.loadingSelectedPage
+    }
+  }))
+  /*
+  const [context, setContext] = useState(() => {
+    const initialState = store.getState()
+    return {
+      pages: {
+        selectedPage: initialState.pages.selectedPage,
+        loading: false,
+      }
     }
   })
 
@@ -29,7 +38,7 @@ export default function SelectedPage ({
       (state) => {
         setContext((prev) => ({
           pages: {
-            // Selected is hidden for default, this will ignore any seting of undefined value
+            // Selected is hidden by default, this will ignore any seting of undefined value
             // until setting an not undefined value
             selectedPage: (
               prev.pages.selectedPage === null && 
@@ -43,6 +52,7 @@ export default function SelectedPage ({
       },
     )
   }, [])
+  */
 
   const selectedPage = context.pages.selectedPage
   const hasSelectedPage = selectedPage !== undefined && selectedPage !== null
@@ -68,7 +78,9 @@ export default function SelectedPage ({
             height: 0;
           `
         }
-      })()}
+      })() + ' ' + css`
+        overflow: clip;
+      `}
     >
       <Card
         className={css`

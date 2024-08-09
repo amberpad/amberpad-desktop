@@ -3,7 +3,7 @@ import { Box, Flex } from '@radix-ui/themes'
 import _ from 'lodash'
 import { css } from '@emotion/css'
 
-import store from '@renderer/utils/redux-store'
+import store, { useStore } from '@renderer/utils/redux-store'
 import { commonsSliceInitials } from '@renderer/actions/commons.slice'
 import { fetchNotepadsThunk, fetchPagesThunk } from '@renderer/actions/notepads.slice'
 import InifiniteScroll from '@renderer/wrappers/InifiniteScroll'
@@ -14,6 +14,28 @@ import SelectedPage from '@renderer/components/SelectedPage'
 import type { BoxProps } from '@radix-ui/themes'
 
 function SidebarContent(props: BoxProps) {
+  const context = useStore((state) => ({
+    commons: {
+      initialIsSidebarOpen: state.commons.initialIsSidebarOpen,
+      isSidebarOpen: state.commons.isSidebarOpen,
+      search: state.commons.search,
+    },
+    pages: {
+      selectedPageID: state.pages.selectedPageID
+    },
+    notepads: {
+      ...state.notepads,
+      values: state.notepads.values,
+      page: state.notepads.page,
+      hasNextPage: state.notepads.hasNextPage,
+      adjustScrollHash: state.notepads.adjustScrollHash,
+      scrollEndHash: state.notepads.scrollEndHash,
+      loading: state.notepads.loading,
+      paginationMap: state.notepads.paginationMap,
+    }
+  }))
+  
+  /*
   const [context, setContext] = useState({
     commons: {
       initialIsSidebarOpen: commonsSliceInitials.initialIsSidebarOpen,
@@ -89,6 +111,7 @@ function SidebarContent(props: BoxProps) {
       }))
     )
   })
+    */
 
   const onScrollNext = () => {
     store.dispatch(fetchNotepadsThunk({

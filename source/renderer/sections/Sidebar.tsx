@@ -3,7 +3,7 @@ import { Box, Flex, ScrollArea, } from '@radix-ui/themes'
 import _ from 'lodash'
 import { css } from '@emotion/css';
 
-import store from '@renderer/utils/redux-store'
+import store, { useStore } from '@renderer/utils/redux-store'
 import commonsSlice, { 
   commonsSliceInitials,
   fetchInitialIsSidebarOpen 
@@ -14,10 +14,17 @@ import SidebarContent from '@renderer/sections/SidebarContent'
 import type { BoxProps } from '@radix-ui/themes'
 
 function Sidebar(boxProps: BoxProps) {
+  const context = useStore((state) => ({
+    commons:  {
+      isSidebarOpen: state.commons.isSidebarOpen,
+      initialIsSidebarOpen: state.commons.initialIsSidebarOpen,
+    }
+  }))
   const [state, setState] = useState({
     sidebarInitialAperture: undefined,
     aperture: undefined,
   })
+  /*
   const [context, setContext] = useState({
     commons: {
       initialIsSidebarOpen: commonsSliceInitials.initialIsSidebarOpen,
@@ -41,6 +48,7 @@ function Sidebar(boxProps: BoxProps) {
       }
     )
   }, [])
+  */
 
   /******************************************************************************
   * Aperture sidebar context/localStorage setters

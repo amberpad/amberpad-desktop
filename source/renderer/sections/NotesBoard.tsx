@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Box, Flex } from '@radix-ui/themes'
 
-import store from '@renderer/utils/redux-store'
+import store, { useStore } from '@renderer/utils/redux-store'
 import { fetchNotesThunk } from '@renderer/actions/notes.slice'
 import InifiniteScroll from '@renderer/wrappers/InifiniteScroll'
 import Note from '@renderer/sections/Note'
@@ -9,6 +9,24 @@ import Note from '@renderer/sections/Note'
 import type { BoxProps } from '@radix-ui/themes'
 
 function NotesBoard (props: BoxProps) {
+  const context = useStore((state) => ({
+    commons: { 
+      search: state.commons.search,
+    },
+    notes: {
+      values: state.notes.values,
+      page: state.notes.page,
+      hasNextPage: state.notes.hasNextPage,
+      adjustScrollHash: state.notes.adjustScrollHash,
+      scrollBeginingHash: state.notes.scrollBeginingHash,
+      loading: state.notes.loading
+    },
+    pages: {
+      selectedPageID: state.pages.selectedPageID
+    }
+  }))
+
+  /*
   const [context, setContext] = useState({ 
     commons: {
       search: '',
@@ -64,6 +82,7 @@ function NotesBoard (props: BoxProps) {
       } 
     )
   }, [])
+  */
 
   const onScrollNext = () => {
     store.dispatch(fetchNotesThunk({

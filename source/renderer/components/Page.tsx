@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-regular-svg-icons'
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons'
 
-import store from '@renderer/utils/redux-store'
+import store, { useStore }  from '@renderer/utils/redux-store'
 import DropdownMenu from '@renderer/primitives/DropdownMenu'
 import UpdatePage from '@renderer/dialogs/UpdatePage'
 import DeletePage from '@renderer/dialogs/DeletePage'
@@ -41,10 +41,14 @@ function Page ({
   data: PageType,
   loading?: boolean,
 }) {
+  const context = useStore((state) => ({
+    selectedPageID: state.pages.selectedPageID
+  }))
   const [state, setState] = useState({
     isUpdatePageOpen: false,
     isDeletePageOpen: false,
   })
+  /*
   const [context, setContext] = useState({
     selectedPageID: undefined,
   })
@@ -61,6 +65,7 @@ function Page ({
       }
     )
   }, [])
+  */
 
   const onPageClick = () => {
     const { setSelectedPageID } = pagesSlice.actions

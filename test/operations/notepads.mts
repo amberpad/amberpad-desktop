@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /*
@@ -34,13 +35,22 @@ export const updateNotepad = async (
   name: string,
   newName: string,
 ) => {
+  /*
+  console.log('->', await page.locator(
+    'xpath=' +
+    `//*[contains(text(), '${name}')]` + // Notepad text element
+    `//ancestor::*[@data-testid='notepad']` + // Notepad element
+    `//descendant::*[@data-testid='notepad-options-button']` // Options button
+  ).all())
+  await page.waitForTimeout(200)
+  */
+
   await page.locator(
     'xpath=' +
     `//*[contains(text(), '${name}')]` + // Notepad text element
     `//ancestor::*[@data-testid='notepad']` + // Notepad element
     `//descendant::*[@data-testid='notepad-options-button']` // Options button
   ).click();
-  // Click create page option
   await page.locator(
     'xpath=' +
     `//ancestor::*[@data-testid='notepad-options-menu']` +
@@ -65,13 +75,11 @@ export const deleteNotepad = async (
     `//ancestor::*[@data-testid='notepad']` + // Notepad element
     `//descendant::*[@data-testid='notepad-options-button']` // Options button
   ).click();
-  // Click create page option
   await page.locator(
     'xpath=' +
     `//ancestor::*[@data-testid='notepad-options-menu']` +
     `//descendant::*[@data-testid='notepad-options-delete-notepad-button']`
   ).click();
-  // Click confirm button
   await page.locator(`xpath=//*[@data-testid='modal-confirm-button']`).click();
 };
 

@@ -9,7 +9,7 @@ import type { BoxProps, FlexProps } from '@radix-ui/themes'
 import { useAppUpdater, AppUpdaterContext } from '@renderer/providers/AppUpdaterProvider'
 
 
-export default function VersionUpdate (
+export default function VersionUpdatePopover (
   {
     ...boxProps
   }: BoxProps & {
@@ -34,7 +34,7 @@ export default function VersionUpdate (
       data-testid='version-update-popover-root'
     >
       <Popover.Trigger>
-        <VersionUpdateButton
+        <VersionUpdateTriggerButton
           updater={updater}
         />
       </Popover.Trigger>
@@ -59,7 +59,7 @@ export default function VersionUpdate (
   )
 }
 
-const VersionUpdateButton = forwardRef(function VersionUpdateButton (
+const VersionUpdateTriggerButton = forwardRef(function (
   {
     updater,
     ...boxProps

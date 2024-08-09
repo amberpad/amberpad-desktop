@@ -4,8 +4,12 @@ import { ThrowError } from '@main/utils/errors'
 import store from "@main/utils/electron-store"
 
 app.on('ready', () => {
+  ipcMain.handle('store.getAll', () => store.store)
+})
+
+app.on('ready', () => {
   ipcMain.handle(
-    'store:get',
+    'store.get',
     async function (
       event: Electron.IpcMainInvokeEvent,
       payload: { key: string }
@@ -24,7 +28,7 @@ app.on('ready', () => {
 
 app.on('ready', () => {
   ipcMain.handle(
-    'store:set',
+    'store.set',
     async function (
       event: Electron.IpcMainInvokeEvent,
       payload: { key: string, value: any }

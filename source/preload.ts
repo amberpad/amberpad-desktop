@@ -40,15 +40,25 @@ const UPDATER_EVENT_TYPES = [
 type UpdaterEventType = (typeof UPDATER_EVENT_TYPES)[number]
 
 export const electronAPI = {
+  /**************************************************************************** 
+  *  Initial values
+  ****************************************************************************/
+  getInitials: () => ipcRenderer.invoke('getInitials'),
+  
+  /**************************************************************************** 
+  *  Commands
+  ****************************************************************************/
   general: {
     openExternal: (payload: { url: string }) => 
       ipcRenderer.invoke('general.openExternal', payload),
+    getDefaultTheme: () => ipcRenderer.invoke('initials.getDefaultTheme'),
   },
   store: {
     get: (payload: { key: string }) => 
-      ipcRenderer.invoke('store:get', payload),
+      ipcRenderer.invoke('store.get', payload),
     set: (payload: { key: string, value: any }) => 
-      ipcRenderer.invoke('store:set', payload)
+      ipcRenderer.invoke('store.set', payload),
+    getAll: () => ipcRenderer.invoke('store.getAll'),
   },
   notes: {
     getAll: ((payload) => {

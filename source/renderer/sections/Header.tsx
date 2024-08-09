@@ -1,10 +1,12 @@
 import React, {} from 'react'
-import { Flex, Section, Box, SectionProps } from '@radix-ui/themes';
+import { Flex, Section, Box, SectionProps, Button } from '@radix-ui/themes';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { css } from '@emotion/css';
 
 /* @ts-ignore */
 import SearchBar from '@renderer/components/SearchBar'
-import VersionUpdate from '@renderer/components/VersionUpdate'
+import VersionUpdatePopover from '@renderer/components/VersionUpdatePopover'
+import ThemeDropdown from '@renderer/components/ThemeDropdown';
 
 export default function Header(
   sectionProps: SectionProps
@@ -29,12 +31,8 @@ export default function Header(
         >
           <SearchBar />
         </Box>
-
-        <Box
-          asChild={true}
-        >
-          <VersionUpdate />
-        </Box>
+        <VersionUpdatePopover />
+        <ThemeDropdown />
       </Flex>
     </Section>
   )

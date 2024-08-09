@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Flex, Section, Box, Separator, Callout } from '@radix-ui/themes'
 import { css } from '@emotion/css'
 
-import store from '@renderer/utils/redux-store'
+import store, { useStore } from '@renderer/utils/redux-store'
 import pagesSlice, { fetchSelectedPageThunk } from '@renderer/actions/pages.slice'
 import { fetchNotesThunk } from '@renderer/actions/notes.slice'
 import { fetchNotepadsThunk } from '@renderer/actions/notepads.slice'
@@ -11,35 +11,22 @@ import AddNote from '@renderer/sections/AddNote'
 import NotesBoard from '@renderer/sections/NotesBoard'
 import Alert from '@renderer/components/Alert'
 import Header from '@renderer/sections/Header'
+//import commonsSlice ,{ CommonsSliceState } from '@renderer/actions/commons.slice'
 
 export default function Home() {
-  const [context, setContext] = useState({
-    commons: {
-      search: '',
+  const context = useStore((state) => ({
+    commons:  {
+      search: state.commons.search,
+      theme: state.commons.theme,
     },
     pages: {
-      selectedPageID: undefined,
+      selectedPageID: state.pages.selectedPageID
     }
-  })
+  }))
 
-  useEffect(() => {
-    store.monitor(
-      (state) => ({
-        search: state.commons.search,
-        selectedPageID: state.pages.selectedPageID,
-      }), 
-      (state) => {
-        setContext({
-          commons:  {
-            search: state.commons.search,
-          },
-          pages: {
-            selectedPageID: state.pages.selectedPageID
-          }
-        })
-      }
-    )
-  }, [])
+  /****************************************************************************
+  * Fetch initial data
+  ****************************************************************************/
 
   useEffect(() => {
     store.dispatch(fetchSelectedPageThunk({
@@ -73,17 +60,22 @@ export default function Home() {
   }, [context.commons.search])
 
   /****************************************************************************
-  * Local storage
+  * Local storage initial values
   ****************************************************************************/
 
+  /*
   useEffect(() => {
-    window.electronAPI.store
-      .get({ key: 'selectedPageID' })
-      .then((selectedPageID) => {
-        const { setSelectedPageID } = pagesSlice.actions
-        store.dispatch(setSelectedPageID({ value: selectedPageID }))
-      })
-  }, [])
+    window.electronAPI.store.getAll().then((initials) => {
+      // Selected page initial value
+      const { setSelectedPageID } = pagesSlice.actions
+      store.dispatch(setSelectedPageID({ value: initials.selectedPageID }))
+
+      // Initial theme value
+      const { setTheme } = commonsSlice.actions
+      store.dispatch(setTheme({ value: initials.theme }))
+    }) 
+  })
+  */
 
   return (
     <Flex

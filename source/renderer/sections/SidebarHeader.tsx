@@ -56,12 +56,14 @@ function SidebarHeader({
         flexShrink='1'
       >
         <Heading
+          className={css`
+            user-select: none;
+            -webkit-user-drag: none;
+            overflow-x: clip;
+          `}
           size='2'
           weight='bold'
           wrap='nowrap'
-          style={{
-            overflowX: 'clip'
-          }}
         >
           Notepads / Pages
         </Heading>

@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from './utils/test.mts';
 import { createPage, updatePage, deletePage, countPages } from './operations/pages.mts';
 
-test('Page is added it\'s container when created #0Yu8lf8Q20', async ({ launchElectron }) => {
+test('Page is added to it\'s container when created #0Yu8lf8Q20', async ({ launchElectron }) => {
   for await (const page of launchElectron('0Yu8lf8Q20')) {
     const notepadName = 'text:oqaTyRWhj5';
     const pageName = 'text:JfJF3rNfom';
