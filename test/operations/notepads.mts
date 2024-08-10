@@ -35,16 +35,6 @@ export const updateNotepad = async (
   name: string,
   newName: string,
 ) => {
-  /*
-  console.log('->', await page.locator(
-    'xpath=' +
-    `//*[contains(text(), '${name}')]` + // Notepad text element
-    `//ancestor::*[@data-testid='notepad']` + // Notepad element
-    `//descendant::*[@data-testid='notepad-options-button']` // Options button
-  ).all())
-  await page.waitForTimeout(200)
-  */
-
   await page.locator(
     'xpath=' +
     `//*[contains(text(), '${name}')]` + // Notepad text element
