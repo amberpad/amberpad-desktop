@@ -5,7 +5,7 @@ import { css } from '@emotion/css'
 import {filesize} from "filesize"
 import React, { forwardRef, ReactNode, useCallback, useState } from 'react'
 
-import type { BoxProps, FlexProps } from '@radix-ui/themes'
+import type { BoxProps, FlexProps, IconButtonProps } from '@radix-ui/themes'
 import { useAppUpdater, AppUpdaterContext } from '@renderer/providers/AppUpdaterProvider'
 import { UpdateInfo } from 'electron-updater'
 import { useStore } from '@renderer/utils/redux-store'
@@ -14,11 +14,11 @@ import { useStore } from '@renderer/utils/redux-store'
 const COLORS = {
   'light': {
     'active': 'var(--accent-9)',
-    'passive': 'var(--accent-8)'
+    'passive': 'var(--gray-1)'
   },
   'dark': {
     'active': 'var(--accent-9)',
-    'passive': 'var(--accent-8)'
+    'passive': 'var(--gray-9)'
   }
 }
 
@@ -32,16 +32,12 @@ const ICON_STYLE = css`
 
 export default function VersionUpdatePopover (
   {
-    ...boxProps
-  }: BoxProps & {
+    ...aditionalProps
+  }: FlexProps & {
 
   }
 ) {
-  const context = useStore((state) => ({
-    commons: { theme: state.commons.theme }
-  }))
   const updater = useAppUpdater()
-  updater.status = 'update-available'
 
   if (
     [
@@ -59,27 +55,30 @@ export default function VersionUpdatePopover (
       data-testid='version-update-popover-root'
     >
       <Popover.Trigger>
-        <VersionUpdateTriggerButton
-          updater={updater}
-        />
-      </Popover.Trigger>
-
-
-        <Popover.Content
-          data-testid='version-update-popup-content-container'
+        <Flex
+          {...aditionalProps}
+          justify='center'
+          align='center'
+          p='2'
         >
-          {{
-            "checking-for-updates": <VersionUpdateCheckingForUpdates updater={updater} />, 
-            "update-available": <VersionUpdateUpdateAvailable updater={updater} />,
-            "dowloading-update": <VersionUpdateDownloading updater={updater} />,
-            "update-downloaded": <VersionUpdateQuitAndInstall updater={updater} />,
-            "notifying-update-available": <VersionUpdateNotify updater={updater} />,
-            "idle": undefined,
-            "cancelled": undefined, 
-            "error": undefined,
-            "update-not-available": undefined, 
-          }[updater.status]}
-        </Popover.Content>
+          <VersionUpdateTriggerButton updater={updater} />
+        </Flex>
+      </Popover.Trigger>
+      <Popover.Content
+        data-testid='version-update-popup-content-container'
+      >
+        {{
+          "checking-for-updates": <VersionUpdateCheckingForUpdates updater={updater} />, 
+          "update-available": <VersionUpdateUpdateAvailable updater={updater} />,
+          "dowloading-update": <VersionUpdateDownloading updater={updater} />,
+          "update-downloaded": <VersionUpdateQuitAndInstall updater={updater} />,
+          "notifying-update-available": <VersionUpdateNotify updater={updater} />,
+          "idle": undefined,
+          "cancelled": undefined, 
+          "error": undefined,
+          "update-not-available": undefined, 
+        }[updater.status]}
+      </Popover.Content>
     </Popover.Root>
   )
 }
@@ -87,10 +86,10 @@ export default function VersionUpdatePopover (
 const VersionUpdateTriggerButton = forwardRef(function (
   {
     updater,
-    ...boxProps
-  }: BoxProps & {
+    ...iconButtonProps
+  }: {
     updater: AppUpdaterContext
-  },
+  } & IconButtonProps,
   ref: React.LegacyRef<any>,
 )  {
   const context = useStore((state) => ({
@@ -102,71 +101,72 @@ const VersionUpdateTriggerButton = forwardRef(function (
     COLORS.light.active : COLORS.dark.active
   const pasiveColor = context.commons.theme === 'light' ? 
     COLORS.light.passive : COLORS.dark.passive
+
   return (
-    <Box
-      {...boxProps}
-      asChild={true}
+    <IconButton
+      {...iconButtonProps}
+      ref={ref}
+      className={css`
+        position: relative;
+
+        @media (prefers-color-scheme: light) {
+          background-color: var(--gray-12);
+        }
+      `}
+      size='2'
+      variant='ghost'
     >
-      <IconButton
-        ref={ref}
+      <FontAwesomeIcon
         className={css`
-          position: relative;
-        `}
-        variant="ghost"
-      >
-        <FontAwesomeIcon
-          className={
-            css`
-              color: ${
-                [
-                  "update-available", 
-                  "dowloading-update", 
-                  "update-downloaded", 
-                  "notifying-update-available",
-                ].includes(status) ?
-                  activeColor : pasiveColor
-              } ;
-            ` + ' ' + 
-            (["checking-for-updates", "dowloading-update"].includes(status) ? 
-                'fa-spin' : '')
-          }
-          size='1x'
-          icon={faRotate}
-        />
-
-        <FontAwesomeIcon
-          className={css`
-            display: ${
+            font-size: 1.0em;
+            color: ${
               [
-                "update-available",
+                "update-available", 
+                "dowloading-update", 
+                "update-downloaded", 
                 "notifying-update-available",
-              ].includes(status) ? 'block' : 'none'
-            };
-            color: ${activeColor};
-            font-size: 0.5em;
-            position: absolute;
-            top: 4px;
-            right: 4px;
-          `}
-          icon={faCircle}
-        />
+              ].includes(status) ?
+                activeColor : pasiveColor
+            } ;
+          ` + ' ' + 
+          (["checking-for-updates", "dowloading-update"].includes(status) ? 
+              'fa-spin' : '')
+        }
+        icon={faRotate}
+      />
 
-        <FontAwesomeIcon
-          className={css`
-            display: ${
-              ["update-downloaded"].includes(status) ?
-                'block' : 'none'
-            };
-            color: ${activeColor};
-            font-size: 0.65em;
-            position: absolute;
-            top: 4px;
-            right: 4px;
-          `}
-          icon={faCircleUp}
-        />
-      </IconButton>
-    </Box>
+      <FontAwesomeIcon
+        className={css`
+          display: ${
+            [
+              "update-available",
+              "notifying-update-available",
+            ].includes(status) ? 'block' : 'none'
+          };
+          color: ${activeColor};
+          position: absolute;
+          font-size: 0.45em;
+          top: 20%;
+          right: 20%;
+        `}
+        icon={faCircle}
+      />
+
+      <FontAwesomeIcon
+        className={css`
+          display: ${
+            ["update-downloaded"].includes(status) ?
+              'block' : 'none'
+          };
+          color: ${activeColor};
+          font-size: 0.65em;
+          position: absolute;
+          top: 4px;
+          right: 4px;
+        `}
+        icon={faCircleUp}
+      />
+    </IconButton>
   )
 })
 

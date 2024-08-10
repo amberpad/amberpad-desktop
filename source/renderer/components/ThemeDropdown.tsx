@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { IconButton } from "@radix-ui/themes";
+import { Box, BoxProps, Flex, FlexProps, IconButton } from "@radix-ui/themes";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DropdownMenu from "@renderer/primitives/DropdownMenu";
 import { css } from "@emotion/css";
@@ -8,8 +8,16 @@ import { faCircleHalfStroke, faSun, faMoon } from "@fortawesome/free-solid-svg-i
 import store, { useStore } from "@renderer/utils/redux-store"
 import commonsSlice, { CommonsSliceState } from "@renderer/actions/commons.slice";
 
-export default function ThemeDropdown () {
+export default function ThemeDropdown (
+  {
+    ...aditionalProps
+  }: FlexProps & {
+
+  }
+
+) {
   const context = useStore((state) => ({ 
+    theme: state.commons.theme,
     themeSource: state.commons.themeSource 
   }))
 
@@ -21,14 +29,22 @@ export default function ThemeDropdown () {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
-        <IconButton
-          variant='ghost'
+        <Flex
+          {...aditionalProps}
+          data-testid='theme-dropdown-trigger'
+          p={context.theme === 'light' ? '0' : '2'}
         >
-          <FontAwesomeIcon
-            size='1x'
-            icon={faCircleHalfStroke}
-          />
-        </IconButton>
+          <IconButton
+            size='2'
+            variant={context.theme === 'light' ? 'outline' : 'ghost'}
+            color={context.theme === 'light' ? 'gray' : undefined}
+          >
+            <FontAwesomeIcon
+              size='1x'
+              icon={faCircleHalfStroke}
+            />
+          </IconButton>
+        </Flex>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content
         data-accent='gray'

@@ -20,19 +20,26 @@ export default function Header(
       <Flex
         display='flex'
         direction='row'
-        gap='3'
+        gap='1'
         justify='center'
         align='center'
         px='6'
       >
         <Box
+          flexBasis='auto'
           flexGrow='1'
+          flexShrink='1'
           maxWidth='720px'
         >
           <SearchBar />
         </Box>
-        <VersionUpdatePopover />
-        <ThemeDropdown />
+        <VersionUpdatePopover 
+        />
+        <ThemeDropdown 
+          flexBasis='max-content'
+          flexShrink='0'
+          flexGrow='0'
+        />
       </Flex>
     </Section>
   )
