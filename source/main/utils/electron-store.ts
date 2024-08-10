@@ -4,7 +4,8 @@ type StoreType = {
   sidebarAperture?: string,
   isSidebarOpen?: boolean,
   selectedPageID?: string,
-  theme?: string,
+  //theme?: string,
+  themeSource?: string,
 }
 
 const store = new Store<StoreType>({
@@ -12,7 +13,8 @@ const store = new Store<StoreType>({
     sidebarAperture: undefined,
     isSidebarOpen: undefined,
     selectedPageID: undefined,
-    theme: 'default'
+    //theme: undefined,
+    themeSource: undefined,
   }
 }) as Store<StoreType> & { 
   set: (key: string, any) => void, 

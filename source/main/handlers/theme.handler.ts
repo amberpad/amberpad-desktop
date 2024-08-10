@@ -11,6 +11,7 @@ app.on('ready', () => {
       payload: { theme: "system" | "light" | "dark" }
     ): Promise<void> {
       nativeTheme.themeSource = payload.theme
+      store.set('themeSource', payload.theme)
     }
   )
 

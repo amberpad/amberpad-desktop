@@ -5,6 +5,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import setAppUpdaterHandlers from './services/appUpdater'
 import AppUpdater from 'electron-updater'
+import store from "@main/utils/electron-store"
 
 import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
