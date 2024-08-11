@@ -10,10 +10,12 @@
     "baseUrl": "source/",
     "paths": {
       "@renderer/*": ["renderer/*"],
-      "@ts/*": ["ts/*"]
+      "@ts/*": ["ts/*"],
+      "@resources/*": ["../resources/*"],
     },
   },
   "include": [
     "./source/renderer/**/*",
+    "./resources/**/*",
   ],
 }

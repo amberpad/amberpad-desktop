@@ -144,7 +144,7 @@ const notesSlice = createSlice({
     hasNextPage: true,
     adjustScrollHash: 0,
     scrollBeginingHash: 0,
-    loading: false,
+    loading: true,
   } as NotesSliceState,
   reducers: {
     set,

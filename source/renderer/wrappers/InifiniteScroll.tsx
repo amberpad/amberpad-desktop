@@ -22,6 +22,8 @@ interface InifiniteScrollPropsType {
   scrollBeginingHash?: string,
   scrollEndHash?: string,
   scrolledOverHashMap?: {[key: string]: string | number},
+  // Style
+  scrollbarSize?: '1' | '2' | '3' | '4',
   renderItem: (item: any) => ReactNode
   getItemID: (item: any) => ElementID
   next?: (...args: any[]) => any,
@@ -41,6 +43,8 @@ export default React.forwardRef(function InifiniteScroll (
     scrollBeginingHash=undefined,
     scrollEndHash=undefined,
     scrolledOverHashMap={},
+    // Style
+    scrollbarSize='1',
     renderItem,
     getItemID,
     next=()=>{},
@@ -264,7 +268,7 @@ export default React.forwardRef(function InifiniteScroll (
       {...aditionalProps}
       data-testid='inifinite-scroll'
       className={`${aditionalProps.className || ''} ${css`
-        --scrollarea-scrollbar-size: var(--space-1);
+        --scrollarea-scrollbar-size: var(--space-${scrollbarSize});
         --scrollarea-scrollbar-border-radius: max(var(--radius-1), var(--radius-full));
 
         ::-webkit-scrollbar {

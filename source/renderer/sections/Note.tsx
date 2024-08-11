@@ -44,11 +44,11 @@ function Note (
         />
       </>
       <Box
-        data-testid='note'
-        maxWidth='100%'
         {...containerProps}
+        data-testid='note'
+        asChild={true}
       >
-        <Card
+        <Card          
           data-radius='small'
         >
           <Flex
@@ -60,6 +60,7 @@ function Note (
           >
             <Flex
               minWidth='0'
+              p='2'
               pt='4'
               flexGrow='1'
               direction='column'

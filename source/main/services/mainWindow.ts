@@ -15,6 +15,9 @@ export default function createMainWindow () {
     },
   })
 
+  window.setMinimumSize(720, 540)
+  window.setMaximumSize(1600, 1280)
+
   window.loadFile(path.join(getResourcesDir(), 'index.html'))
   // If debug open dev tools
   globals.DEBUG && window.webContents.openDevTools();

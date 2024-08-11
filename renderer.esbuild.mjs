@@ -2,6 +2,7 @@ import { resolve } from 'node:path';
 import esbuild from 'esbuild';
 import { clean } from 'esbuild-plugin-clean';
 import stylePlugin from 'esbuild-style-plugin'
+import svgr from 'esbuild-plugin-svgr'
 
 import globals from './globals.mjs'
 const outputDir = './.package';
@@ -29,6 +30,7 @@ const config = {
         './renderer.js',
       ].map((item) => resolve(outputDir, item)),
     }),
+    svgr(),
   ],
 }
 

@@ -76,6 +76,7 @@
     "esbuild-node-externals": "^1.13.1",
     "esbuild-plugin-clean": "^1.0.1",
     "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-svgr": "^2.1.0",
     "esbuild-plugin-write-file": "^0.0.4",
     "esbuild-style-plugin": "^1.6.3",
     "escape-string-regexp": "^5.0.0",
