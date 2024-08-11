@@ -5,7 +5,6 @@ import store, { useStore } from '@renderer/utils/redux-store'
 import { fetchNotesThunk } from '@renderer/actions/notes.slice'
 import InifiniteScroll from '@renderer/wrappers/InifiniteScroll'
 import Note from '@renderer/sections/Note'
-//import EmptyBoardSVG from '@resources/ilustrations/visual-collaboration.svg'
 import EmptyBoardSVG from '@resources/ilustrations/drawing-on-chart-with-pencil.svg'
 
 import type { BoxProps, FlexProps } from '@radix-ui/themes'
@@ -76,8 +75,8 @@ function NotesBoard (
         <EmptyBoardSVG 
           className={css`
             object-fit: contain;
-            max-width: 80%;
-            max-height: 80%;
+            max-width: 55%;
+            max-height: 55%;
             width: auto;
             height: auto;
 
