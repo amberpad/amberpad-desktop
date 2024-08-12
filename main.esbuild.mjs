@@ -53,8 +53,8 @@ await esbuild.build({
         })
 
         build.onEnd(() => {
-          const toBundle = Array.isArray(pkg.toBundle) ? pkg.toBundle : []
-          toBundle.forEach(module => modulesToPack.add(module)) 
+          const bundleAsExternal = Array.isArray(pkg.bundleAsExternal) ? pkg.bundleAsExternal : []
+          bundleAsExternal.forEach(module => modulesToPack.add(module)) 
           modulesToPack.delete('electron')
 
           writeFile(resolve(outDir, './package.json'), JSON.stringify({
@@ -70,7 +70,7 @@ await esbuild.build({
             binary: pkg.binary,
             type: pkg.type,
             scripts: {
-              "rebuild": "electron-rebuild -f -w better-sqlite3 -m .",
+              "rebuild": "electron-rebuild -f -w better-sqlite3,argon2,better-sqlite3-multiple-ciphers -m .",
             },
             devDependencies: Object.fromEntries(
               Object.entries(dependencies).filter(([module, _]) => [

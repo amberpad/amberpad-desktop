@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import { app } from 'electron'
 import knex from 'knex'
 
-import { getResourcesDir } from "@main/utils/resources"
+import { getResourcesDir, getRootDir } from "@main/utils/resources"
 import { ThrowFatalError } from '@main/utils/errors';
 
 /******************************************************************************
@@ -32,6 +32,7 @@ if (!fs.existsSync(path.dirname(databasePath))){
 export default {
   queriesManager: undefined,
   connectDatabase: async function () {
+    /*
     this.queriesManager = await knex({
       client: 'better-sqlite3',
       debug: globals.DEBUG,
@@ -40,6 +41,35 @@ export default {
       },
       useNullAsDefault: true,
     });
+    */
+    this.queriesManager = knex({
+      client: 'better-sqlite3',
+      debug: globals.DEBUG,
+      useNullAsDefault: true,
+      connection: {
+        filename: databasePath,
+        options: {
+          // note: we need this in order to use encryption
+          nativeBinding: path.join(
+            getRootDir(),
+            'node_modules',
+            'better-sqlite3-multiple-ciphers',
+            'build',
+            'Release',
+            'better_sqlite3.node'
+          )
+        }
+      },
+      pool: {
+        // https://knexjs.org/faq/recipes.html#db-access-using-sqlite-and-sqlcipher
+        afterCreate(db, fn) {
+          db.pragma(`cipher='sqlcipher'`)
+          db.pragma(`legacy=4`)
+          db.pragma(`key='password'`);
+          fn();
+        }
+      }
+    })
     return this.queriesManager;
   },
   init: async function () {

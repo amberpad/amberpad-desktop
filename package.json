@@ -84,6 +84,7 @@
     "fast-deep-equal": "^3.1.3",
     "filesize": "^10.1.4",
     "flat": "^6.0.1",
+    "generate-passphrase": "^1.3.0",
     "icon-gen": "^4.0.0",
     "is-hotkey": "^0.2.0",
     "knex": "^3.1.0",
@@ -105,10 +106,13 @@
     "stylus": "^0.63.0"
   },
   "dependencies": {
-    "better-sqlite3": "^9.6.0"
+    "argon2": "^0.40.3",
+    "better-sqlite3": "^11.1.2",
+    "better-sqlite3-multiple-ciphers": "^11.1.2"
   },
-  "toBundle": [
-    "better-sqlite3"
+  "bundleAsExternal": [
+    "argon2",
+    "better-sqlite3-multiple-ciphers"
   ],
   "build": {
     "architectures": {

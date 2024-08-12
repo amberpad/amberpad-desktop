@@ -11,8 +11,7 @@ import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
 import buildMenuTemplate from "./services/buildMenuTemplate"
 import '@main/handlers/index'
-
-console.log('STARTING APPLICATION')
+import dbSession from "@main/utils/database/session"
 
 const menu = Menu.buildFromTemplate(buildMenuTemplate())
 Menu.setApplicationMenu(menu)
@@ -76,7 +75,7 @@ async function launch() {
     windows[0].focus();
   }
   await database.init();
-  setAppUpdaterHandlers(appContext.mainWindow)
+  setAppUpdaterHandlers(appContext.mainWindow);
 }
 
 function destroy() {
