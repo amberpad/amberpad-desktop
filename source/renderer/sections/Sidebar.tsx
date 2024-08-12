@@ -95,7 +95,7 @@ function Sidebar(boxProps: BoxProps) {
         direction='right'
         minSize='72px'
         maxSize='520px'
-        offsetpad='120px'
+        offsetpad='300px'
         initialIsOpen={
           globals.ENVIRONMENT === 'testing' ||
           context.commons.initialIsSidebarOpen

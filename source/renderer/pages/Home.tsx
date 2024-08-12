@@ -91,14 +91,15 @@ export default function Home() {
         align='stretch'
         flexGrow='1'
         flexShrink='1'
+        overflowX='hidden'
       >
         <Sidebar />
         <Flex
           className={css`
             position: relative;
+            min-width: 300px;
           `}
           data-testid='home-content'
-          minWidth='0'
           minHeight='0'
           width='100%'
           display='flex'
@@ -109,13 +110,13 @@ export default function Home() {
           flexGrow='1'
         >
           <Flex
+            data-testid='content-header'
             className={css`
               position: absolute;
               top: 0;
               right: 0;
               z-index: 12;
             `}
-            data-testid='content-header'
             mt='2'
             mx='4'
             direction='row'

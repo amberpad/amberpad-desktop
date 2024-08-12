@@ -12,6 +12,8 @@ import createMainWindow from '@main/services/mainWindow';
 import buildMenuTemplate from "./services/buildMenuTemplate"
 import '@main/handlers/index'
 
+console.log('STARTING APPLICATION')
+
 const menu = Menu.buildFromTemplate(buildMenuTemplate())
 Menu.setApplicationMenu(menu)
 

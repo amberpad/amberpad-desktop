@@ -20,13 +20,13 @@ const search = async (
   // Set search text into search bar
   await page.locator(
     `xpath=` + 
-    `//*[contains(@data-testid, 'searchbar')]` +
+    `//*[@data-testid='searchbar']` +
     `//descendant-or-self::input`
   ).fill(content);
   // Click search button
   await page.locator(
     `xpath=` + 
-    `//*[contains(@data-testid, 'searchbar-send-button')]`
+    `//*[@data-testid='searchbar-send-button']`
   ).click();
 }
 

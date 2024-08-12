@@ -43,8 +43,7 @@ test('Notes board should paginate when there is too many items #E1qQS4raeE', asy
     }).toPass();
     await page.locator(
       `xpath=` + 
-      `//*[@data-testid='notes-board']` +
-      `//descendant-or-self::*[@data-testid='inifinite-scroll']`
+      `//*[@data-testid='notes-board']`
     ).evaluate((node) => {
       node.scrollTo(0, 0);
     });

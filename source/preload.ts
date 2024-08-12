@@ -28,22 +28,15 @@ import type {
   NotepadIDType
 } from '@ts/models/Notepads.types'
 import { UpdateInfo, UpdateDownloadedEvent, ProgressInfo } from 'electron-updater'
-
-const UPDATER_EVENT_TYPES = [
-  'checking-for-update',
-  'update-available',
-  'update-not-available',
-  'error',
-  'download-progress',
-  'update-downloaded'  
-] as const
-type UpdaterEventType = (typeof UPDATER_EVENT_TYPES)[number]
+import { Initials } from '@main/handlers/initials.handler'
 
 export const electronAPI = {
   /**************************************************************************** 
   *  Initial values
   ****************************************************************************/
-  getInitials: () => ipcRenderer.invoke('getInitials'),
+  getInitials: (): Promise<Initials> => {
+    return ipcRenderer.invoke('initials.getInitials')
+  },
   
   /**************************************************************************** 
   *  Commands

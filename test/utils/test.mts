@@ -59,32 +59,24 @@ export const test = base.extend<{
       env: {
         ...process.env,
         __TESTING_ENVRONMENT_DB_PATH: buildDatabasePath(id),
-      }
+      },
     });
 
-    //console.log('#####################################')
-    //console.log('options.windowTitle', options.windowTitle)
     var page = await electronApp.firstWindow()
-    //console.log( options.windowTitle )
-    //while (await page.title() === 'devtools') {
     label:
     while (options.windowTitle !== undefined) {
       const windows = electronApp.windows()
       for (let i = 0; i < windows.length; i++) {
         const window = windows[i]
         const title = await window.title()
-        //console.log('TITLES', title.toLocaleLowerCase(), options.windowTitle.toLocaleLowerCase())
         if (title.toLocaleLowerCase() === options.windowTitle.toLocaleLowerCase()) {
           page = window
           break label
         }
       }
-      //await page.waitForTimeout(100)
       await sleep(100);
     }
 
-    //console.log('FOUND PAGE', await page.title())
-    //console.log('#####################################')
     try {
       await page.waitForLoadState('domcontentloaded')
       yield page;

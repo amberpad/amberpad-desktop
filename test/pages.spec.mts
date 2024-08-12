@@ -64,8 +64,7 @@ test('Page containers should paginate when there is too many items #RE7WsTQyCx',
     // Scroll to bottom
     await page.locator(
       `xpath=` + 
-      `//*[@data-testid='notepads']` +
-      `//descendant-or-self::*[@data-testid='inifinite-scroll']`
+      `//*[@data-testid='notepads']`
     ).evaluate((node) => {
       node.scrollTo(0, node.scrollHeight);
     });

@@ -20,6 +20,8 @@ export default function createMainWindow () {
 
   window.loadFile(path.join(getResourcesDir(), 'index.html'))
   // If debug open dev tools
-  globals.DEBUG && window.webContents.openDevTools();
+  if (globals.DEBUG === true && globals.ENVIRONMENT !== 'testing') {
+    window.webContents.openDevTools();
+  }
   return window
 }

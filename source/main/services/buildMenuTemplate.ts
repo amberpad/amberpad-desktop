@@ -2,8 +2,6 @@ import { app } from 'electron'
 
 const isMac = process.platform === 'darwin'
 
-console.log('app.name', app.name)
-
 export default function buildMenuTemplate () {
   return [
     ...(isMac ? 

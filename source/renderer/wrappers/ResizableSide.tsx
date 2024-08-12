@@ -92,6 +92,8 @@ const ResizableSide = React.forwardRef(function ResizableSide (
       yield {
         container: containerRef.current,
         parent: containerRef.current.parentElement,
+        siblings: [...containerRef.current.parentElement.children]
+          .filter(node => node !== containerRef.current),
         dragableLine: dragableLineRef.current
       }
     } finally {}
@@ -104,19 +106,18 @@ const ResizableSide = React.forwardRef(function ResizableSide (
     // Avoid aperture to grow or shrink on some limits
     for(const { parent } of usingReferences()) {
       const parentBoundaries = parent.getBoundingClientRect()
-      const parentSize = isVertical ? parentBoundaries.width : parentBoundaries.height
       const parsedMaxSize = parsePixelMetric(maxSize)
       const parsedOffsetpad = parsePixelMetric(offsetpad)
       const parsedMinSize = parsePixelMetric(minSize, 0)
+      const parentSize = isVertical ? parentBoundaries.width : parentBoundaries.height
+      const computedMaxSize = parsedMaxSize > parentSize - parsedOffsetpad ? 
+        parentSize - parsedOffsetpad :
+        parsedMaxSize
 
       if (aperture <= parsedMinSize) {
         aperture = parsedMinSize
-      } else if (aperture > (parsedMaxSize || Infinity)) {
-        aperture = parsedMaxSize
-      } else if (aperture > (parsedMaxSize || Infinity)) {
-        aperture = parentSize - (parsedMaxSize || 0)
-      } else if (aperture > (parentSize - parsedOffsetpad)) {
-        aperture = parentSize - parsedOffsetpad
+      } else if (aperture > (computedMaxSize || Infinity)) {
+        aperture = computedMaxSize
       }
     }
     return aperture

@@ -63,7 +63,6 @@ function SidebarContent(props: BoxProps) {
       className={`${props.className || ''}`}
     >
       <Flex
-        data-testid='notepads'
         height='100%'
         direction='column'
         gap='4'
@@ -80,6 +79,7 @@ function SidebarContent(props: BoxProps) {
           isSidebarOpen={isOpen}
         />
         <Flex
+          data-testid='notepads'
           className={!isOpen && css`
             display: none;
           `}

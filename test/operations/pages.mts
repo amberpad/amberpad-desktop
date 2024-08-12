@@ -95,7 +95,6 @@ export const countPages = async (
   return await page.locator(
     `xpath=` +
     `//*[@data-testid='notepads']` +
-    `//descendant-or-self::*[@data-testid='inifinite-scroll']` +
     `//descendant::*[@data-testid='page']`
   ).count();
 }

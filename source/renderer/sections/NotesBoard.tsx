@@ -100,8 +100,8 @@ function NotesBoard (
 
   return (
     <Flex
-      {...aditionalProps}
       data-testid='notes-board'
+      {...aditionalProps}
       width='100%'
       height='100%'
       p='5'

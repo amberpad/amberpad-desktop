@@ -2,11 +2,10 @@ import { app, ipcMain, nativeTheme } from 'electron'
 
 import store from "@main/utils/electron-store"
 
-function getInitials () {
-  nativeTheme.themeSource = store.get('themeSource')
+function getInitials(_, payload) {
   return {
     theme: {
-      theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light',
+      theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light' as 'dark' | 'light',
       themeSource: nativeTheme.themeSource,
     },
     store: store.store
@@ -14,7 +13,8 @@ function getInitials () {
 }
 
 app.on('ready', () => {
-  ipcMain.handle('getInitials', getInitials)
+  nativeTheme.themeSource = store.get('themeSource')
+  ipcMain.handle('initials.getInitials', getInitials)
 })
 
 export type Initials = ReturnType<typeof getInitials>

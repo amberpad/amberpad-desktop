@@ -40,6 +40,7 @@
     "test:build": "cross-env AMBERPAD_ENVIRONMENT=testing npm run build:prebuild",
     "test:build:debug": "cross-env AMBERPAD_ENVIRONMENT=testing AMBERPAD_DEBUG=true npm run build:prebuild",
     "test:start": "playwright test --config=./playwright.config.ts",
+    "test:start:grep": "playwright test --config=./playwright.config.ts -g",
     "test": "npm run test:build && npm run test:start"
   },
   "devDependencies": {
