@@ -42,23 +42,6 @@ function NotesBoard (
     }))   
   }
 
-  if (context.notes.loading) {
-    return (
-      <Flex
-        {...aditionalProps}
-        data-testid='notes-board'
-        width='100%'
-        height='100%'
-        direction='column'
-        justify='center'
-        align='center'
-        gap='2'
-      >
-        <Spinner size='3' />
-      </Flex>
-    )
-  }
-
   if (
     context.notes.values.length === 0 &&
     ( 
@@ -124,6 +107,16 @@ function NotesBoard (
     >
       <InifiniteScroll
         data={context.notes.values}
+        loading={context.notes.loading}
+        loadingElement={
+          <Flex
+            width='100%'
+            justify='center'
+            align='center'
+          >
+            <Spinner size='3' />
+          </Flex>
+        }
         renderItem={(item) => (
           <Note 
             data={item}
@@ -135,7 +128,6 @@ function NotesBoard (
         getItemID={(item) => item.id}
         hasMore={context.notes.hasNextPage}
         inverse={true}
-        loading={context.notes.loading}
         next={onScrollNext}
         scrollBeginingHash={`${context.notes.scrollBeginingHash}`}
         adjustScrollHash={`${context.notes.adjustScrollHash}`}

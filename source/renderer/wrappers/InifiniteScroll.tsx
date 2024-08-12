@@ -264,7 +264,6 @@ export default React.forwardRef(function InifiniteScroll (
     <div
       ref={containerRef}
       {...aditionalProps}
-      //data-testid={['inifinite-scroll', aditionalProps['data-testid'] || ''].join(' ')}
       className={`${aditionalProps.className || ''} ${css`
         --scrollarea-scrollbar-size: var(--space-${scrollbarSize});
         --scrollarea-scrollbar-border-radius: max(var(--radius-1), var(--radius-full));
@@ -287,7 +286,6 @@ export default React.forwardRef(function InifiniteScroll (
     >
       { loading && inverse ? loadingElement : null }
       { elements }
-      {/* children */}
       { loading && !inverse ? loadingElement : null }
     </div>
   )

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Flex } from '@radix-ui/themes'
+import { Box, Flex, Spinner } from '@radix-ui/themes'
 import _ from 'lodash'
 import { css } from '@emotion/css'
 
@@ -97,6 +97,16 @@ function SidebarContent(props: BoxProps) {
         >
           <InifiniteScroll
             data={context.notepads.values}
+            loading={context.notepads.loading}
+            loadingElement={
+              <Flex
+                width='100%'
+                justify='center'
+                align='center'
+              >
+                <Spinner size='3' />
+              </Flex>
+            }
             renderItem={(item) => (
               <Notepad
                 data={item}
@@ -106,7 +116,7 @@ function SidebarContent(props: BoxProps) {
             getItemID={(item) => item.id}
             hasMore={context.notepads.hasNextPage}
             next={onScrollNext}
-            loading={context.notepads.loading}
+            
             adjustScrollHash={`${context.notepads.adjustScrollHash}`}
             scrollEndHash={`${context.notepads.scrollEndHash}`}
             scrolledOver={paginateOverScrolledOver}
