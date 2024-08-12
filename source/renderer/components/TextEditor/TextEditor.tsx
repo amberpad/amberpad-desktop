@@ -57,6 +57,7 @@ function TextEditor (
         border-radius: var(--radius-1);
         padding: var(--space-2);
         z-index: -1;
+        overflow-x: hidden;
 
         @media (prefers-color-scheme: light) {
           border: 1px solid  var(--gray-a8);

@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Box, Card, Flex, Heading } from '@radix-ui/themes'
+import { Box, Card, Flex, Heading, IconButton } from '@radix-ui/themes'
 import { css, injectGlobal } from '@emotion/css'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
 import store, { useStore } from '@renderer/utils/redux-store'
 import type { BoxProps } from '@radix-ui/themes'
+import pagesSlice from '@renderer/actions/pages.slice';
 
 injectGlobal`
 /* ----------------------------------------------
@@ -110,6 +113,11 @@ export default function SelectedPage ({
     lastSelectedPage.current = hasSelectedPage 
   }, [hasSelectedPage, ignoreAnimation])
 
+  const onClose = () => {
+    const { setSelectedPageID } = pagesSlice.actions
+    store.dispatch(setSelectedPageID({ value: null }))
+  }
+
   if (!isSidebarOpen) {
     return <></>
   }
@@ -121,7 +129,6 @@ export default function SelectedPage ({
       className={(() => {
         if (hasSelectedPage) {
           return css`
-            background-color: red;
             max-height: 150px;
             animation: slide-in-blurred-left 0.6s cubic-bezier(0.230, 1.000, 0.320, 1.000) both;
           `
@@ -163,26 +170,60 @@ export default function SelectedPage ({
         variant='surface'
       >
         <Flex
-          direction='column'
-          gap='1'
-          justify='center'
+          direction='row'
+          gap='4'
+          justify='end'
           align='stretch'
         >
-          <Heading
-            size='1'
-            color='gray'
-            align='right'
-            truncate={true}
+          <Flex
+            flexBasis='0'
+            flexGrow='1'
+            direction='column'
+            gap='1'
+            justify='start'
+            align='stretch'
           >
-            {selectedPage ? selectedPage.notepad.name : ''}
-          </Heading>
-          <Heading
-            size='4'
-            align='right'
-            truncate={true}
+            <Heading
+              className={css`
+                @media (prefers-color-scheme: light) {
+                  color: var(--accent-11);
+                }
+                @media (prefers-color-scheme: dark) {
+                  color: var(--accent-9);
+                }
+              `}
+              size='1'
+              align='left'
+              truncate={true}
+            >
+              {selectedPage ? selectedPage.notepad.name : ''}
+            </Heading>
+            <Heading
+              size='5'
+              align='left'
+              truncate={true}
+            >
+              {selectedPage ? selectedPage.name : ''}
+            </Heading>
+          </Flex>
+
+          <Flex
+            direction='column'
+            gap='0'
+            justify='start'
+            align='end'
           >
-            {selectedPage ? selectedPage.name : ''}
-          </Heading>
+            <IconButton
+              variant='ghost'
+              onClick={onClose}
+            >
+              <FontAwesomeIcon
+              color='var(--gray-9)'
+                size='xs'
+                icon={faXmark}
+              />
+            </IconButton>
+          </Flex>
         </Flex>
       </Card>
     </Box>

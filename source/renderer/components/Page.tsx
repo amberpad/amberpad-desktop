@@ -78,7 +78,7 @@ function Page ({
     const { setSelectedPageID } = pagesSlice.actions
     store.dispatch(setSelectedPageID({ 
       value: context.selectedPageID === data.id ?
-        undefined :
+        null :
         data.id
     }))
   }
@@ -99,7 +99,17 @@ function Page ({
       </>
       <Flex
         data-testid='page'
-        className='page'
+        className={`page 
+          ${context.selectedPageID === data.id ? css`
+            @media (prefers-color-scheme: light) {
+              background-color: var(--accent-a3);
+            }
+
+            @media (prefers-color-scheme: dark) {
+              background-color: var(--accent-a3);
+            }
+          ` : ''}
+        `}
         direction='row'
         gap='4'
         justify='start'

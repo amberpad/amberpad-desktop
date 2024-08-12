@@ -40,6 +40,13 @@ const SearchBar = () => {
     state.search  !== context.commons.search;
   return (
     <TextField.Root
+      className={
+        context.commons.search === '' ?
+        css`` :
+        css`
+        box-shadow: rgba(255, 197, 61, 0.19) 0px 5px 10px, rgba(255, 197, 61, 0.23) 0px 3px 3px;
+        outline: 2px solid var(--amber-8);
+      `}
       data-testid='searchbar'
       variant={context.commons.theme === 'light' ? 'surface': 'soft'}
       placeholder='Search'

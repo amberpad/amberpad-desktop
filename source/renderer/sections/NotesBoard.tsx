@@ -59,8 +59,13 @@ function NotesBoard (
     )
   }
 
-
-  if (context.notes.values.length === 0) {
+  if (
+    context.notes.values.length === 0 &&
+    ( 
+      context.pages.selectedPageID === undefined ||
+      context.pages.selectedPageID === null
+    )
+  ) {
     return (
       <Flex
         {...aditionalProps}
@@ -86,6 +91,10 @@ function NotesBoard (
           `}
         />
         <Flex
+          className={css`
+            user-select: none;
+            -webkit-user-drag: none;
+          `}
           direction='column'
           justify='center'
           align='center'
