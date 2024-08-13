@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import esbuild from 'esbuild';
 import { clean } from 'esbuild-plugin-clean';
 import stylePlugin from 'esbuild-style-plugin'
-import svgr from 'esbuild-plugin-svgr'
+import svgr from '@imacdonald/esbuild-plugin-svgr'
 
 import globals from './globals.mjs'
 const outputDir = './.package';

@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import { app } from 'electron'
 import knex from 'knex'
 
+import dbSession from "@main/utils/database/session"
 import { getResourcesDir, getRootDir } from "@main/utils/resources"
 import { ThrowFatalError } from '@main/utils/errors';
 
@@ -32,16 +33,15 @@ if (!fs.existsSync(path.dirname(databasePath))){
 export default {
   queriesManager: undefined,
   connectDatabase: async function () {
-    /*
-    this.queriesManager = await knex({
-      client: 'better-sqlite3',
-      debug: globals.DEBUG,
-      connection: {
-        filename: databasePath,
-      },
-      useNullAsDefault: true,
-    });
-    */
+    let session = { hash: '' }
+    if (globals.ENVIRONMENT === 'testing') {
+      session = await dbSession.get()
+      if (!session) {
+        const passphrase = await dbSession.generatePassphrase()
+        session = await dbSession.create(passphrase)
+      }
+    }
+
     this.queriesManager = knex({
       client: 'better-sqlite3',
       debug: globals.DEBUG,
@@ -65,11 +65,14 @@ export default {
         afterCreate(db, fn) {
           db.pragma(`cipher='sqlcipher'`)
           db.pragma(`legacy=4`)
-          db.pragma(`key='password'`);
+          db.pragma(`key='${globals.ENVIRONMENT === 'testing' ? 'testing' : session.hash}'`);
           fn();
         }
       }
     })
+
+    await this.testConnection()
+
     return this.queriesManager;
   },
   init: async function () {
@@ -101,9 +104,10 @@ export default {
     }
     return this.queriesManager;
   },
+  withManager: undefined,
   testConnection: async function (): Promise<Boolean> {
     try {
-      await this.queriesManager.raw('SELECT 1')
+      await this.queriesManager.raw('PRAGMA user_version;')
       return true
     } catch (error) {
       ThrowFatalError({

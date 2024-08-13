@@ -50,23 +50,28 @@ app.on('ready', () => {
   ipcMain.handle(
     'pages.get',
     async function get (_, payload) {
-      const knex = await database.getManager();
-      const notepadsColumns = Object.keys(await knex('notepads').columnInfo())
-      const pagesColumns = Object.keys(await knex('pages').columnInfo())
-      const data = await knex('pages')
-        .select([
-          ...(pagesColumns.map((item) => ({[item]: `pages.${item}`}))),
-          ...(notepadsColumns.map((item) => ({[`notepad.${item}`]: `notepads.${item}`})))
-        ])
-        .from('pages')
-        .leftJoin('notepads', 'pages.notepadID', 'notepads.id')
-        .where({ 'pages.id': payload.pageID })
-
-      if (data.length === 0) {
-        return { value: undefined }
-        //throw('Row could not been got from database')
+      try {
+        const knex = await database.getManager();
+        const notepadsColumns = Object.keys(await knex('notepads').columnInfo())
+        const pagesColumns = Object.keys(await knex('pages').columnInfo())
+        const data = await knex('pages')
+          .select([
+            ...(pagesColumns.map((item) => ({[item]: `pages.${item}`}))),
+            ...(notepadsColumns.map((item) => ({[`notepad.${item}`]: `notepads.${item}`})))
+          ])
+          .from('pages')
+          .leftJoin('notepads', 'pages.notepadID', 'notepads.id')
+          .where({ 'pages.id': payload.pageID })
+  
+        if (data.length === 0) {
+          return { value: undefined }
+          //throw('Row could not been got from database')
+        }
+        return { value: unflatten(data[0]) }
+      } catch(error) {
+        console.error('Error while running \'pages.get\' handler', JSON.stringify(error))
       }
-      return { value: unflatten(data[0]) }
+
     }  as QueryHandlerType<{ pageID: PageIDType}, { value: PageType & { notepad: NotepadType } }>
   )
 })

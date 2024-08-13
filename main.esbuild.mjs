@@ -2,11 +2,8 @@ import { readFileSync} from 'node:fs';
 import { resolve } from 'node:path';
 import esbuild from 'esbuild';
 import { nodeExternalsPlugin } from 'esbuild-node-externals';
-//import { EsmExternalsPlugin } from '@esbuild-plugins/esm-externals'
 import { copy } from 'esbuild-plugin-copy';
 import { clean } from 'esbuild-plugin-clean';
-import writeFilePlugin from 'esbuild-plugin-write-file';
-//import { builtinModules } from 'node:module';
 import escapeStringRegexp from 'escape-string-regexp'
 import { writeFile } from 'fs/promises';
 
@@ -22,7 +19,7 @@ await esbuild.build({
   platform: 'node',
   format: 'esm',
   bundle: true,
-  //minify: !!isPackaged,
+  minify: !!isPackaged,
   sourcemap: !isPackaged,
   logLevel: isPackaged ? 'silent' : "info",
   entryPoints: ["./source/main/main.ts"],
@@ -56,6 +53,8 @@ await esbuild.build({
           const bundleAsExternal = Array.isArray(pkg.bundleAsExternal) ? pkg.bundleAsExternal : []
           bundleAsExternal.forEach(module => modulesToPack.add(module)) 
           modulesToPack.delete('electron')
+          const betterSqliteVersion = Object.entries(dependencies).find(
+            ([module, version]) => ['better-sqlite3-multiple-ciphers'] .includes(module))
 
           writeFile(resolve(outDir, './package.json'), JSON.stringify({
             main: "main.mjs",
@@ -70,7 +69,8 @@ await esbuild.build({
             binary: pkg.binary,
             type: pkg.type,
             scripts: {
-              "rebuild": "electron-rebuild -f -w better-sqlite3,argon2,better-sqlite3-multiple-ciphers -m .",
+              "rebuild": "electron-rebuild -f -o better-sqlite3,argon2,better-sqlite3-multiple-ciphers -w .",
+              "preinstall": `npm install better-sqlite3-multiple-ciphers@'${betterSqliteVersion[1]}' --no-save --build-from-source --sqlite3=\"./resources/deps/sqlite3\"`,
             },
             devDependencies: Object.fromEntries(
               Object.entries(dependencies).filter(([module, _]) => [
@@ -111,39 +111,6 @@ await esbuild.build({
       ],
       watch: false,
     }),
-    /*
-    writeFilePlugin({
-      after: {
-        [resolve(outDir, './package.json')]: JSON.stringify({
-          main: "main.mjs",
-          name: pkg.name,
-          version: pkg.version,
-          productName: pkg.productName,
-          description: pkg.description,
-          repository: pkg.repository,
-          license: pkg.license,
-          author: pkg.author,
-          engines: pkg.engines,
-          binary: pkg.binary,
-          type: pkg.type,
-          scripts: {
-            "rebuild": "electron-rebuild -f -w better-sqlite3 -m .",
-          },
-          externals: Array.from(modulesToPack.values()),
-          dependencies: Object.fromEntries(
-            Object.entries({
-              ...pkg.devDependencies,
-              ...pkg.dependencies,
-              ...pkg.peerDependencies,
-              ...pkg.optionalDependencies,
-            } || {}).filter(([module, _]) => [
-              Array.from(modulesToPack.values())
-            ].some(item => item === module))
-          ),
-        }, null, 4)
-      }
-    }),
-    */
     clean({
       cleanOnStartPatterns: [
         './main.mjs',

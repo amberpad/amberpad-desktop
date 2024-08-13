@@ -13,7 +13,7 @@ app.on('ready', () => {
       const result = await autoUpdater.checkForUpdates()
       return result ? result.updateInfo : null
     } catch (error) {
-      console.error(error)
+      globals.DEBUG && console.error(error)
       return null
     }
   })
@@ -22,7 +22,7 @@ app.on('ready', () => {
     try {
       return await autoUpdater.downloadUpdate(cancellationToken)
     } catch (error) {
-      console.error(error)
+      globals.DEBUG && console.error(error)
       return []
     }
   })
@@ -30,7 +30,7 @@ app.on('ready', () => {
     try {
       return cancellationToken.cancel()
     } catch (error) {
-      console.error(error)
+      globals.DEBUG && console.error(error)
       return
     }
   })
@@ -52,7 +52,7 @@ app.on('ready', () => {
       autoUpdater.quitAndInstall(true, true)
       return 
     } catch (error) {
-      console.error(error)
+      globals.DEBUG && console.error(error)
       return
     }
 

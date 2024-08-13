@@ -1,8 +1,9 @@
 import path from 'node:path'
 import { defineConfig } from '@playwright/test';
 
-import globals from './globals.mjs';
+import * as _globals from './globals.mjs';
 
+const globals = _globals as unknown as any
 const outputDir = path.resolve('./.run');
 const testDir = path.resolve('./test');
 

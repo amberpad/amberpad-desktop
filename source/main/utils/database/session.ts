@@ -33,7 +33,7 @@ export default {
   },
   create: async (passphrase: string, force: boolean=false): Promise<{ hash: string }> => {
     const sessionFileContent = {
-      hash: (await argon2.hash(passphrase, { type: argon2.argon2i })).toString()
+      hash: (await argon2.hash(passphrase, { type: argon2.argon2i, salt: SALT })).toString()
     }
 
     if (fs.existsSync(sessionLocation) && !force) {

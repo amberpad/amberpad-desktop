@@ -11,7 +11,6 @@ import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
 import buildMenuTemplate from "./services/buildMenuTemplate"
 import '@main/handlers/index'
-import dbSession from "@main/utils/database/session"
 
 const menu = Menu.buildFromTemplate(buildMenuTemplate())
 Menu.setApplicationMenu(menu)

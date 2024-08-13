@@ -20,12 +20,34 @@ const buildDatabasePath = (id: string) =>
 
 const connectDatabase = async (id: string): Promise<DatabaseType> => {
   const queries = knex({
-    client: 'sqlite3',
+    client: 'better-sqlite3',
     debug: global.DEBUG,
+    useNullAsDefault: true,
     connection: {
       filename: buildDatabasePath(id),
+      options: {
+        nativeBinding: path.join(
+          // It is gonna use the binding (.node) in the :root_folder/node_modules/ and not the one 
+          // .package/node_modules cause the one in .package is compiled to work inside electron
+          'node_modules',
+          'better-sqlite3-multiple-ciphers--test',
+          'build',
+          'Release',
+          'better_sqlite3.node'
+        )
+      }
     },
-    useNullAsDefault: true,
+    pool: {
+      // https://knexjs.org/faq/recipes.html#db-access-using-sqlite-and-sqlcipher
+      afterCreate(db, fn) {
+        db.pragma(`cipher='sqlcipher'`)
+        db.pragma(`legacy=4`)
+        // If this key is changed it should be changed also in the knex connection of 
+        // the main thread of electon
+        db.pragma(`key='testing'`);
+        fn();
+      }
+    }
   })
 
   await queries.migrate.up({
@@ -61,6 +83,7 @@ export const test = base.extend<{
         __TESTING_ENVRONMENT_DB_PATH: buildDatabasePath(id),
       },
     });
+    electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
 
     var page = await electronApp.firstWindow()
     label:

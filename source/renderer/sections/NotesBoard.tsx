@@ -71,6 +71,18 @@ function NotesBoard (
             @media (min-width: 600px) {
               max-width: 600px;
             }
+
+            @media (prefers-color-scheme: light) {
+              .change-color-in-svg {
+                fill: var(--accent-8) !important;
+              }
+            }
+
+            @media (prefers-color-scheme: dark) {
+              .change-color-in-svg {
+                fill: var(--accent-9) !important;
+              }
+            }
           `}
         />
         <Flex

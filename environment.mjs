@@ -50,7 +50,7 @@ function filteredEnviromentByPrefix (environment, prefix=PREFIX) {
       .filter(([key, value]) => key.startsWith(prefix))
       .map(([key, value]) => [key.replace(prefix, ''), value])
   )
-} 
+}
 
 /******************************************************************************
 * Environments
