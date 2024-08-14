@@ -7,9 +7,16 @@ jobs:
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
     - uses: actions/setup-node@v4
       with:
         node-version: '20.11.x'
+    - name: install python dependencies
+      run: python -m pip install --upgrade setuptools
+    - name: upgrade node-gyp
+      run: npm install -g node-gyp@latest
     - name: install dependencies
       run: yarn install
     - name: run tests
@@ -20,10 +27,17 @@ jobs:
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
     - uses: actions/setup-node@v4
       with:
         node-version: '20.11.x'
-    - name: install dependencies
+    - name: install python dependencies
+      run: python -m pip install --upgrade setuptools
+    - name: upgrade node-gyp
+      run: npm install -g node-gyp@latest
+    - name: install node dependencies
       run: yarn install
     - name: run tests
       run: yarn run test
@@ -33,9 +47,16 @@ jobs:
     timeout-minutes: 15
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
     - uses: actions/setup-node@v4
       with:
         node-version: '20.11.x'
+    - name: install python dependencies
+      run: python -m pip install --upgrade setuptools
+    - name: upgrade node-gyp
+      run: npm install -g node-gyp@latest
     - name: install dependencies
       run: yarn install
     - name: run tests
