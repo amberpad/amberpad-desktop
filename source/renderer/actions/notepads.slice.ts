@@ -330,7 +330,6 @@ const moveTop = (state, action) => {
     action.payload.value !== undefined
   ) {
     const page = action.payload.value
-    console.log('page', page)
 
     // Move notepad to first position in array
     const notepadIndex = state.values.findIndex((item) => item.id === page.notepadID)        

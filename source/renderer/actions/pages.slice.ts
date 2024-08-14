@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
+import { 
+  updateNotepadThunk, 
+  destroyNotepadThunk,
+  updatePageThunk,
+  destroyPageThunk,
+} from './notepads.slice'
 import type { NotepadType } from '@ts/models/Notepads.types'
 import type { PageType, PageIDType } from '@ts/models/Pages.types'
 
@@ -73,6 +79,44 @@ const pagesSlice = createSlice({
         key: 'selectedPageID',
         value: action.payload.value && action.payload.value.id,
       })
+    })
+    // Cases for notepad and page update/destroy
+    builder.addCase(updateNotepadThunk.fulfilled, (state, action) => {
+      const notepad = action.payload.value
+      if (state.selectedPage) {
+        state.selectedPage.notepad = notepad
+        state.selectedPage.notepadID = notepad.id
+      }
+    })
+    builder.addCase(destroyNotepadThunk.fulfilled, (state, action) => {
+      const notepad = action.payload.value
+      if (
+        state.selectedPage && 
+        notepad.pages.some((page) => page.id === state.selectedPageID)
+      ) {
+        state.selectedPage = null
+        state.selectedPageID = null
+      }
+    })
+    builder.addCase(updatePageThunk.fulfilled, (state, action) => {
+      const page = action.payload.value
+      if (state.selectedPage) {
+        state.selectedPage = {
+          ...state.selectedPage,
+          ...page
+        }
+        state.selectedPage.notepadID = page.id
+      }
+    })
+    builder.addCase(destroyPageThunk.fulfilled, (state, action) => {
+      const page = action.payload.value
+      if (
+        state.selectedPage && 
+        page.id === state.selectedPageID
+      ) {
+        state.selectedPage = null
+        state.selectedPageID = null
+      }
     })
   }
 })
