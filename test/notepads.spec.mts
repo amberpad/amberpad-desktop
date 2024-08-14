@@ -22,7 +22,9 @@ test('Notepad is added it\'s container when created #EnnXQW3AYD', async ({ launc
 });
 
 test('Notepad is modified from it\'s container when updated #KR3ZMLAgsk', async ({ launchElectron }) => {
-  for await (const page of launchElectron('KR3ZMLAgsk')) {
+  for await (const page of launchElectron({
+    id: 'KR3ZMLAgsk', seed: 'operations/KR3ZMLAgsk'
+  })) {
     const originalName = 'text:3OxLimFmdA'
     const updatedName = 'text:txg393ydXN'
     await updateNotepad(page, originalName, updatedName);
@@ -46,7 +48,9 @@ test('Notepad is modified from it\'s container when updated #KR3ZMLAgsk', async 
 });
 
 test('Notepad is removed from it\'s container when deleted #qgZ84s8G0C', async ({ launchElectron }) => {
-  for await (const page of launchElectron('qgZ84s8G0C')) {
+  for await (const page of launchElectron({
+    id: 'qgZ84s8G0C', seed: 'operations/qgZ84s8G0C'
+  })) {
     const name = 'text:vfzbE9RYPL';
     await deleteNotepad(page, name);
     await page.locator(
@@ -63,7 +67,9 @@ test('Notepad is removed from it\'s container when deleted #qgZ84s8G0C', async (
 });
 
 test('Notepad container should paginate when there is too many items #5MG57jsx1u', async ({ launchElectron }) => {
-  for await (const page of launchElectron('5MG57jsx1u')) {
+  for await (const page of launchElectron({
+    id: '5MG57jsx1u', seed: 'operations/5MG57jsx1u'
+  })) {
     await expect(async () => {
       await expect(await countNotepads(page)).toEqual(20)
     }).toPass();

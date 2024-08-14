@@ -61,21 +61,37 @@ const connectDatabase = async (id: string): Promise<DatabaseType> => {
 
 // Extend the Test object with electron connection and database utilities
 export const test = base.extend<{
-  launchElectron: (_id?: any, options?: { windowTitle: string }) => AsyncGenerator<Page, void, unknown>
+  launchElectron: ( 
+    options?: { 
+      id?: string,
+      windowTitle?: string
+      seed?: string,
+    }
+  ) => AsyncGenerator<Page, void, unknown>
 }>({
-  launchElectron: async({}, use) => use(async function* (_id, options={ windowTitle: 'Amberpad' }) {
+  launchElectron: async({}, use) => use(
+    async function* (
+      options={ 
+        id: undefined,
+        windowTitle: 'Amberpad',
+        seed: undefined
+      }
+    ) {
     // If not ID generate a random one
-    const id = _id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
+    const id = options.id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
     const queries = await connectDatabase(id);
-    try {
-      id && await seed(queries, id);
-    } catch (error) {
-      if (error.code === 'ERR_MODULE_NOT_FOUND' && _id) {
-        console.warn(`Seed '${_id}' was not found in the seeds folder`);
-      } else if (error.code !== 'ERR_MODULE_NOT_FOUND') {
-        throw error;
+    if (options.seed !== undefined) {
+      try {
+        await seed(queries, options.seed);
+      } catch (error) {
+        if (error.code === 'ERR_MODULE_NOT_FOUND') {
+          console.warn(`Seed '${options.seed}' was not found in the seeds folder"`);
+        } else if (error.code !== 'ERR_MODULE_NOT_FOUND') {
+          throw error;
+        }
       }
     }
+
     const electronApp = await _electron.launch({ 
       args: [entrypoint],
       env: {

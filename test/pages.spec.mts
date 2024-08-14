@@ -3,7 +3,9 @@ import { test } from './utils/test.mts';
 import { createPage, updatePage, deletePage, countPages } from './operations/pages.mts';
 
 test('Page is added to it\'s container when created #0Yu8lf8Q20', async ({ launchElectron }) => {
-  for await (const page of launchElectron('0Yu8lf8Q20')) {
+  for await (const page of launchElectron({
+    id: '0Yu8lf8Q20', seed: 'operations/0Yu8lf8Q20'
+  })) {
     const notepadName = 'text:oqaTyRWhj5';
     const pageName = 'text:JfJF3rNfom';
     await createPage(page, notepadName, pageName);
@@ -16,7 +18,9 @@ test('Page is added to it\'s container when created #0Yu8lf8Q20', async ({ launc
 })
 
 test('Page is modified from it\'s container when updated #k8Rzma7uDj', async ({ launchElectron }) => {
-  for await (const page of launchElectron('k8Rzma7uDj')) {
+  for await (const page of launchElectron({
+    id: 'k8Rzma7uDj', seed: 'operations/k8Rzma7uDj'
+  })) {
     const originalName = 'text:g5CtZHIxOv';
     const updatedName = 'text:w6XpzCK527';
     await updatePage(page, originalName, updatedName);
@@ -39,7 +43,9 @@ test('Page is modified from it\'s container when updated #k8Rzma7uDj', async ({ 
 })
 
 test('Page is removed from it\'s container when deleted #CofA5PWDDT', async ({ launchElectron }) => {
-  for await (const page of launchElectron('CofA5PWDDT')) {
+  for await (const page of launchElectron({
+    id: 'CofA5PWDDT', seed: 'operations/CofA5PWDDT'
+  })) {
     const pageName = 'text:T2snrtMcFR'
     await deletePage(page, pageName);
     await page.locator(
@@ -56,7 +62,10 @@ test('Page is removed from it\'s container when deleted #CofA5PWDDT', async ({ l
 })
 
 test('Page containers should paginate when there is too many items #RE7WsTQyCx', async ({ launchElectron }) => {
-  for await (const page of launchElectron('RE7WsTQyCx')) {
+  for await (const page of launchElectron({
+    id: 'RE7WsTQyCx', seed: 'operations/RE7WsTQyCx'
+  })) {
+    await page.pause()
     // Wait until there is at least one page in the list
     await expect(async () => {
       await expect(await countPages(page)).toEqual(50)

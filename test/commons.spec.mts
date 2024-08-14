@@ -41,7 +41,9 @@ const clearSearch = async (
 }
 
 test('Search should filter items by its keywords #6LGdgVNDb0', async ({ launchElectron }) => {
-  for await (const page of launchElectron('6LGdgVNDb0')) {
+  for await (const page of launchElectron({
+    id: '6LGdgVNDb0', seed: 'operations/6LGdgVNDb0'
+  })) {
     // Search for multiple items
     await search(page, 'text');
     expect(await countNotepads(page)).toEqual(5);

@@ -16,11 +16,11 @@ import type { NotepadType } from "@ts/models/Notepads.types"
 import { PageType } from '@ts/models/Pages.types'
 
 injectGlobal`
-  .notepad-lavr8Nx04e__options {
+  .notepad__options {
     opacity: 0.0;
   }
 
-  .notepad-lavr8Nx04e:hover .notepad-lavr8Nx04e__options {
+  .notepad:hover .notepad__options {
     opacity: 1.0;
   }
 `
@@ -68,7 +68,7 @@ function Notepad ({
       >
 
         <Flex 
-          className={`notepad-lavr8Nx04e`}
+          className={`notepad`}
           direction='row'
           gap='4'
           justify='start'
@@ -89,7 +89,7 @@ function Notepad ({
             <DropdownMenu.Trigger>
               <IconButton
                 data-testid='notepad-options-button'
-                className={'notepad-lavr8Nx04e__options'}
+                className={'notepad__options'}
                 size='1'
                 variant='ghost'
               >

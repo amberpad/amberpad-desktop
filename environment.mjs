@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 const PREFIX = 'AMBERPAD_';
 
 /******************************************************************************
@@ -96,7 +98,10 @@ var configs = {
     parser: (value) => [...new Set(
       value.toLocaleLowerCase().replace(' ', '').split('|')
     )]
-  }
+  },
+  SEED: { 
+    default: null, 
+  },
 }
 
 // Extends config dictionary with default values

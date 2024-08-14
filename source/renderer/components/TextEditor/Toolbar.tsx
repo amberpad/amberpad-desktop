@@ -22,6 +22,7 @@ import { useAmberpadEditor } from "@renderer/utils/slate"
 
 import type { FlexProps, IconButtonProps } from "@radix-ui/themes"
 import { useAlert } from "@renderer/providers/AlertProvider"
+import { css } from "@emotion/css"
 
 const FONTAWESOME_ICON_SIZE = 'xs'
 
@@ -64,6 +65,9 @@ ref: React.LegacyRef<HTMLButtonElement>,
     className={[
       !!checked ? 'text-editor__button--checked' : '',
       !!disabled ? 'text-editor__button--disabled': '', 
+      css` 
+        color: var(--text-color)
+      `
     ].join(' ')}
     disabled={disabled}
     {...iconButtonProps}

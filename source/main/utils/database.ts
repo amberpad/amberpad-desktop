@@ -5,7 +5,8 @@ import knex from 'knex'
 
 import dbSession from "@main/utils/database/session"
 import { getResourcesDir, getRootDir } from "@main/utils/resources"
-import { ThrowFatalError } from '@main/utils/errors';
+import { ThrowFatalError, ThrowError } from '@main/utils/errors';
+import seed from '@main/utils/database/seed'
 
 /******************************************************************************
  * Set up database location
@@ -30,11 +31,11 @@ if (!fs.existsSync(path.dirname(databasePath))){
  * Export database object
  ******************************************************************************/
 
-export default {
+const Database = {
   queriesManager: undefined,
   connectDatabase: async function () {
-    let session = { hash: '' }
-    if (globals.ENVIRONMENT === 'testing') {
+    let session = undefined
+    if (globals.ENVIRONMENT !== 'testing') {
       session = await dbSession.get()
       if (!session) {
         const passphrase = await dbSession.generatePassphrase()
@@ -72,7 +73,6 @@ export default {
     })
 
     await this.testConnection()
-
     return this.queriesManager;
   },
   init: async function () {
@@ -87,12 +87,21 @@ export default {
         extension: 'ts',
         tableName: 'knex_migrations'
       })
+
+      if (
+        globals.ENVIRONMENT === 'development' && 
+        globals.SEED !== undefined && 
+        globals.SEED !== null
+      ) {
+        seed(this.queriesManager, globals.SEED)
+      }
     } catch (error) {
       ThrowFatalError({
         content: 'Unable to set up the database, the app will be closed',
         error: error,
       })
     }
+
     return this
   },
   destroy: async function () {
@@ -104,7 +113,6 @@ export default {
     }
     return this.queriesManager;
   },
-  withManager: undefined,
   testConnection: async function (): Promise<Boolean> {
     try {
       await this.queriesManager.raw('PRAGMA user_version;')
@@ -116,5 +124,32 @@ export default {
       })
       return false
     }
-  }
+  },
+  withManager: async function* (
+    { 
+      errorMessage=undefined
+    }: { 
+      errorMessage?: string 
+    }
+  ) {
+    const manager = this.getManager()
+    try {
+      yield manager;
+    } catch (error) {
+      ThrowError({ 
+        content: errorMessage !== undefined ? 
+          errorMessage : 'Error executing operation in the database',
+        error: error,
+      })
+    } finally {
+    }
+  },
 }
+
+// Bind all functions in singleton object to avoid bugs by changing context
+// of object's functions in the future
+Object.values(Database)
+  .filter(value => typeof value === 'function')
+  .forEach(fn => fn.bind(Database))
+
+export default Database

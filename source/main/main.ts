@@ -20,6 +20,7 @@ const { autoUpdater } = AppUpdater
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = false
 autoUpdater.autoRunAppAfterInstall = true
+autoUpdater.logger = ['testing'].includes(globals.ENVIRONMENT) ? null : console
 
 var appContext: {
   mainWindow: BrowserWindow,

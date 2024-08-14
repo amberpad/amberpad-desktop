@@ -20,7 +20,9 @@ test('Note is added to note\'s board when created #hJh8yfxfy6', async ({ launchE
 });
 
 test('Note is deleted when delete\'s operation is confirmed #HbHdvSxtjY', async ({ launchElectron }) => {
-  for await (const page of launchElectron('HbHdvSxtjY')) {
+  for await (const page of launchElectron({
+    id: 'HbHdvSxtjY', seed: 'operations/HbHdvSxtjY'
+  })) {
     const textContent = 'text:NXIdNyzgq9';
     await deleteNote(page, textContent);
     await page.locator(
@@ -37,7 +39,9 @@ test('Note is deleted when delete\'s operation is confirmed #HbHdvSxtjY', async 
 });
 
 test('Notes board should paginate when there is too many items #E1qQS4raeE', async ({ launchElectron }) => {
-  for await (const page of launchElectron('E1qQS4raeE')) {
+  for await (const page of launchElectron({
+    id: 'E1qQS4raeE', seed: 'operations/E1qQS4raeE'
+  })) {
     await expect(async () => {
       await expect(await countNotes(page)).toEqual(20)
     }).toPass();

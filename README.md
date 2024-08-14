@@ -2,7 +2,7 @@
 App to make annotations with the visuals of a Webchat.
 
 ## Enviroment settings
-Enviromental variables only supported in development enviroments
+Enviromental variables only supported in development enviroments. Usage of ".env" file inside the root of the project is supported.
 
 | Variables | Description | Type |
 |-|-|-|
@@ -15,6 +15,14 @@ Enviromental variables only supported in development enviroments
 | AMBERPAD_DB_PATH | The path to the sqlite database file | string |
 
 | AMBERPAD_ALLOW_VERSION_UPDATE | Show a notification when there is a new version and allow user the donloawd and install update directly from the app | allowed OS separated by "\|", example: "darwin\|win32\|linux"  |
+
+| AMBERPAD_ALLOW_VERSION_UPDATE | 
+Show a notification when there is a new version and allow user the donloawd and install update directly from the app 
+| allowed OS separated by "\|", example: "darwin\|win32\|linux"  |
+
+| AMBERPAD_SEED | 
+Seed of data that is loaded after migrations are run, this only works in development mode
+| location inside resources/seed folder, example: "migrations/001_initial"  |
 
 
 ## Package.json settings

@@ -26,14 +26,13 @@ const sessionLocation = (
       session = await dbSession.create(passphrase)
     }
 */
-
 export default {
   generatePassphrase: async (): Promise<string> => {
     return generate()
   },
   create: async (passphrase: string, force: boolean=false): Promise<{ hash: string }> => {
     const sessionFileContent = {
-      hash: (await argon2.hash(passphrase, { type: argon2.argon2i, salt: SALT })).toString()
+      hash: (await argon2.hash(passphrase, { type: argon2.argon2i, salt: SALT, raw: true })).toString('hex')
     }
 
     if (fs.existsSync(sessionLocation) && !force) {

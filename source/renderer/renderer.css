@@ -24,6 +24,7 @@
 }
 
 /* Ghost Icon buttons  */
+/*
 .radix-themes .rt-variant-ghost.rt-IconButton {
   color: var(--text-color);
 }
@@ -31,6 +32,7 @@
 .radix-themes .rt-variant-ghost.rt-SelectTrigger * {
   color: var(--text-color);
 }
+*/
 
 /******************************************************************************
 * Text editor
