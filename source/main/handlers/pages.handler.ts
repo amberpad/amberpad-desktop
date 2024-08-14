@@ -23,7 +23,7 @@ import {
   NotepadType 
 } from '@ts/models/Notepads.types'
 
-app.on('ready', () => {
+export default function setup () {
   ipcMain.handle(
     'pages.get-all',
     async function (_, payload) {
@@ -44,9 +44,7 @@ app.on('ready', () => {
       }
     } as ModelQueryHandlerType<PagesFiltersPayloadType, PageType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'pages.get',
     async function get (_, payload) {
@@ -74,9 +72,7 @@ app.on('ready', () => {
 
     }  as QueryHandlerType<{ pageID: PageIDType}, { value: PageType & { notepad: NotepadType } }>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'pages.create',
     async function create (_, payload) {
@@ -96,9 +92,7 @@ app.on('ready', () => {
       }
     } as ModelCreateHandlerType<PagePayloadType, PageType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'pages.update',
     async function update (_, payload) {
@@ -124,9 +118,7 @@ app.on('ready', () => {
       }
     } as ModelUpdateHandlerType<PageType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'pages.destroy',
     async function destroy (_, payload) {
@@ -153,11 +145,7 @@ app.on('ready', () => {
       }
     } as ModelDestroyHandlerType<PageType>
   )
-})
 
-
-
-app.on('ready', () => {
   ipcMain.handle(
     'pages.moveTop',
     async function update (_, payload): Promise<boolean> {
@@ -182,4 +170,4 @@ app.on('ready', () => {
       }
     }
   )
-})
+}

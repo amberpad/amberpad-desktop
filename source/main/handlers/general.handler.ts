@@ -1,8 +1,7 @@
 import { app, ipcMain, shell , nativeTheme} from 'electron'
 import store from "@main/utils/electron-store"
 
-
-app.on('ready', () => {
+export default function setup () {
   ipcMain.handle(
     'general.openExternal',
     async function (
@@ -12,4 +11,4 @@ app.on('ready', () => {
       shell.openExternal(payload.url)
     }
   )
-})
+}

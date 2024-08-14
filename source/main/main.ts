@@ -5,15 +5,27 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import setAppUpdaterHandlers from './services/appUpdater'
 import AppUpdater from 'electron-updater'
-import store from "@main/utils/electron-store"
 
 import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
 import buildMenuTemplate from "./services/buildMenuTemplate"
-import '@main/handlers/index'
+// Handlers
+import initialsHandlers from "./handlers/initials.handler"
+import generalHandlers from '@main/handlers/general.handler'
+import storesHandlers from '@main/handlers/store.handler'
+import notepadsHandlers from '@main/handlers/notepads.handler'
+import pagesHandlers from '@main/handlers/pages.handler'
+import notesHandlers from '@main/handlers/notes.handler'
+import updaterHandlers from '@main/handlers/updater.handler'
+import themeHandlers from '@main/handlers/theme.handler'
 
-const menu = Menu.buildFromTemplate(buildMenuTemplate())
-Menu.setApplicationMenu(menu)
+const context: {
+  mainWindow: BrowserWindow,
+  database: {[key: string]: any},
+} = {
+  mainWindow: undefined,
+  database: undefined
+}
 
 // Updater settings
 const { autoUpdater } = AppUpdater 
@@ -22,18 +34,17 @@ autoUpdater.autoInstallOnAppQuit = false
 autoUpdater.autoRunAppAfterInstall = true
 autoUpdater.logger = ['testing'].includes(globals.ENVIRONMENT) ? null : console
 
-var appContext: {
-  mainWindow: BrowserWindow,
-  database: {[key: string]: any},
-} = {
-  mainWindow: undefined,
-  database: undefined
-}
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (checkSquirrelStartup) {
   destroy();
 }
+
+const menu = Menu.buildFromTemplate(buildMenuTemplate())
+Menu.setApplicationMenu(menu)
+
+/****************************************************************************** 
+* App listeners
+******************************************************************************/
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -54,6 +65,7 @@ app.on('activate', () => {
 })
 
 app.whenReady()
+  .then(setHandlers)
   .then(launch)
   .then(() => {
     if (globals.DEBUG) {
@@ -63,22 +75,35 @@ app.whenReady()
     }
   })
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
+/****************************************************************************** 
+* Setup functions
+******************************************************************************/
+
+async function setHandlers () {
+  await initialsHandlers()
+  await generalHandlers()
+  await storesHandlers()
+  await notepadsHandlers()
+  await pagesHandlers()
+  await notesHandlers()
+  await updaterHandlers()
+  await themeHandlers()
+}
+
 async function launch() {
   let windows = BrowserWindow.getAllWindows();
   if (windows.length === 0) {
-    appContext.mainWindow = createMainWindow();
+    context.mainWindow = createMainWindow();
     windows = BrowserWindow.getAllWindows();
   } else {
     windows[0].show();
     windows[0].focus();
   }
   await database.init();
-  setAppUpdaterHandlers(appContext.mainWindow);
+  setAppUpdaterHandlers(context.mainWindow);
 }
 
 function destroy() {
   app.quit();
-  appContext.database?.destroy();
+  context.database?.destroy();
 }

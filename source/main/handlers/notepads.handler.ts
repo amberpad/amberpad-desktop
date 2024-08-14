@@ -19,12 +19,12 @@ import type {
   NotepadsPagesFiltersPayloadType
 } from '@ts/models/Notepads.types'
 
-app.on('ready', () => {
+export default function setup () {
   ipcMain.handle(
     'notepads.get-all',
-    async function (_, payload) {
+    async function getAll(_, payload) {
       /* -- Raw query
-
+    
       */
       const options = Object.assign({
         search: '',
@@ -34,7 +34,7 @@ app.on('ready', () => {
         associatedPaginationOffset: globals.ASSOCIATED_PAGES_PAGINATION_OFFSET,
       }, payload)
       options.page = options.page < 1 ? 1 : options.page
-
+    
       const knex = await database.getManager();
       const notepadsColumns = Object.keys(await knex('notepads').columnInfo())
       const pagesColumns = Object.keys(await knex('pages').columnInfo())
@@ -92,16 +92,14 @@ app.on('ready', () => {
           ]
         ))
         .orderBy([{column: 'updated_at', order: 'desc'}])
-
+    
       const unflattened = (unflatten({ref: data}) as any).ref
       return {
         values: groupByAssociation(unflattened, ['pages']),
       }
-    } as ModelQueryHandlerType<NotepadsFiltersPayloadType, NotepadType>
+    }  as ModelQueryHandlerType<NotepadsFiltersPayloadType, NotepadType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'notepads.pages.all',
     async function (_, payload) {
@@ -147,9 +145,7 @@ app.on('ready', () => {
       }
     } as ModelQueryHandlerType<NotepadsPagesFiltersPayloadType, NotepadType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'notepads.create',
     async function create (_, payload) {
@@ -169,9 +165,7 @@ app.on('ready', () => {
       }
     } as ModelCreateHandlerType<NotepadPayloadType, NotepadType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'notepads.update',
     async function update (_, payload) {
@@ -196,9 +190,7 @@ app.on('ready', () => {
       }
     } as ModelUpdateHandlerType<NotepadType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'notepads.destroy',
     async function destroy (_, payload) {
@@ -225,4 +217,4 @@ app.on('ready', () => {
       }
     } as ModelDestroyHandlerType<NotepadType>
   )
-})
+}

@@ -1,9 +1,7 @@
 import { app, ipcMain, shell , nativeTheme, BrowserWindow } from 'electron'
 import store from "@main/utils/electron-store"
 
-
-app.on('ready', () => {
-
+export default function setup () {
   ipcMain.handle(
     'theme.setThemeSource',
     async function (
@@ -23,4 +21,4 @@ app.on('ready', () => {
       )
     })
   })
-})
+}

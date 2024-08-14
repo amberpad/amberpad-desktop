@@ -50,7 +50,7 @@ export const createNoteThunk = createAsyncThunk(
   'notes/createNote',
   async (payload: NotePayloadType, thunkAPI) => {
     const response = await window.electronAPI.notes.create({
-      data: [payload]
+      data: [ payload ]
     })
 
     if (thunkAPI.signal.aborted)

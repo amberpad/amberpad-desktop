@@ -16,7 +16,8 @@ import type {
   NoteType 
 } from '@ts/models/Notes.types'
 
-app.on('ready', () => {
+
+export default function setup () {
   ipcMain.handle(
     'notes.get-all',
     async function (_, payload) {
@@ -97,9 +98,7 @@ app.on('ready', () => {
       } 
     }  as ModelQueryHandlerType<NotesFiltersPayloadType, NoteType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'notes.create',
     async function create (_, payload) {
@@ -119,9 +118,7 @@ app.on('ready', () => {
       }
     } as ModelCreateHandlerType<NotePayloadType, NoteType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'note.update',
     async function update (_, payload) {
@@ -147,9 +144,7 @@ app.on('ready', () => {
       }
     } as ModelUpdateHandlerType<NoteType>
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'notes.destroy',
     async function destroy (_, payload) {
@@ -176,4 +171,4 @@ app.on('ready', () => {
       }
     } as ModelDestroyHandlerType<NoteType>
   )
-})
+}

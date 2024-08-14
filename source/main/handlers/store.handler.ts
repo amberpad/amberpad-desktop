@@ -3,11 +3,9 @@ import { app, ipcMain } from 'electron'
 import { ThrowError } from '@main/utils/errors'
 import store from "@main/utils/electron-store"
 
-app.on('ready', () => {
+export default function setup () {
   ipcMain.handle('store.getAll', () => store.store)
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'store.get',
     async function (
@@ -24,9 +22,7 @@ app.on('ready', () => {
       }
     }
   )
-})
 
-app.on('ready', () => {
   ipcMain.handle(
     'store.set',
     async function (
@@ -47,4 +43,4 @@ app.on('ready', () => {
       }
     }
   )
-})
+}

@@ -7,7 +7,8 @@ import type { UpdateInfo } from 'electron-updater'
 const { autoUpdater } = AppUpdater 
 
 const cancellationToken = new CancellationToken()
-app.on('ready', () => {
+
+export default function setup () {
   ipcMain.handle('updater.check-for-updates', async (_event, payload): Promise<UpdateInfo | null> => {
     try {
       const result = await autoUpdater.checkForUpdates()
@@ -17,6 +18,7 @@ app.on('ready', () => {
       return null
     }
   })
+
   // @returns {Promise<Array<string>>} Paths to downloaded files.
   ipcMain.handle('updater.download-update', async (_event, payload): Promise<Array<string>> => {
     try {
@@ -26,6 +28,7 @@ app.on('ready', () => {
       return []
     }
   })
+
   ipcMain.handle('updater.cancel-download-update', (_event, payload) => {
     try {
       return cancellationToken.cancel()
@@ -34,6 +37,7 @@ app.on('ready', () => {
       return
     }
   })
+
   ipcMain.handle('updater.quit-and-install', async (_event, payload) => {    
     try {
       let windows = BrowserWindow.getAllWindows();
@@ -57,4 +61,4 @@ app.on('ready', () => {
     }
 
   })
-})
+}
