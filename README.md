@@ -22,7 +22,7 @@ Show a notification when there is a new version and allow user the donloawd and 
 
 | AMBERPAD_SEED | 
 Seed of data that is loaded after migrations are run, this only works in development mode
-| location inside resources/seed folder, example: "migrations/001_initial"  |
+| location inside resources/seed folder, example: "migrations/001_initial.mts"  |
 
 
 ## Package.json settings

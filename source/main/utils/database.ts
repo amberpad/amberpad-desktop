@@ -82,18 +82,27 @@ const Database = {
 
     // Run setup migrations
     try {
-      await this.queriesManager.migrate.up({
+      const [version, applied] = await this.queriesManager.migrate.latest({
         directory: path.resolve(getResourcesDir(), './migrations'),
         extension: 'ts',
         tableName: 'knex_migrations'
       })
 
-      if (
-        globals.ENVIRONMENT === 'development' && 
-        globals.SEED !== undefined && 
-        globals.SEED !== null
-      ) {
-        seed(this.queriesManager, globals.SEED)
+      if (globals.ENVIRONMENT === 'development') {
+        const [completed, pending] = await this.queriesManager.migrate.list({
+          directory: path.resolve(getResourcesDir(), './migrations'),
+          extension: 'ts',
+          tableName: 'knex_migrations'
+        })
+  
+        if (
+          applied.length > 0 &&
+          pending.length === 0 &&
+          globals.SEED !== undefined && 
+          globals.SEED !== null
+        ) {
+          seed(this.queriesManager, globals.SEED)
+        }
       }
     } catch (error) {
       ThrowFatalError({
