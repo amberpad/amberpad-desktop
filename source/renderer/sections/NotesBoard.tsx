@@ -23,11 +23,10 @@ function NotesBoard (
     },
     notes: {
       values: state.notes.values,
-      page: state.notes.page,
-      hasNextPage: state.notes.hasNextPage,
       adjustScrollHash: state.notes.adjustScrollHash,
       scrollBeginingHash: state.notes.scrollBeginingHash,
-      loading: state.notes.loading
+      loading: state.notes.loading,
+      pagination: state.notes.pagination
     },
     pages: {
       selectedPageID: state.pages.selectedPageID
@@ -36,10 +35,9 @@ function NotesBoard (
 
   const onScrollNext = () => {
     store.dispatch(fetchNotesThunk({
-      page: context.notes.page + 1,
       search: context.commons.search,
       pageID: context.pages.selectedPageID,
-    }))   
+    }))
   }
 
   if (
@@ -138,7 +136,7 @@ function NotesBoard (
           />
         )}
         getItemID={(item) => item.id}
-        hasMore={context.notes.hasNextPage}
+        hasMore={context.notes.pagination.hasNextPage}
         inverse={true}
         next={onScrollNext}
         scrollBeginingHash={`${context.notes.scrollBeginingHash}`}

@@ -6,27 +6,31 @@ import type { NoteType, NotePayloadType } from "@ts/models/Notes.types"
 
 export interface NotesSliceState {
   values: NoteType[],
-  page: number,
-  hasNextPage: boolean,
   adjustScrollHash: number,
   scrollBeginingHash: number,
   loading: boolean,
+  pagination: {
+    page: number,
+    hasNextPage: boolean,
+  }
 }
 
 export const fetchNotesThunk = createAsyncThunk(
   'notes/fetchNotes',
   async (
     payload: { 
-      page: number, 
       search: string,
       pageID: PageIDType,
+      resetPagination?: boolean,
     },
     thunkAPI
   ) => {
+    const state = thunkAPI.getState()['notes']
+    const page = !!payload.resetPagination ? 1 : (state.pagination.page + 1)
     const response = await window.electronAPI.notes.getAll({
-      page: payload.page,
       search: payload.search,
       pageID: payload.pageID,
+      page,
     })
 
     if (thunkAPI.signal.aborted)
@@ -37,7 +41,7 @@ export const fetchNotesThunk = createAsyncThunk(
 
     return {
       ...response,
-      page: payload.page,
+      page,
     }
   },
 )
@@ -140,11 +144,13 @@ const notesSlice = createSlice({
   name: 'notes',
   initialState: {
     values: [],
-    page: 1,
-    hasNextPage: true,
     adjustScrollHash: 0,
     scrollBeginingHash: 0,
     loading: true,
+    pagination: {
+      page: 1,
+      hasNextPage: true,
+    }
   } as NotesSliceState,
   reducers: {
     set,
@@ -172,9 +178,9 @@ const notesSlice = createSlice({
         }
       )
       state.loading = false
-      state.page = action.payload.page
+      state.pagination.page = action.payload.page
       if (action.payload.values.length === 0) {
-        state.hasNextPage = false
+        state.pagination.hasNextPage = false
       }
       if (action.payload.page > 1) {
         state.adjustScrollHash += 1

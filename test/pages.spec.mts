@@ -65,7 +65,6 @@ test('Page containers should paginate when there is too many items #RE7WsTQyCx',
   for await (const page of launchElectron({
     id: 'RE7WsTQyCx', seed: 'operations/RE7WsTQyCx'
   })) {
-    await page.pause()
     // Wait until there is at least one page in the list
     await expect(async () => {
       await expect(await countPages(page)).toEqual(50)

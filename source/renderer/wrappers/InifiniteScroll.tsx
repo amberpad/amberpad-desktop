@@ -172,7 +172,7 @@ export default React.forwardRef(function InifiniteScroll (
     return () => containerRef.current?.removeEventListener('scroll', ListenToScrollEnd)
   }, [
     containerRef.current, 
-    //itemsHash,
+    ListenToScrollEnd,
     hasMore
   ])
 
@@ -188,7 +188,7 @@ export default React.forwardRef(function InifiniteScroll (
       // Notify when a childelement has been scrolled over
       if (scrolledOver) {
         const { children, childElementCount } = containerRef.current
-        const { 
+        let { 
           top: parentTop,
           bottom: parentBottom,
         } = containerRef.current.getBoundingClientRect()
@@ -196,10 +196,11 @@ export default React.forwardRef(function InifiniteScroll (
         for (let i = 0; i < childElementCount; i++) {
           const element = children.item(i) as HTMLElement
           const reachedLine = element.getBoundingClientRect()[inverse ? 'top' : 'bottom']
-          if (
-            parentTop <= reachedLine &&
-            parentBottom >= reachedLine
-          ) {
+
+          // normal flow from top to bottom, inverse flow from bottom to top
+          parentTop = parentTop - (inverse ? scrollThreshold : 0)
+          parentBottom = parentBottom + (!inverse ? scrollThreshold : 0)
+          if (parentTop <= reachedLine && reachedLine <= parentBottom) {
             references.push(element)
           }
         }

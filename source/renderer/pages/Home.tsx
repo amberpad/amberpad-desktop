@@ -25,7 +25,7 @@ export default function Home() {
   }))
 
   /****************************************************************************
-  * Fetch initial data
+  * Fetch data
   ****************************************************************************/
 
   useEffect(() => {
@@ -39,9 +39,9 @@ export default function Home() {
     const { search } = context.commons
     const { selectedPageID } = context.pages
     const promise = store.dispatch(fetchNotesThunk({ 
-      page: 1, 
       search: search,
       pageID: selectedPageID,
+      resetPagination: true,
     }))
     return () => {
       promise.abort()
