@@ -3,13 +3,13 @@ import { dialog, app } from "electron"
 import store from '@main/utils/electron-store'
 
 type ThrowErrorParams = {
-  content?: string,
+  msg?: string,
   title?: string,
   error?: Error,
 }
 
 export function ThrowError ({
-  content='',
+  msg='',
   title='Error',
   error=undefined,
 }: ThrowErrorParams = {} ) {
@@ -20,7 +20,7 @@ export function ThrowError ({
       `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
     globals.DEBUG ? console.log(detail) : ''
     dialog.showMessageBox(undefined, {
-      message: content,
+      message: msg,
       detail: globals.DEBUG ? detail : '',
       type: 'error',
       title: title,
@@ -32,7 +32,7 @@ export function ThrowError ({
 }
 
 export function ThrowFatalError ({
-  content='',
+  msg='',
   title='Fatal error',
   error=undefined,
 }: ThrowErrorParams = {} ) {
@@ -41,9 +41,10 @@ export function ThrowFatalError ({
       `Stack:\n${error.stack}\n\n` +
       `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
       `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
-    globals.DEBUG ? console.log(detail) : ''
+
+    console.error(detail)
     dialog.showMessageBox(undefined, {
-      message: content,
+      message: msg,
       detail: globals.DEBUG ? detail : '',
       type: 'error',
       title: title,

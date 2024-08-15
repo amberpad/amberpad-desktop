@@ -106,7 +106,7 @@ const Database = {
       }
     } catch (error) {
       ThrowFatalError({
-        content: 'Unable to set up the database, the app will be closed',
+        msg: 'Unable to set up the database, the app will be closed',
         error: error,
       })
     }
@@ -128,7 +128,7 @@ const Database = {
       return true
     } catch (error) {
       ThrowFatalError({
-        content: 'Unable to connect to the database, the app will be closed',
+        msg: 'Unable to connect to the database, the app will be closed',
         error: error,
       })
       return false
@@ -146,7 +146,7 @@ const Database = {
       yield manager;
     } catch (error) {
       ThrowError({ 
-        content: errorMessage !== undefined ? 
+        msg: errorMessage !== undefined ? 
           errorMessage : 'Error executing operation in the database',
         error: error,
       })

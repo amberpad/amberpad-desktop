@@ -52,7 +52,7 @@ await esbuild.build({
         build.onEnd(() => {
           const bundleAsExternal = Array.isArray(pkg.bundleAsExternal) ? pkg.bundleAsExternal : []
           bundleAsExternal.forEach(module => modulesToPack.add(module)) 
-          modulesToPack.delete('electron')
+          //modulesToPack.delete('electron')
           const betterSqliteVersion = Object.entries(dependencies).find(
             ([module, version]) => ['better-sqlite3-multiple-ciphers'] .includes(module))
 
@@ -73,12 +73,12 @@ await esbuild.build({
               "preinstall": `npm install better-sqlite3-multiple-ciphers@'${betterSqliteVersion[1]}' --no-save --build-from-source --sqlite3=\"./resources/deps/sqlite3\"`,
             },
             devDependencies: Object.fromEntries(
-              Object.entries(dependencies).filter(([module, _]) => [
-                'electron'
+              Object.entries(pkg.devDependencies).filter(([module, _]) => [
+                ...Array.from(modulesToPack.values())
               ].some(item => item === module))
             ),
             dependencies: Object.fromEntries(
-              Object.entries(dependencies).filter(([module, _]) => [
+              Object.entries(pkg.dependencies).filter(([module, _]) => [
                 ...Array.from(modulesToPack.values())
               ].some(item => item === module))
             ),

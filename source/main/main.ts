@@ -9,6 +9,7 @@ import AppUpdater from 'electron-updater'
 import database from '@main/utils/database'
 import createMainWindow from '@main/services/mainWindow';
 import buildMenuTemplate from "./services/buildMenuTemplate"
+import { ThrowFatalError, ThrowError } from '@main/utils/errors';
 // Handlers
 import initialsHandlers from "./handlers/initials.handler"
 import generalHandlers from '@main/handlers/general.handler'
@@ -65,29 +66,36 @@ app.on('activate', () => {
 })
 
 app.whenReady()
-  .then(setHandlers)
-  .then(launch)
+  .then(() => setHandlers())
+  .then(async () => await launch())
   .then(() => {
-    if (globals.DEBUG) {
-      installExtension(REACT_DEVELOPER_TOOLS)
-        .then((name) => console.log(`Added Extension:  ${name}`))
-        .catch((err) => console.log('An error occurred: ', err));
-    }
+    globals.ENVIRONMENT === 'development' && 
+    globals.DEBUG && 
+    /* @ts-ignore */
+    installExtension.default(REACT_DEVELOPER_TOOLS)
+      .then((name) => console.log(`electron-dev-tools: Added Extension:  ${name}`))
+      .catch((err) => console.log(`electron-dev-tools: An error occurred: ${err}`));
+  }).catch((error) => {
+    ThrowFatalError({
+      msg: `There was an error launching the app`,
+      error: error,
+    })
+    app.quit()
   })
 
 /****************************************************************************** 
 * Setup functions
 ******************************************************************************/
 
-async function setHandlers () {
-  await initialsHandlers()
-  await generalHandlers()
-  await storesHandlers()
-  await notepadsHandlers()
-  await pagesHandlers()
-  await notesHandlers()
-  await updaterHandlers()
-  await themeHandlers()
+function setHandlers () {
+  initialsHandlers()
+  generalHandlers()
+  storesHandlers()
+  notepadsHandlers()
+  pagesHandlers()
+  notesHandlers()
+  updaterHandlers()
+  themeHandlers()
 }
 
 async function launch() {
