@@ -119,6 +119,7 @@ export const test = base.extend<{
     });
     electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
 
+    console.log('WINDOWS', electronApp.windows())
     var page = await electronApp.firstWindow()
     label:
     while (options.windowTitle !== undefined) {
