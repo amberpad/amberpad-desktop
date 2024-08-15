@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { unlink } from 'node:fs';
+import { unlinkSync, existsSync } from 'node:fs';
 import { _electron } from 'playwright';
 import { test as base } from '@playwright/test';
 import knex from 'knex'
@@ -18,13 +18,29 @@ type DatabaseType = knex.Knex<any, unknown[]> & {
 const buildDatabasePath = (id: string) => 
   `.run/amberpad.test${id ? ('.' + id) : ''}.db`;
 
+const testConnection = async function (
+  queries: knex.Knex<any, unknown[]>
+): Promise<Boolean> {
+  try {
+    await queries.raw('PRAGMA user_version;')
+    return true
+  } catch (error) {
+    throw(`Database could not be decrypted`)
+  }
+}
+
+const removeDatabaseFile = (path) => existsSync(path) && unlinkSync(path)
+
 const connectDatabase = async (id: string): Promise<DatabaseType> => {
+  const databasePath = buildDatabasePath(id)
+  removeDatabaseFile(databasePath)
+
   const queries = knex({
     client: 'better-sqlite3',
     debug: global.DEBUG,
     useNullAsDefault: true,
     connection: {
-      filename: buildDatabasePath(id),
+      filename: databasePath,
       options: {
         nativeBinding: path.join(
           // It is gonna use the binding (.node) in the :root_folder/node_modules/ and not the one 
@@ -49,6 +65,8 @@ const connectDatabase = async (id: string): Promise<DatabaseType> => {
       }
     }
   })
+
+  if (await testConnection(queries)) 
 
   await queries.migrate.up({
     directory: path.resolve('./resources/migrations'),
@@ -121,14 +139,12 @@ export const test = base.extend<{
       yield page;
     } finally {
       await queries.destroy();
-      unlink(
-        buildDatabasePath(id), 
-        (error) => error // If errors ignore
-      );
+      removeDatabaseFile(buildDatabasePath(id))
       await electronApp.close();
     }
   }),
   page: async ({}, use) => {
+    // Remove default page so it doest cause troubles
     use(undefined as never);
   }
 });
