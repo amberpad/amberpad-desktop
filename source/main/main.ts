@@ -88,16 +88,22 @@ app.on('activate', () => {
   }
 })
 
+
+const onLaunchingError = (error) => {
+  console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
+  ThrowFatalError({
+    msg: `There was an error launching the app`,
+    error: error,
+  })
+  app.quit()
+}
+
 app.whenReady()
   .then(() => console.info('Starting the application...'))
   .then(() => setHandlers())
-  .catch((error) => {
-    console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
-  })
+  .catch(onLaunchingError)
   .then(async () => await launch())
-  .catch((error) => {
-    console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
-  })
+  .catch(onLaunchingError)
   .then(() => {
     globals.ENVIRONMENT === 'development' && 
     globals.DEBUG && 
@@ -105,14 +111,7 @@ app.whenReady()
     installExtension.default(REACT_DEVELOPER_TOOLS)
       .then((name) => console.info(`electron-dev-tools: Added Extension:  ${name}`))
       .catch((err) => console.info(`electron-dev-tools: An error occurred: ${err}`));
-  }).catch((error) => {
-    console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
-    ThrowFatalError({
-      msg: `There was an error launching the app`,
-      error: error,
-    })
-    app.quit()
-  })
+  }).catch(onLaunchingError)
 
 /****************************************************************************** 
 * Setup functions
