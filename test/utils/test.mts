@@ -160,9 +160,10 @@ test.afterEach(() => {
     const logFilePath = buildLogFilePath(id)
   
     if (test.info().status !== test.info().expectedStatus) {
-      console.log(`\x1b[31m${ `History log for test: ${id}` }\x1b[0m`)
       const logContent = fs.readFileSync(logFilePath,'utf8')
-      console.log(`\x1b[41m${logContent}\x1b[0m`)
+      console.log(`\x1b[31m${ `Test ${id} failed this is the history log for the test` }\x1b[0m`)
+      console.log(`\x1b[31m${logContent}\x1b[0m`)
+      console.log(`\x1b[31m ======================== \x1b[0m`)
     }
   
     removeFile(databasePath)

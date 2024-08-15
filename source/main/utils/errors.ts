@@ -15,7 +15,7 @@ export function ThrowError ({
 }: ThrowErrorParams = {} ) {
   if (error && globals.ENVIRONMENT !== 'testing') {
     const detail = `Type: Error\n\n` +
-      `Stack:\n${error.stack}\n\n` +
+      `Stack:\n${error.stack || ''}\n\n` +
       `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
       `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
     dialog.showMessageBox(undefined, {
@@ -35,23 +35,27 @@ export function ThrowFatalError ({
   title='Fatal error',
   error=undefined,
 }: ThrowErrorParams = {} ) {
-  if (error && globals.ENVIRONMENT !== 'testing') {
+  if (error !== undefined) {
     const detail = `Type: Fatal Error\n\n` +
-      `Stack:\n${error.stack}\n\n` +
-      `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
-      `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
+    `Stack:\n${error.stack || ''}\n\n` +
+    `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
+    `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
 
-    dialog.showMessageBox(undefined, {
-      message: msg,
-      detail: globals.DEBUG ? detail : '',
-      type: 'error',
-      title: title,
-      buttons: [
-        'Close'
-      ]
-    }).then((response) => {
-      console.log('Error response:', response)
-      app.quit()
-    })
+    console.error(`${msg}\n${detail}`)
+    if (globals.ENVIRONMENT === 'production') {
+      dialog.showMessageBox(undefined, {
+        message: msg,
+        detail: globals.DEBUG ? detail : '',
+        type: 'error',
+        title: title,
+        buttons: [
+          'Close'
+        ]
+      }).then(() => {
+        app.quit()
+      })
+    }
+  } else {
+    console.error(`${msg}`)
   }
 }

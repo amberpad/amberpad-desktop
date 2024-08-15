@@ -88,30 +88,24 @@ app.on('activate', () => {
   }
 })
 
-
-const onLaunchingError = (error) => {
-  console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
-  ThrowFatalError({
-    msg: `There was an error launching the app`,
-    error: error,
-  })
-  app.quit()
-}
-
 app.whenReady()
   .then(() => console.info('Starting the application...'))
   .then(() => setHandlers())
-  .catch(onLaunchingError)
+  .catch((error) => {
+    ThrowFatalError({ msg: `Error while setting up hanlders at app start`, error })
+  })
   .then(async () => await launch())
-  .catch(onLaunchingError)
+  .catch((error) => {
+    ThrowFatalError({ msg: `Error while launcing the app`, error })
+  })
   .then(() => {
     globals.ENVIRONMENT === 'development' && 
     globals.DEBUG && 
     /* @ts-ignore */
     installExtension.default(REACT_DEVELOPER_TOOLS)
       .then((name) => console.info(`electron-dev-tools: Added Extension:  ${name}`))
-      .catch((err) => console.info(`electron-dev-tools: An error occurred: ${err}`));
-  }).catch(onLaunchingError)
+      .catch((err) => console.error(`electron-dev-tools: An error occurred: ${err}`));
+  })
 
 /****************************************************************************** 
 * Setup functions
