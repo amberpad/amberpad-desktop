@@ -11,17 +11,15 @@ import globals from './globals.mjs';
 
 const outDir = './.package';
 const pkg = JSON.parse(readFileSync(resolve('./package.json'), { encoding: 'utf8' }));
-const isPackaged = globals.ENVIRONMENT === 'production' || 
-  (globals.ENVIRONMENT === 'testing' && !globals.DEBUG)
 
 await esbuild.build({
   target: 'node20',
   platform: 'node',
   format: 'esm',
   bundle: true,
-  minify: !!isPackaged,
-  sourcemap: !isPackaged,
-  logLevel: isPackaged ? 'silent' : "info",
+  minify: globals.ENVIRONMENT === 'production',
+  sourcemap: globals.ENVIRONMENT !== 'production',
+  logLevel: globals.ENVIRONMENT === 'production' ? 'silent' : "info",
   entryPoints: ["./source/main/main.ts"],
   outfile: resolve(outDir, './main.mjs'),
   tsconfig: './tsconfig.json',

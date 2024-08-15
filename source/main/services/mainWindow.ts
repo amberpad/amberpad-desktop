@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from "electron";
 import path from 'node:path';
 
-import { getResourcesDir, getPreloadEntry } from "@main/utils/resources";
+import { getResourcesDir, getPreloadEntry } from "@main/utils/locations";
 
 export default function createMainWindow () {
   const window = new BrowserWindow({

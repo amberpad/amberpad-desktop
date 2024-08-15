@@ -6,8 +6,6 @@ import svgr from '@imacdonald/esbuild-plugin-svgr'
 
 import globals from './globals.mjs'
 const outputDir = './.package';
-const isPackaged = globals.ENVIRONMENT === 'production' || 
-  (globals.ENVIRONMENT === 'testing' && !globals.DEBUG)
 
 const config = {
   target: 'chrome124',
@@ -15,8 +13,8 @@ const config = {
   format: 'iife',
   logLevel: "info",
   bundle: true,
-  minify: !!isPackaged,
-  sourcemap: !isPackaged,
+  minify: globals.ENVIRONMENT === 'production',
+  sourcemap: globals.ENVIRONMENT !== 'production',
   entryPoints: ["./source/renderer/renderer.tsx"],
   outfile: resolve(outputDir, './renderer.js'),
   tsconfig: './tsconfig.web.json',

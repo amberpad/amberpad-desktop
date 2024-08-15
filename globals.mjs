@@ -5,9 +5,12 @@ import settings from './settings.mjs';
 
 const pkg = JSON.parse(readFileSync(resolve('./package.json'), { encoding: 'utf8' }));
 
+const ENVIRONMENT = settings.ENVIRONMENT || environment.ENVIRONMENT
+const DEBUG = settings.DEBUG || environment.DEBUG
 export default {
   ...environment,
   ...settings,
   platfrom: process.platform,
-  version: pkg.version
+  version: pkg.version,
+  isPackaged: ENVIRONMENT === 'production'
 }

@@ -4,7 +4,7 @@ import { app } from 'electron'
 import knex from 'knex'
 
 import dbSession from "@main/utils/database/session"
-import { getResourcesDir, getRootDir } from "@main/utils/resources"
+import { resolveFromRoot, resolveFromUserData } from "@main/utils/locations"
 import { ThrowFatalError, ThrowError } from '@main/utils/errors';
 import seed from '@main/utils/database/seed'
 
@@ -13,12 +13,11 @@ import seed from '@main/utils/database/seed'
  ******************************************************************************/
 
 const databaseLocations = {
-  'production': path.resolve(app.getPath('userData'), 'amberpad.db'),
-  'development' : path.resolve('.run/amberpad.development.db'), 
-  'testing': path.resolve('.run/amberpad.test.db'),
+  'production': resolveFromUserData('amberpad.db'),
+  'development' : resolveFromUserData('amberpad.development.db'),
+  'testing': process.env.__TESTING_ENVRONMENT_DB_PATH,
 }
 const databasePath = (
-  process.env.__TESTING_ENVRONMENT_DB_PATH ||  
   databaseLocations[globals.ENVIRONMENT] || 
   databaseLocations['production']
 )
@@ -45,14 +44,13 @@ const Database = {
 
     this.queriesManager = knex({
       client: 'better-sqlite3',
-      debug: globals.DEBUG,
+      debug: false,//globals.DEBUG,
       useNullAsDefault: true,
       connection: {
         filename: databasePath,
         options: {
           // note: we need this in order to use encryption
-          nativeBinding: path.join(
-            getRootDir(),
+          nativeBinding: resolveFromRoot(
             'node_modules',
             'better-sqlite3-multiple-ciphers',
             'build',
@@ -83,14 +81,14 @@ const Database = {
     // Run setup migrations
     try {
       const [version, applied] = await this.queriesManager.migrate.latest({
-        directory: path.resolve(getResourcesDir(), './migrations'),
+        directory: resolveFromRoot('./resources/migrations'),
         extension: 'ts',
         tableName: 'knex_migrations'
       })
 
       if (globals.ENVIRONMENT === 'development') {
         const [completed, pending] = await this.queriesManager.migrate.list({
-          directory: path.resolve(getResourcesDir(), './migrations'),
+          directory: resolveFromRoot('./resources/migrations'),
           extension: 'ts',
           tableName: 'knex_migrations'
         })

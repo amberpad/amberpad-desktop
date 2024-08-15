@@ -5,12 +5,14 @@ import { app } from 'electron'
 import { generate } from 'generate-passphrase'
 import * as argon2 from 'argon2'
 
+import { resolveFromUserData } from "@main/utils/locations"
+
 const SALT = Buffer.from('t6BkSeQz0t')
 
 const sessionLocations = {
-  'production': path.resolve(app.getPath('userData'), 'session'),
-  'development' : path.resolve('.run/session'), 
-  'testing': path.resolve('.run/session'),
+  'production': resolveFromUserData('session'),
+  'development': resolveFromUserData('session'), 
+  'testing': resolveFromUserData('session')
 }
 
 const sessionLocation = (
