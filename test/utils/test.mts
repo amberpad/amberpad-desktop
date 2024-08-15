@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { unlinkSync, existsSync } from 'node:fs';
+import fs from 'node:fs';
 import { _electron } from 'playwright';
 import { test as base } from '@playwright/test';
 import knex from 'knex'
@@ -18,22 +18,14 @@ type DatabaseType = knex.Knex<any, unknown[]> & {
 const buildDatabasePath = (id: string) => 
   `.run/amberpad.test${id ? ('.' + id) : ''}.db`;
 
-const testConnection = async function (
-  queries: knex.Knex<any, unknown[]>
-): Promise<Boolean> {
-  try {
-    await queries.raw('PRAGMA user_version;')
-    return true
-  } catch (error) {
-    throw(`Database could not be decrypted`)
-  }
-}
+const buildLogFilePath = (id: string) => 
+  `.run/logs/test.${id ? ('.' + id) : ''}.log`;
 
-const removeDatabaseFile = (path) => existsSync(path) && unlinkSync(path)
+const removeFile = (path) => fs.existsSync(path) && fs.unlinkSync(path)
 
 const connectDatabase = async (id: string): Promise<DatabaseType> => {
   const databasePath = buildDatabasePath(id)
-  removeDatabaseFile(databasePath)
+  removeFile(databasePath)
 
   const queries = knex({
     client: 'better-sqlite3',
@@ -66,7 +58,12 @@ const connectDatabase = async (id: string): Promise<DatabaseType> => {
     }
   })
 
-  if (await testConnection(queries)) 
+  // Test connection
+  try {
+    await queries.raw('PRAGMA user_version;')
+  } catch (error) {
+    throw(`Database could not be decrypted`)
+  }
 
   await queries.migrate.up({
     directory: path.resolve('./resources/migrations'),
@@ -87,65 +84,89 @@ export const test = base.extend<{
     }
   ) => AsyncGenerator<Page, void, unknown>
 }>({
-  launchElectron: async({}, use) => use(
-    async function* (
-      options={ 
-        id: undefined,
-        windowTitle: 'Amberpad',
-        seed: undefined
-      }
+  launchElectron: async({ }, use, testInfo) => {
+    use(
+      async function* (
+        options={ 
+          id: undefined,
+          windowTitle: 'Amberpad',
+          seed: undefined
+        }
     ) {
-    // If not ID generate a random one
-    const id = options.id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
-    const queries = await connectDatabase(id);
-    if (options.seed !== undefined) {
+      // If not ID generate a random one
+      const id = options.id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
+      testInfo.annotations.push({ type: 'identifier', description: id })
+      const databasePath = buildDatabasePath(id)
+      const logFilePath = buildLogFilePath(id)
+
+      const queries = await connectDatabase(id)
+      if (options.seed !== undefined) {
+        try {
+          await seed(queries, options.seed);
+        } catch (error) {
+          if (error.code === 'ERR_MODULE_NOT_FOUND') {
+            console.warn(`Seed '${options.seed}' was not found in the seeds folder"`);
+          } else if (error.code !== 'ERR_MODULE_NOT_FOUND') {
+            throw error;
+          }
+        }
+      }
+
+      const electronApp = await _electron.launch({ 
+        args: [entrypoint],
+        env: {
+          ...process.env,
+          __TESTING_ENVRONMENT_DB_PATH: databasePath,
+          __TESTING_ENVRONMENT_LOG_PATH: logFilePath,
+        },
+      });
+      //electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
+
+      var page = await electronApp.firstWindow()
+      label:
+      while (options.windowTitle !== undefined) {
+        const windows = electronApp.windows()
+        for (let i = 0; i < windows.length; i++) {
+          const window = windows[i]
+          const title = await window.title()
+          if (title.toLocaleLowerCase() === options.windowTitle.toLocaleLowerCase()) {
+            page = window
+            break label
+          }
+        }
+        await sleep(100);
+      }
+
       try {
-        await seed(queries, options.seed);
-      } catch (error) {
-        if (error.code === 'ERR_MODULE_NOT_FOUND') {
-          console.warn(`Seed '${options.seed}' was not found in the seeds folder"`);
-        } else if (error.code !== 'ERR_MODULE_NOT_FOUND') {
-          throw error;
-        }
+        await page.waitForLoadState('domcontentloaded')
+        yield page;
+      } finally {
+        await queries.destroy();
+        await electronApp.close();
+        //removeFile(databasePath)
       }
     }
-
-    console.log('DATABASE PATH', buildDatabasePath(id))
-    const electronApp = await _electron.launch({ 
-      args: [entrypoint],
-      env: {
-        ...process.env,
-        __TESTING_ENVRONMENT_DB_PATH: buildDatabasePath(id),
-      },
-    });
-    electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
-
-    var page = await electronApp.firstWindow()
-    label:
-    while (options.windowTitle !== undefined) {
-      const windows = electronApp.windows()
-      for (let i = 0; i < windows.length; i++) {
-        const window = windows[i]
-        const title = await window.title()
-        if (title.toLocaleLowerCase() === options.windowTitle.toLocaleLowerCase()) {
-          page = window
-          break label
-        }
-      }
-      await sleep(100);
-    }
-
-    try {
-      await page.waitForLoadState('domcontentloaded')
-      yield page;
-    } finally {
-      await queries.destroy();
-      removeDatabaseFile(buildDatabasePath(id))
-      await electronApp.close();
-    }
-  }),
+  )},
   page: async ({}, use) => {
     // Remove default page so it doest cause troubles
     use(undefined as never);
   }
+})
+
+test.afterEach(() => {
+  const id = test.info().annotations.find(item => item.type === 'identifier')?.description
+  if (id !== undefined) {
+    const databasePath = buildDatabasePath(id)
+    const logFilePath = buildLogFilePath(id)
+  
+    if (test.info().status !== test.info().expectedStatus) {
+      console.log(`\x1b[43m${ `History log for test: ${id}` }\x1b[0m`)
+      const logContent = fs.readFileSync(logFilePath,'utf8')
+      console.log(`\x1b[41m${logContent}\x1b[0m`)
+    }
+  
+    removeFile(databasePath)
+    removeFile(logFilePath)
+  }
 });
+

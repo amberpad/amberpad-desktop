@@ -13,14 +13,15 @@ export default function setAppUpdaterHandlers (
     mainWindow?.webContents.send('updater.checking-for-update')
   })
   autoUpdater.on('update-available', (info) => {
+    console.info('App updater found an update', info)
     mainWindow?.webContents.send('updater.update-available', info)
   })
   autoUpdater.on('update-not-available', (info) => {
     mainWindow?.webContents.send('updater.update-not-available', info)
   })
-  autoUpdater.on('error', (err) => {
-    console.error(err)
-    mainWindow?.webContents.send('updater.error', err)
+  autoUpdater.on('error', (error) => {
+    console.error('Error while appliying an update', error)
+    mainWindow?.webContents.send('updater.error', error)
   })
   autoUpdater.on('download-progress', (progressObj) => {
     mainWindow?.webContents.send('updater.download-progress', progressObj)

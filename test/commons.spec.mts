@@ -40,7 +40,7 @@ const clearSearch = async (
   ).click();
 }
 
-test('Search should filter items by its keywords #6LGdgVNDb0', async ({ launchElectron }) => {
+test('Search should filter items by its keywords #6LGdgVNDb0', async ({ launchElectron }, testInfo) => {
   for await (const page of launchElectron({
     id: '6LGdgVNDb0', seed: 'operations/6LGdgVNDb0'
   })) {
@@ -59,5 +59,4 @@ test('Search should filter items by its keywords #6LGdgVNDb0', async ({ launchEl
     expect(await countPages(page)).toEqual(5);
     expect(await countNotes(page)).toEqual(5);
   }
-
 });

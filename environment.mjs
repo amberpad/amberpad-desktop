@@ -74,7 +74,11 @@ var configs = {
     default: false,
     verifier: /^(true|false)$/i,
     parser: (value) => value.toLocaleLowerCase() === 'true'
-
+  },
+  LOG_LEVEL: {
+    default: 'info',
+    verifier: /^(error|warn|info|verbose|debug|silly|false)$/i,
+    parser: (value) => value.toLocaleLowerCase() === 'false' ? false : value.toLocaleLowerCase()
   },
   RESET_SETTINGS_STORE: {
     default: false,

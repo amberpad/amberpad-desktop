@@ -44,7 +44,13 @@ const Database = {
 
     this.queriesManager = knex({
       client: 'better-sqlite3',
-      debug: false,//globals.DEBUG,
+      debug: true,
+      log: {
+        warn: console.warn,
+        error: console.error,
+        deprecate: console.warn,
+        debug: console.debug,
+      },
       useNullAsDefault: true,
       connection: {
         filename: databasePath,
@@ -103,6 +109,7 @@ const Database = {
         }
       }
     } catch (error) {
+      console.error('There was a problem running migrations in the database', JSON.stringify(error))
       ThrowFatalError({
         msg: 'Unable to set up the database, the app will be closed',
         error: error,
@@ -125,6 +132,8 @@ const Database = {
       await this.queriesManager.raw('PRAGMA user_version;')
       return true
     } catch (error) {
+      console.error('Unable to connect to the database, check that is decrypted correctly', 
+        JSON.stringify(error))
       ThrowFatalError({
         msg: 'Unable to connect to the database, the app will be closed',
         error: error,

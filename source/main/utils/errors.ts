@@ -18,7 +18,6 @@ export function ThrowError ({
       `Stack:\n${error.stack}\n\n` +
       `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
       `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
-    globals.DEBUG ? console.log(detail) : ''
     dialog.showMessageBox(undefined, {
       message: msg,
       detail: globals.DEBUG ? detail : '',
@@ -42,7 +41,6 @@ export function ThrowFatalError ({
       `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
       `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
 
-    console.error(detail)
     dialog.showMessageBox(undefined, {
       message: msg,
       detail: globals.DEBUG ? detail : '',

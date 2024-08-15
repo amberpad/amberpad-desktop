@@ -5,9 +5,11 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import setAppUpdaterHandlers from './services/appUpdater'
 import AppUpdater from 'electron-updater'
+import log from 'electron-log/main.js'
 
 import database from '@main/utils/database'
-import createMainWindow from '@main/services/mainWindow';
+import { resolveFromUserData } from '@main/utils/locations'
+import createMainWindow from '@main/services/mainWindow'
 import buildMenuTemplate from "./services/buildMenuTemplate"
 import { ThrowFatalError, ThrowError } from '@main/utils/errors';
 // Handlers
@@ -34,6 +36,27 @@ autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = false
 autoUpdater.autoRunAppAfterInstall = true
 autoUpdater.logger = ['testing'].includes(globals.ENVIRONMENT) ? null : console
+
+// Logger settings
+const loggerFileLocations = {
+  'production': resolveFromUserData('./logs/main.log'),
+  'development': resolveFromUserData('./logs/main.log'), 
+  'testing': process.env.__TESTING_ENVRONMENT_LOG_PATH,
+}
+
+const logLevel = globals.DEBUG ? globals.LOG_LEVEL : 'info';
+log.initialize();
+log.transports.console.level = logLevel;
+log.transports.file.level = logLevel;
+log.transports.file.maxSize = 10 * 1048576 // unit 1mb
+log.transports.file.resolvePathFn = () => 
+  loggerFileLocations[globals.ENVIRONMENT] || 
+  loggerFileLocations['production'];
+
+// assign log functions to console module
+// Log leves: error, warn, info, verbose, debug, silly
+Object.assign(console, log.functions);
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (checkSquirrelStartup) {
@@ -66,6 +89,7 @@ app.on('activate', () => {
 })
 
 app.whenReady()
+  .then(() => console.info('Starting the application...'))
   .then(() => setHandlers())
   .then(async () => await launch())
   .then(() => {
@@ -73,9 +97,10 @@ app.whenReady()
     globals.DEBUG && 
     /* @ts-ignore */
     installExtension.default(REACT_DEVELOPER_TOOLS)
-      .then((name) => console.log(`electron-dev-tools: Added Extension:  ${name}`))
-      .catch((err) => console.log(`electron-dev-tools: An error occurred: ${err}`));
+      .then((name) => console.info(`electron-dev-tools: Added Extension:  ${name}`))
+      .catch((err) => console.info(`electron-dev-tools: An error occurred: ${err}`));
   }).catch((error) => {
+    console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
     ThrowFatalError({
       msg: `There was an error launching the app`,
       error: error,
