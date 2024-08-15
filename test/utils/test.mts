@@ -110,7 +110,6 @@ export const test = base.extend<{
       }
     }
 
-    console.log(`LAUNCHING APP FOR TEST: ${id}`)
     const electronApp = await _electron.launch({ 
       args: [entrypoint],
       env: {
@@ -118,7 +117,7 @@ export const test = base.extend<{
         __TESTING_ENVRONMENT_DB_PATH: buildDatabasePath(id),
       },
     });
-    electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
+    //electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
 
     var page = await electronApp.firstWindow()
     label:

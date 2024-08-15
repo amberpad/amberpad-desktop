@@ -5,8 +5,10 @@ import { getResourcesDir, getPreloadEntry } from "@main/utils/locations";
 
 export default function createMainWindow () {
   const window = new BrowserWindow({
-    height: 768,
-    width: 1080,
+    width: 1080, height: 768,
+    ...(globals.ENVIRONMENT === 'testing' ? {
+      width: 540, height: 720,
+    }: {}),
     // If testing and not debuging mode run in headless mode, in background
     show: globals.ENVIRONMENT !== 'testing' || globals.DEBUG === true,
     hasShadow: true,
