@@ -44,6 +44,7 @@ const loggerFileLocations = {
   'testing': process.env.__TESTING_ENVRONMENT_LOG_PATH,
 }
 
+// Log leves: error, warn, info, verbose, debug, silly
 const logLevel = globals.DEBUG ? globals.LOG_LEVEL : 'info';
 log.initialize();
 log.transports.console.level = logLevel;
@@ -54,7 +55,6 @@ log.transports.file.resolvePathFn = () =>
   loggerFileLocations['production'];
 
 // assign log functions to console module
-// Log leves: error, warn, info, verbose, debug, silly
 Object.assign(console, log.functions);
 
 
@@ -91,7 +91,13 @@ app.on('activate', () => {
 app.whenReady()
   .then(() => console.info('Starting the application...'))
   .then(() => setHandlers())
+  .catch((error) => {
+    console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
+  })
   .then(async () => await launch())
+  .catch((error) => {
+    console.error(`There was an error launching the app: ${JSON.stringify(error)}`)
+  })
   .then(() => {
     globals.ENVIRONMENT === 'development' && 
     globals.DEBUG && 
