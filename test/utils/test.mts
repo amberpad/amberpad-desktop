@@ -110,6 +110,7 @@ export const test = base.extend<{
       }
     }
 
+    console.log('DATABASE PATH', buildDatabasePath(id))
     const electronApp = await _electron.launch({ 
       args: [entrypoint],
       env: {
