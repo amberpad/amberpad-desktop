@@ -13,8 +13,7 @@ const store = new Store<StoreType>({
     sidebarAperture: undefined,
     isSidebarOpen: undefined,
     selectedPageID: undefined,
-    //theme: undefined,
-    themeSource: undefined,
+    themeSource: 'system',
   }
 }) as Store<StoreType> & { 
   set: (key: string, any) => void, 

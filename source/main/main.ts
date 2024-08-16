@@ -22,6 +22,11 @@ import notesHandlers from '@main/handlers/notes.handler'
 import updaterHandlers from '@main/handlers/updater.handler'
 import themeHandlers from '@main/handlers/theme.handler'
 
+if (globals.ENVIRONMENT !== 'production') {
+  import('source-map-support/register.js')
+}
+
+
 const context: {
   mainWindow: BrowserWindow,
   database: {[key: string]: any},
@@ -92,7 +97,7 @@ app.whenReady()
   .then(() => console.info('Starting the application...'))
   .then(() => setHandlers())
   .catch((error) => {
-    ThrowFatalError({ msg: `Error while setting up hanlders at app start`, error })
+    ThrowFatalError({ msg: `Error while setting up handlers in main thread`, error })
   })
   .then(async () => await launch())
   .catch((error) => {

@@ -15,6 +15,6 @@ function getInitials() {
 export type Initials = ReturnType<typeof getInitials>
 
 export default function setup () {
-  nativeTheme.themeSource = store.get('themeSource')
+  nativeTheme.themeSource = store.get('themeSource') || 'system'
   ipcMain.handle('initials.getInitials', getInitials)
 }
