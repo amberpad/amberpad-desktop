@@ -16,7 +16,7 @@ type DatabaseType = knex.Knex<any, unknown[]> & {
 }
 
 const buildDatabasePath = (id: string) => 
-  `.run/amberpad.test${id ? ('.' + id) : ''}.db`;
+  `.run/amberpad.test${id ? ('.' + id) : ''}.sqlite`;
 
 const buildLogFilePath = (id: string) => 
   `.run/logs/test.${id ? ('.' + id) : ''}.log`;
@@ -117,6 +117,7 @@ export const test = base.extend<{
         env: {
           ...process.env,
           __TESTING_ENVRONMENT_DB_PATH: databasePath,
+          __TESTING_ENVRONMENT_DB_PASS: 'testing',
           __TESTING_ENVRONMENT_LOG_PATH: logFilePath,
         },
       });
