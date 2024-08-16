@@ -1,5 +1,6 @@
 /// <reference path="../globals.d.ts" />
 
+import util from 'node:util';
 import { app, BrowserWindow, ipcMain, Menu } from "electron"
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import checkSquirrelStartup from 'electron-squirrel-startup'
@@ -21,6 +22,7 @@ import pagesHandlers from '@main/handlers/pages.handler'
 import notesHandlers from '@main/handlers/notes.handler'
 import updaterHandlers from '@main/handlers/updater.handler'
 import themeHandlers from '@main/handlers/theme.handler'
+import chalk from "chalk"
 
 if (globals.ENVIRONMENT !== 'production') {
   import('source-map-support/register.js')
@@ -42,6 +44,7 @@ autoUpdater.autoInstallOnAppQuit = false
 autoUpdater.autoRunAppAfterInstall = true
 autoUpdater.logger = ['testing'].includes(globals.ENVIRONMENT) ? null : console
 
+
 // Logger settings
 const loggerFileLocations = {
   'production': resolveFromUserData('./logs/main.log'),
@@ -52,6 +55,15 @@ const loggerFileLocations = {
 // Log leves: error, warn, info, verbose, debug, silly
 const logLevel = globals.DEBUG ? globals.LOG_LEVEL : 'info';
 log.initialize();
+/* @ts-ignore */
+log.transports.console.format = ({ data, level, message }) => {
+  const text = util.format(...data);
+  return [ 
+    message.date.toISOString().slice(11, -1),
+    `[${level}]`,
+    text
+  ].map(item => level === 'error' ? chalk.red(item) : item)
+}
 log.transports.console.level = logLevel;
 log.transports.file.level = logLevel;
 log.transports.file.maxSize = 10 * 1048576 // unit 1mb

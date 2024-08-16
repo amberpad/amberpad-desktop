@@ -2,10 +2,9 @@ import path from 'node:path'
 import fs from 'node:fs'
 import { app } from 'electron'
 import knex from 'knex'
-import { JSONFilePreset } from 'lowdb/node'
-import { generate as generatePassphrase } from 'generate-passphrase'
+//import { JSONFilePreset } from 'lowdb/node'
+//import { generate as generatePassphrase } from 'generate-passphrase'
 
-import dbSession from "@main/utils/database/session"
 import hash from '@main/utils/database/hash'
 import { resolveFromRoot, resolveFromUserData } from "@main/utils/locations"
 import { ThrowFatalError, ThrowError } from '@main/utils/errors';
@@ -19,7 +18,7 @@ interface SessionFileContent {
  * Set up database constants
  ******************************************************************************/
 
-const INSECURE_PASSWORD = 'amberpad'
+const DEFAULT_INSECURE_PASSWORD = 'amberpad'
 
 const databaseLocations = {
   'production': resolveFromUserData('amberpad.sqlite'),
@@ -31,23 +30,13 @@ const databasePath = (
   databaseLocations['production']
 )
 
-const sessionLocations = {
-  'production': resolveFromUserData('amberpad.session'),
-  'development': resolveFromUserData('amberpad.development.session'), 
-  'testing': undefined
-}
-
-const sessionPath = (
-  sessionLocations[globals.ENVIRONMENT] || 
-  sessionLocations['production']
-)
-
 /******************************************************************************
  * Export database object
  ******************************************************************************/
 
 const Database = {
   queries: undefined,
+  status: 'disconnected' as 'connected' | 'disconnected',
   connectKnex: async function (passphrase: string) {
     // Create folder for db if it doesn't exists
     if (!fs.existsSync(path.dirname(databasePath))){
@@ -90,55 +79,34 @@ const Database = {
 
     return this.queries
   },
-  readSessionFile: async function (): Promise<SessionFileContent> {
-    const defaultContent = { hash: undefined }
-    if (fs.existsSync(sessionPath)) {
-      const sessionFile = await JSONFilePreset(sessionPath, defaultContent)
-      console.log('readSessionFile', sessionFile.data)
-      return sessionFile.data
-    }
-    throw('Session file could not be readed')
-  },
-  writeSessionFile: async function (content: SessionFileContent) {
-    // If there is already a session file delete it
-    fs.existsSync(sessionPath) && fs.unlinkSync(sessionPath)
-    const sessionFile = await JSONFilePreset(sessionPath, content)
-    await sessionFile.write()
-  },
-  sessionFileExists: () => {
-    return fs.existsSync(sessionPath)
-  },
   _delete: function () {
     try {
-      fs.unlinkSync(sessionPath)
       fs.unlinkSync(databasePath)
     } catch (error) {}
   },
-  create: async function () {
+  create: async function (passphrase: string = DEFAULT_INSECURE_PASSWORD) {
     if (!this.exists()) {
       try {
-        const passphrase = generatePassphrase()
-        const hashedPassphrase = await hash(passphrase)
-        await this.connectKnex(hashedPassphrase)
-        if (await this.testConnection()) {
-          await this.writeSessionFile({ hash: hashedPassphrase })
+        this.queries = await this.connectKnex(passphrase)
+
+        if (await this.testConnection() === false) {
+          throw new Error('Connection with db could not been stablished')
         }
         return this.queries
       } catch (error) {
         this._delete()
-        ThrowError({ msg: 'Error creating the database', error: error })
+        ThrowFatalError({ msg: 'Error creating the database', error: error })
       }
     }
   },
-  open: async function () {
+  open: async function (passphrase: string = DEFAULT_INSECURE_PASSWORD) {
     if (this.exists()) {
-      let { hash: hashedPassphrase } = await this.readSessionFile()
       if (globals.ENVIRONMENT === 'testing') {
         // Override passphrase in testing environment
-        hashedPassphrase = process.env['__TESTING_ENVRONMENT_DB_PASS']
+        passphrase = process.env['__TESTING_ENVRONMENT_DB_PASS']
       }
-      await this.connectKnex(hashedPassphrase)
-      if (!await this.testConnection()) {
+      await this.connectKnex(passphrase)
+      if (await this.testConnection() === false) {
         ThrowFatalError({ msg: 'Unable to connect to the database, the app will be closed' })
       }
       return this.queries
@@ -147,7 +115,7 @@ const Database = {
   exists: function () {
     return fs.existsSync(databasePath)
   },
-  connect: async function ()  {
+  connect: async function (passphrase: string = DEFAULT_INSECURE_PASSWORD)  {
     if (this.exists()) {
       this.queries = await this.open()
     } else {
@@ -199,6 +167,8 @@ const Database = {
   },
   destroy: async function () {
     this.queries.destroy();
+    this.queries = undefined
+    this.destroyContinuiosConnectionTesting();
   },
   testConnection: async function (): Promise<Boolean> {
     try {
@@ -208,6 +178,22 @@ const Database = {
       return false
     }
   },
+  /*
+  setUpContinuosConnectionTesting: function () {
+    this._heartbeat = this._heartbeat.bind(this)
+    this.heartbeatInverval = setInterval(this.heartbeat, 100)
+  },
+  destroyContinuiosConnectionTesting: function () {
+    clearInterval(this.heartbeatInverval)
+  },
+  _heartbeat: async function () {
+    const isConnected = await this.testConnection()
+    if (this.status !== 'disconnected' && !isConnected) {
+      // DB has been disconnected
+    }
+    this.status = isConnected ? 'connected' : 'disconnected'
+  },
+  */
   getManager: async function () {
     if (this.queries === undefined) {
       this.queries = await this.connect();

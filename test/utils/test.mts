@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { _electron } from 'playwright';
 import { test as base } from '@playwright/test';
+import chalk from 'chalk'
 import knex from 'knex'
 
 import { sleep } from './utils.mts';
@@ -162,9 +163,9 @@ test.afterEach(() => {
   
     if (test.info().status !== test.info().expectedStatus) {
       const logContent = fs.readFileSync(logFilePath,'utf8')
-      console.log(`\x1b[31m${ `Test ${id} failed this is the history log for the test` }\x1b[0m`)
-      console.log(`\x1b[31m${logContent}\x1b[0m`)
-      console.log(`\x1b[31m ======================== \x1b[0m`)
+      console.log(chalk.red(`Test ${id} failed this is the history log for the test`))
+      console.log(chalk.red(logContent))
+      console.log(chalk.red(' ======================== '))
     }
   
     removeFile(databasePath)

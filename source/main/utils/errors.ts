@@ -1,4 +1,5 @@
 import { dialog, app } from "electron"
+import chalk from 'chalk'
 
 import store from '@main/utils/electron-store'
 
@@ -14,19 +15,25 @@ export function ThrowError ({
   error=undefined,
 }: ThrowErrorParams = {} ) {
   if (error && globals.ENVIRONMENT !== 'testing') {
-    const detail = `Type: Error\n\n` +
+    const detail = (
+      `Type: Error\n\n`+
       `Stack:\n${error.stack || ''}\n\n` +
       `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
       `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
-    dialog.showMessageBox(undefined, {
-      message: msg,
-      detail: globals.DEBUG ? detail : '',
-      type: 'error',
-      title: title,
-      buttons: [
-        'Close'
-      ]
-    })
+    )
+
+    console.error(chalk.red(`${msg}\n${detail}`))
+    if (globals.ENVIRONMENT === 'production') {
+      dialog.showMessageBox(undefined, {
+        message: msg,
+        detail: globals.DEBUG ? detail : '',
+        type: 'error',
+        title: title,
+        buttons: [
+          'Close'
+        ]
+      })
+    }
   }
 }
 
@@ -36,12 +43,14 @@ export function ThrowFatalError ({
   error=undefined,
 }: ThrowErrorParams = {} ) {
   if (error !== undefined) {
-    const detail = `Type: Fatal Error\n\n` +
-    `Stack:\n${error.stack || ''}\n\n` +
-    `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
-    `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
+    const detail = (
+      `Type: Fatal Error\n\n`+
+      `Stack:\n${error.stack || ''}\n\n` +
+      `Globals:\n${JSON.stringify(globals, undefined, 4)}\n\n` +
+      `Electron store:\n${JSON.stringify(store.store, undefined, 4)}\n\n`
+    )
 
-    console.error(`${msg}\n${detail}`)
+    console.error(chalk.red(`${msg}\n${detail}`))
     if (globals.ENVIRONMENT === 'production') {
       dialog.showMessageBox(undefined, {
         message: msg,
@@ -54,8 +63,8 @@ export function ThrowFatalError ({
       }).then(() => {
         app.quit()
       })
+    } else {
+      app.quit()
     }
-  } else {
-    console.error(`${msg}`)
   }
 }
