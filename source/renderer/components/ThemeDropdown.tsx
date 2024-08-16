@@ -35,6 +35,11 @@ export default function ThemeDropdown (
           p={context.theme === 'light' ? '0' : '2'}
         >
           <IconButton
+            className={css`
+              @media (prefers-color-scheme: dark) {
+                color: var(--text-color);
+              }
+            `}
             size='2'
             variant={context.theme === 'light' ? 'outline' : 'ghost'}
             color={context.theme === 'light' ? 'gray' : undefined}

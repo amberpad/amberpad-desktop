@@ -18,6 +18,7 @@ injectGlobal`
   .page__options {
     opacity: 0.0;
   }
+
   .page:hover .page__options {
     opacity: 1.0;
   }
@@ -47,6 +48,10 @@ injectGlobal`
   }
 
   @media (prefers-color-scheme: dark) {
+    .page:hover .page__options {
+      color: var(--text-color);
+    }
+
     .page__bullet {
       width: 3px;
       border-left: 3px solid var(--accent-a5);

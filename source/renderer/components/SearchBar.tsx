@@ -13,9 +13,6 @@ const SearchBar = () => {
       search: state.commons.search,
       theme: state.commons.theme,
     },
-    notes: {
-      page: state.notes.page,
-    },
   }))
   const [state, setState] = useState({
     search: '',
@@ -64,7 +61,7 @@ const SearchBar = () => {
               variant="ghost"
               onClick={() => sendSearch(state.search)}
             >
-              <FontAwesomeIcon 
+              <FontAwesomeIcon
                 size='1x'
                 icon={faMagnifyingGlass}
               />

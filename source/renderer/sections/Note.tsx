@@ -13,6 +13,7 @@ import DeleteNote from "@renderer/dialogs/DeleteNote"
 import type { AmberpadEditor } from "@renderer/utils/slate"
 import type { BoxProps } from "@radix-ui/themes"
 import type { NoteType } from '@ts/models/Notes.types'
+import { css } from "@emotion/css"
 
 function Note (
   { 
@@ -83,6 +84,11 @@ function Note (
                 <DropdownMenu.Trigger>
                   <IconButton
                     data-testid='note-options-button'
+                    className={css`
+                      @media (prefers-color-scheme: dark) {
+                        color: var(--text-color);
+                      }
+                    `}
                     variant="ghost"
                     size='1'
                   >

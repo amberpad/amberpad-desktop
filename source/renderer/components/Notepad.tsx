@@ -23,6 +23,12 @@ injectGlobal`
   .notepad:hover .notepad__options {
     opacity: 1.0;
   }
+
+  @media (prefers-color-scheme: dark) {
+    .notepad:hover .notepad__options {
+      color: var(--text-color);
+    }
+  }
 `
 
 function Notepad ({
