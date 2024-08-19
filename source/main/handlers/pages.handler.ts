@@ -5,6 +5,7 @@ import knex from 'knex'
 
 import { ThrowError } from '@main/utils/errors'
 import database from '@main/utils/database'
+import * as pagesQueries from '@main/queries/pages'
 
 import type { 
   QueryHandlerType,
@@ -27,68 +28,38 @@ export default function setup () {
   ipcMain.handle(
     'pages.get-all',
     async function (_, payload) {
-      const options = Object.assign({
-        page: 1,
-        paginationOffset: globals.ASSOCIATED_PAGES_PAGINATION_OFFSET,
-      }, payload)
-      options.page = options.page < 1 ? 1 : options.page
-
-      const data = await knex('pages')
-        .select('*')
-        .orderBy([{ column: 'updated_at', order: 'desc' }])
-        .limit(options.paginationOffset)
-        .offset(options.paginationOffset * (options.page - 1))
-
-      return {
-        values: data
-      }
+      return await pagesQueries.getAll(payload)
     } as ModelQueryHandlerType<PagesFiltersPayloadType, PageType>
   )
 
   ipcMain.handle(
     'pages.get',
     async function get (_, payload) {
-      try {
-        const knex = await database.getManager();
-        const notepadsColumns = Object.keys(await knex('notepads').columnInfo())
-        const pagesColumns = Object.keys(await knex('pages').columnInfo())
-        const data = await knex('pages')
+      for await (const queries of database.withConnection()) {
+        const notepadsColumns = Object.keys(await queries('notepads').columnInfo())
+        const pagesColumns = Object.keys(await queries('pages').columnInfo())
+        const data = await queries('pages')
           .select([
             ...(pagesColumns.map((item) => ({[item]: `pages.${item}`}))),
             ...(notepadsColumns.map((item) => ({[`notepad.${item}`]: `notepads.${item}`})))
           ])
           .from('pages')
           .leftJoin('notepads', 'pages.notepadID', 'notepads.id')
-          .where({ 'pages.id': payload.pageID })
+          .where({ 'pages.id': payload.id })
   
         if (data.length === 0) {
           return { value: undefined }
-          //throw('Row could not been got from database')
         }
         return { value: unflatten(data[0]) }
-      } catch(error) {
-        console.error('Error while running \'pages.get\' handler', JSON.stringify(error))
       }
-
-    }  as QueryHandlerType<{ pageID: PageIDType}, { value: PageType & { notepad: NotepadType } }>
+    }  as QueryHandlerType<{ id: PageIDType}, { value: PageType & { notepad: NotepadType } }>
   )
 
   ipcMain.handle(
     'pages.create',
     async function create (_, payload) {
-      try {
-        const knex = await database.getManager();
-        const data = await knex('pages')
-          .returning('*')
-          .insert(payload.data)
-        return {
-          values: data as any[]
-        }
-      } catch (error) {
-        ThrowError({ 
-          content: 'Row could not been created',
-          error: error,
-        })
+      return {
+        values: await database.helpers.create('pages', payload.data)
       }
     } as ModelCreateHandlerType<PagePayloadType, PageType>
   )
@@ -97,8 +68,9 @@ export default function setup () {
     'pages.update',
     async function update (_, payload) {
       try {
-        const knex = await database.getManager();
+        const knex = await database.getConnection();
         const instance = payload.value
+        /* @ts-ignore */
         instance.updatedAt = knex.fn.now()
 
         const columns = Object.keys(await knex('pages').columnInfo())
@@ -112,7 +84,7 @@ export default function setup () {
         return {value: data[0] as any}
       } catch (error) {
         ThrowError({ 
-          content: 'Row could not been updated',
+          msg: 'Row could not been updated',
           error: error,
         })
       }
@@ -123,7 +95,7 @@ export default function setup () {
     'pages.destroy',
     async function destroy (_, payload) {
       try {
-        const knex = await database.getManager();
+        const knex = await database.getConnection();
         const data = await knex('pages')
           .where({ id: payload.value.id })
           .delete('*')
@@ -139,7 +111,7 @@ export default function setup () {
         }
       } catch (error) {
         ThrowError({ 
-          content: 'Row could not been removed',
+          msg: 'Row could not been removed',
           error: error,
         })
       }
@@ -149,25 +121,19 @@ export default function setup () {
   ipcMain.handle(
     'pages.moveTop',
     async function update (_, payload): Promise<boolean> {
-      try {
-        const knex = await database.getManager()
+      for await (const queries of database.withConnection()) {
 
-        const updatedPages = await knex('pages')
-          .where({ id: payload.value })
-          .update({ updated_at: knex.fn.now() }, '*')
+        const updatedPages = await queries('pages')
+        .where({ id: payload.value })
+        .update({ updated_at: queries.fn.now() }, '*')
 
-        const updatesNotepads = await knex('notepads')
-          .where({ id: updatedPages[0].notepadID })
-          .update({ updated_at: knex.fn.now() }, '*')
+      const updatedNotepads = await queries('notepads')
+        .where({ id: updatedPages[0].notepadID })
+        .update({ updated_at: queries.fn.now() }, '*')
 
-        return true
-      } catch (error) {
-        ThrowError({ 
-          content: 'Values could not been updated',
-          error: error,
-        })
-        return false
+      return true        
       }
     }
   )
+
 }

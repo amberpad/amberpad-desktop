@@ -27,9 +27,7 @@ export const fetchNotepadsThunk = createAsyncThunk(
     const response = await window.electronAPI.notepads.getAll({
       page: payload.page,
       search: payload.search,
-      paginationOffset: globals.PAGINATION_OFFSET,
       associatedPaginationPage: 1,
-      associatedPaginationOffset: globals.ASSOCIATED_PAGES_PAGINATION_OFFSET,
     })
 
     if (thunkAPI.signal.aborted)
@@ -167,11 +165,13 @@ export const fetchPagesThunk = createAsyncThunk(
           state.paginationMap[notepad.id].page :
           2
       }))
-    if (!notepads) 
+    
+    if (!notepads) {
       return { notepads: { values: [] } }
+    }
+
     const response = await window.electronAPI.notepads.getPages({
       notepads: notepads,
-      search: '',
     })
 
     if (thunkAPI.signal.aborted)

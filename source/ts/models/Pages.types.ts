@@ -18,5 +18,4 @@ export type PageType = BaseModelType & PageDataType
 
 export interface PagesFiltersPayloadType {
   page?: number,
-  paginationOffset?: number,
 }

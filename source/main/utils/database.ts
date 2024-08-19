@@ -1,22 +1,52 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import { app } from 'electron'
 import knex from 'knex'
-//import { JSONFilePreset } from 'lowdb/node'
-//import { generate as generatePassphrase } from 'generate-passphrase'
+import lodash from 'lodash'
 
 import hash from '@main/utils/database/hash'
 import { resolveFromRoot, resolveFromUserData } from "@main/utils/locations"
 import { ThrowFatalError, ThrowError } from '@main/utils/errors';
 import seed from '@main/utils/database/seed'
 
-interface SessionFileContent {
-  hash: string
+
+/******************************************************************************
+* Interfaces
+******************************************************************************/
+
+interface DatabaseHelpers {
+  //get: () => void
+  //all: () => void
+  create: <Payload=any, Return=any>(
+    table: string, 
+    payload: Payload[]
+  ) => Promise<Return[]>
+  delete: () => void
+  update: () => void
+
+  getColumns: (
+    table: string
+  ) => Promise<string[]>
+}
+
+interface DatabaseManager {
+  queries: knex.Knex<any, unknown[]>
+  currentTransaction: knex.Knex.Transaction<any, any[]>
+  _connectKnex: (passphrase: string) => DatabaseManager['queries']
+  _delete: () => void
+  exists: () => boolean
+  create: (passphrase?: string) => Promise<DatabaseManager['queries']>
+  testConnection: () => Promise<boolean>
+  getConnection: () => Promise<DatabaseManager['queries']>
+  connect: (passphrase?: string) => Promise<DatabaseManager['queries']>
+  destroy: () => void
+  applyMigrations: (options?: { applySeed?: boolean }) => Promise<void>
+  withConnection: () => AsyncGenerator<DatabaseManager['queries'], void, unknown>
+  helpers: DatabaseHelpers
 }
 
 /******************************************************************************
- * Set up database constants
- ******************************************************************************/
+* Set up database constants
+******************************************************************************/
 
 const DEFAULT_INSECURE_PASSWORD = 'amberpad'
 
@@ -31,200 +61,228 @@ const databasePath = (
 )
 
 /******************************************************************************
- * Export database object
- ******************************************************************************/
+* Database object
+******************************************************************************/
 
-const Database = {
-  queries: undefined,
-  status: 'disconnected' as 'connected' | 'disconnected',
-  connectKnex: async function (passphrase: string) {
-    // Create folder for db if it doesn't exists
-    if (!fs.existsSync(path.dirname(databasePath))){
-      fs.mkdirSync(path.dirname(databasePath))
+const context: Partial<DatabaseManager> = {
+}
+
+context._connectKnex = (passphrase) => {
+  const instance = knex({
+    client: 'better-sqlite3',
+    debug: true,
+    log: {
+      warn: console.warn,
+      error: console.error,
+      deprecate: console.warn,
+      debug: console.debug,
+    },
+    useNullAsDefault: true,
+    connection: {
+      filename: databasePath,
+      options: {
+        // note: we need this in order to use encryption
+        nativeBinding: resolveFromRoot(
+          'node_modules',
+          'better-sqlite3-multiple-ciphers',
+          'build',
+          'Release',
+          'better_sqlite3.node'
+        )
+      }
+    },
+    pool: {
+      // https://knexjs.org/faq/recipes.html#db-access-using-sqlite-and-sqlcipher
+      afterCreate(db, fn) {
+        db.pragma(`cipher='sqlcipher'`)
+        db.pragma(`legacy=4`)
+        db.pragma(`key='${passphrase}'`);
+        fn();
+      }
+    }
+  })
+
+  context.queries = instance
+  return instance
+}
+
+context._delete = () => {
+  try {
+    fs.unlinkSync(databasePath)
+  } catch (error) {}
+}
+
+context.create = async (
+  passphrase = DEFAULT_INSECURE_PASSWORD
+) => {
+  if (!context.exists()) {
+    try {
+      context.queries = await context._connectKnex(passphrase)
+
+      if (await context.testConnection() === false) {
+        throw new Error('Connection with db could not been stablished')
+      }
+
+      // Apply migrations
+      await context.applyMigrations({ applySeed: true })
+
+      return context.queries
+    } catch (error) {
+      context._delete()
+      ThrowFatalError({ msg: 'Error creating the database', error: error })
+    }
+  }
+}
+
+context.exists = () => {
+  return fs.existsSync(databasePath)
+}
+
+context.connect = async (
+  passphrase = DEFAULT_INSECURE_PASSWORD
+) => {
+  if (await context.testConnection() === true) {
+    return context.queries
+  }
+
+  if (context.exists()) {
+    if (globals.ENVIRONMENT === 'testing') {
+      // Override passphrase in testing environment
+      passphrase = process.env['__TESTING_ENVRONMENT_DB_PASS']
+    }
+    context._connectKnex(passphrase)
+    if (await context.testConnection() === false) {
+      ThrowFatalError({ msg: 'Unable to connect to the database, the app will be closed' })
     }
 
-    this.queries = knex({
-      client: 'better-sqlite3',
-      debug: true,
-      log: {
-        warn: console.warn,
-        error: console.error,
-        deprecate: console.warn,
-        debug: console.debug,
-      },
-      useNullAsDefault: true,
-      connection: {
-        filename: databasePath,
-        options: {
-          // note: we need this in order to use encryption
-          nativeBinding: resolveFromRoot(
-            'node_modules',
-            'better-sqlite3-multiple-ciphers',
-            'build',
-            'Release',
-            'better_sqlite3.node'
-          )
-        }
-      },
-      pool: {
-        // https://knexjs.org/faq/recipes.html#db-access-using-sqlite-and-sqlcipher
-        afterCreate(db, fn) {
-          db.pragma(`cipher='sqlcipher'`)
-          db.pragma(`legacy=4`)
-          db.pragma(`key='${passphrase}'`);
-          fn();
-        }
-      }
+    // Apply migrations
+    await context.applyMigrations()
+    return context.queries
+  }
+}
+
+context.testConnection = async () => {
+  try {
+    if (
+      context.queries === undefined || 
+      context.queries === null
+    ) {
+      return false
+    }
+    await context.queries.raw('PRAGMA user_version;')
+    return true
+  } catch (error) {
+    return false
+  }
+},
+
+context.getConnection = async () => {
+  if (!context.exists()) {
+    console.error('A database to connect with doesn\' exist')
+  }
+  if (context.exists() && !await context.testConnection()) {
+    console.error('There is no database connection available')
+  }
+
+  return context.queries
+}
+
+context.withConnection = async function* () {
+  const connection = await context.getConnection()
+  const transaction = await connection.transaction()
+  const transactionRef = { commit: true}
+  try {
+    context.currentTransaction = transaction
+    yield transaction;
+  } catch (error) {
+    ThrowError({ msg: 'Error accessing the database', error })
+    transactionRef.commit = false
+  } finally {
+    transactionRef.commit ? 
+      transaction.commit() :
+      transaction.rollback()
+    context.currentTransaction = undefined
+  }
+}
+context.withConnection.bind(context)
+
+context.destroy = async () => {
+  context.queries.destroy();
+  context.queries = undefined
+}
+
+context.applyMigrations = async (options={  applySeed: false }) => {
+  if (!context.exists() || !await context.testConnection()) {
+    console.error('There must exit a database connection to apply migrations')
+    return
+  }
+
+  try {
+    const [version, applied] = await context.queries.migrate.latest({
+      directory: resolveFromRoot('./resources/migrations'),
+      extension: 'ts',
+      tableName: 'knex_migrations'
+    })
+    const [completed, pending] = await context.queries.migrate.list({
+      directory: resolveFromRoot('./resources/migrations'),
+      extension: 'ts',
+      tableName: 'knex_migrations'
     })
 
-    return this.queries
-  },
-  _delete: function () {
-    try {
-      fs.unlinkSync(databasePath)
-    } catch (error) {}
-  },
-  create: async function (passphrase: string = DEFAULT_INSECURE_PASSWORD) {
-    if (!this.exists()) {
-      try {
-        this.queries = await this.connectKnex(passphrase)
+    if (
+      options.applySeed &&
+      pending.length === 0 &&
+      globals.ENVIRONMENT === 'development' &&
+      globals.SEED !== undefined && 
+      globals.SEED !== null
+    ) {
+      await seed(context.queries, globals.SEED)
+    }
+  } catch (error) {
+    console.error('There was a problem running migrations in the database', JSON.stringify(error))
+    ThrowFatalError({
+      msg: 'Unable to set up the database, the app will close',
+      error: error,
+    })
+  }
+}
 
-        if (await this.testConnection() === false) {
-          throw new Error('Connection with db could not been stablished')
-        }
-        return this.queries
-      } catch (error) {
-        this._delete()
-        ThrowFatalError({ msg: 'Error creating the database', error: error })
-      }
-    }
-  },
-  open: async function (passphrase: string = DEFAULT_INSECURE_PASSWORD) {
-    if (this.exists()) {
-      if (globals.ENVIRONMENT === 'testing') {
-        // Override passphrase in testing environment
-        passphrase = process.env['__TESTING_ENVRONMENT_DB_PASS']
-      }
-      await this.connectKnex(passphrase)
-      if (await this.testConnection() === false) {
-        ThrowFatalError({ msg: 'Unable to connect to the database, the app will be closed' })
-      }
-      return this.queries
-    }
-  },
-  exists: function () {
-    return fs.existsSync(databasePath)
-  },
-  connect: async function (passphrase: string = DEFAULT_INSECURE_PASSWORD)  {
+/******************************************************************************
+* Helpers
+******************************************************************************/
+
+context.helpers = {} as DatabaseHelpers
+
+context.helpers.getColumns = async (table) => {
+  const manager = context.currentTransaction || context.queries
+  if (manager === undefined || manager === null) {
+    console.error('Database must be open to use this helper')
+  }
+  return Object.keys(await manager(table).columnInfo())
+}
+
+context.helpers.create = async (table, payload) => {
+  for await (const queries of context.withConnection()) {
+    const columns = await context.helpers.getColumns(table)
+    const data = await queries(table)
+      .returning('*')
+      .insert(payload.map(item => lodash.pick(item, columns)))
+    return data as any[]
+  }
+}
+
+/******************************************************************************
+* Exports
+******************************************************************************/
+
+/*
     if (this.exists()) {
       this.queries = await this.open()
     } else {
       this.queries = await this.create()
     }
-    return this.queries;
-  },
-  applyMigrations: async function () {
-    try {
-      const dbExistsFlag = fs.existsSync(resolveFromRoot('./resources/migrations'))
-      const [version, applied] = await this.queries.migrate.latest({
-        directory: resolveFromRoot('./resources/migrations'),
-        extension: 'ts',
-        tableName: 'knex_migrations'
-      })
-      const [completed, pending] = await this.queries.migrate.list({
-        directory: resolveFromRoot('./resources/migrations'),
-        extension: 'ts',
-        tableName: 'knex_migrations'
-      })
+*/
 
-      if (
-        !dbExistsFlag &&
-        pending.length === 0 &&
-        globals.ENVIRONMENT === 'development' &&
-        globals.SEED !== undefined && 
-        globals.SEED !== null
-      ) {
-
-        await seed(this.queries, globals.SEED)
-      }
-    } catch (error) {
-      console.error('There was a problem running migrations in the database', JSON.stringify(error))
-      ThrowFatalError({
-        msg: 'Unable to set up the database, the app will be closed',
-        error: error,
-      })
-    }
-  },
-  init: async function () {
-    if (this.queries === undefined) {
-      this.queries = await this.connect();
-    }
-
-    // Run setup migrations
-    await this.applyMigrations()
-
-    return this
-  },
-  destroy: async function () {
-    this.queries.destroy();
-    this.queries = undefined
-    this.destroyContinuiosConnectionTesting();
-  },
-  testConnection: async function (): Promise<Boolean> {
-    try {
-      await this.queries.raw('PRAGMA user_version;')
-      return true
-    } catch (error) {
-      return false
-    }
-  },
-  /*
-  setUpContinuosConnectionTesting: function () {
-    this._heartbeat = this._heartbeat.bind(this)
-    this.heartbeatInverval = setInterval(this.heartbeat, 100)
-  },
-  destroyContinuiosConnectionTesting: function () {
-    clearInterval(this.heartbeatInverval)
-  },
-  _heartbeat: async function () {
-    const isConnected = await this.testConnection()
-    if (this.status !== 'disconnected' && !isConnected) {
-      // DB has been disconnected
-    }
-    this.status = isConnected ? 'connected' : 'disconnected'
-  },
-  */
-  getManager: async function () {
-    if (this.queries === undefined) {
-      this.queries = await this.connect();
-    }
-    return this.queries;
-  },
-  withManager: async function* (
-    { 
-      errorMessage=undefined
-    }: { 
-      errorMessage?: string 
-    }
-  ) {
-    const manager = this.getManager()
-    try {
-      yield manager;
-    } catch (error) {
-      ThrowError({ 
-        msg: errorMessage !== undefined ? 
-          errorMessage : 'Error executing operation in the database',
-        error: error,
-      })
-    } finally {
-    }
-  },
-}
-
-// Bind all functions in singleton object to avoid bugs by changing context
-// of object's functions in the future
-Object.values(Database)
-  .filter(value => typeof value === 'function')
-  .forEach(fn => fn.bind(Database))
-
-export default Database
+export default {
+  ...context
+} as DatabaseManager

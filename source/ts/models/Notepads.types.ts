@@ -17,9 +17,7 @@ export type NotepadType = BaseModelType & NotepadDataType
 export interface NotepadsFiltersPayloadType {
   page?: number,
   search?: string,
-  paginationOffset?: number,
   associatedPaginationPage?: number,
-  associatedPaginationOffset?: number,
 }
 
 export interface NotepadsPagesFiltersPayloadType {
@@ -27,6 +25,4 @@ export interface NotepadsPagesFiltersPayloadType {
     id: NotepadIDType,
     page: number
   }[],
-  search?: string,
-  paginationOffset?: number,
 }

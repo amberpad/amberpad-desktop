@@ -2,13 +2,14 @@
 
 import util from 'node:util';
 import { app, BrowserWindow, ipcMain, Menu } from "electron"
-import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
+//import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import checkSquirrelStartup from 'electron-squirrel-startup'
 import setAppUpdaterHandlers from './services/appUpdater'
 import AppUpdater from 'electron-updater'
 import log from 'electron-log/main.js'
 
-import database from '@main/utils/database'
+//import database from '@main/utils/database'
+import database from '@main/utils/database';
 import { resolveFromUserData } from '@main/utils/locations'
 import createMainWindow from '@main/services/mainWindow'
 import buildMenuTemplate from "./services/buildMenuTemplate"
@@ -115,14 +116,15 @@ app.whenReady()
   .catch((error) => {
     ThrowFatalError({ msg: `Error while launcing the app`, error })
   })
+  /*
   .then(() => {
     globals.ENVIRONMENT === 'development' && 
     globals.DEBUG && 
-    /* @ts-ignore */
     installExtension.default(REACT_DEVELOPER_TOOLS)
       .then((name) => console.info(`electron-dev-tools: Added Extension:  ${name}`))
       .catch((err) => console.error(`electron-dev-tools: An error occurred: ${err}`));
   })
+  */
 
 /****************************************************************************** 
 * Setup functions
@@ -140,6 +142,13 @@ function setHandlers () {
 }
 
 async function launch() {
+  if (!database.exists()) {
+    await database.create();
+  }
+  await database.connect();
+  setAppUpdaterHandlers(context.mainWindow);
+
+  // Launch main window 
   let windows = BrowserWindow.getAllWindows();
   if (windows.length === 0) {
     context.mainWindow = createMainWindow();
@@ -148,8 +157,6 @@ async function launch() {
     windows[0].show();
     windows[0].focus();
   }
-  await database.init();
-  setAppUpdaterHandlers(context.mainWindow);
 }
 
 function destroy() {

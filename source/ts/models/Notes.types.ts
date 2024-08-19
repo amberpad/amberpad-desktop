@@ -20,5 +20,4 @@ export interface NotesFiltersPayloadType {
   search?: string,
   pageID?: PageIDType,
   page?: number,
-  paginationOffset?: number,
 }

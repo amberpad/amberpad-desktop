@@ -86,7 +86,10 @@ export const test = base.extend<{
   ) => AsyncGenerator<Page, void, unknown>
 }>({
   launchElectron: async({ }, use, testInfo) => {
-    use(
+    const context = {
+      testId: undefined as unknown as string
+    }
+    await use(
       async function* (
         options={ 
           id: undefined,
@@ -94,76 +97,69 @@ export const test = base.extend<{
           seed: undefined
         }
     ) {
-      // If not ID generate a random one
-      const id = options.id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
-      testInfo.annotations.push({ type: 'identifier', description: id })
-      const databasePath = buildDatabasePath(id)
-      const logFilePath = buildLogFilePath(id)
+        // If not ID generate a random one
+        const id = options.id || Math.floor(Math.random() * 0xffffffffff).toString(16).padEnd(10, '0');
+        //testInfo.annotations.push({ type: 'identifier', description: id })
+        context.testId = id
+        const databasePath = buildDatabasePath(id)
+        const logFilePath = buildLogFilePath(id)
 
-      const queries = await connectDatabase(id)
-      if (options.seed !== undefined) {
+        const queries = await connectDatabase(id)
+        if (options.seed !== undefined) {
+          try {
+            await seed(queries, options.seed);
+          } catch (error) {
+            if (error.code === 'ERR_MODULE_NOT_FOUND') {
+              console.warn(`Seed '${options.seed}' was not found in the seeds folder"`);
+            } else if (error.code !== 'ERR_MODULE_NOT_FOUND') {
+              throw error;
+            }
+          }
+        }
+
+        const electronApp = await _electron.launch({ 
+          args: [entrypoint],
+          env: {
+            ...process.env,
+            __TESTING_ENVRONMENT_DB_PATH: databasePath,
+            __TESTING_ENVRONMENT_DB_PASS: 'testing',
+            __TESTING_ENVRONMENT_LOG_PATH: logFilePath,
+          },
+        });
+        //electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
+
+        var page = await electronApp.firstWindow()
+        label:
+        while (options.windowTitle !== undefined) {
+          const windows = electronApp.windows()
+          for (let i = 0; i < windows.length; i++) {
+            const window = windows[i]
+            const title = await window.title()
+            if (title.toLocaleLowerCase() === options.windowTitle.toLocaleLowerCase()) {
+              page = window
+              break label
+            }
+          }
+          await sleep(100);
+        }
+
         try {
-          await seed(queries, options.seed);
-        } catch (error) {
-          if (error.code === 'ERR_MODULE_NOT_FOUND') {
-            console.warn(`Seed '${options.seed}' was not found in the seeds folder"`);
-          } else if (error.code !== 'ERR_MODULE_NOT_FOUND') {
-            throw error;
-          }
+          await page.waitForLoadState('domcontentloaded')
+          yield page;
+        } finally {
+          await queries.destroy();
+          await electronApp.close();
         }
       }
+    )
 
-      const electronApp = await _electron.launch({ 
-        args: [entrypoint],
-        env: {
-          ...process.env,
-          __TESTING_ENVRONMENT_DB_PATH: databasePath,
-          __TESTING_ENVRONMENT_DB_PASS: 'testing',
-          __TESTING_ENVRONMENT_LOG_PATH: logFilePath,
-        },
-      });
-      //electronApp.on('console', (msg) => console.log(`\x1b[40m${msg.text()}\x1b[0m`))
-
-      var page = await electronApp.firstWindow()
-      label:
-      while (options.windowTitle !== undefined) {
-        const windows = electronApp.windows()
-        for (let i = 0; i < windows.length; i++) {
-          const window = windows[i]
-          const title = await window.title()
-          if (title.toLocaleLowerCase() === options.windowTitle.toLocaleLowerCase()) {
-            page = window
-            break label
-          }
-        }
-        await sleep(100);
-      }
-
-      try {
-        await page.waitForLoadState('domcontentloaded')
-        yield page;
-      } finally {
-        await queries.destroy();
-        await electronApp.close();
-        //removeFile(databasePath)
-      }
-    }
-  )},
-  page: async ({}, use) => {
-    // Remove default page so it doest cause troubles
-    use(undefined as never);
-  }
-})
-
-test.afterEach(() => {
-  const id = test.info().annotations.find(item => item.type === 'identifier')?.description
-  if (id !== undefined) {
-    const databasePath = buildDatabasePath(id)
-    const logFilePath = buildLogFilePath(id)
+  if (context.testId !== undefined) {
+    const databasePath = buildDatabasePath(context.testId)
+    const logFilePath = buildLogFilePath(context.testId)
   
-    if (test.info().status !== test.info().expectedStatus) {
+    if (testInfo.status !== testInfo.expectedStatus) {
       const logContent = fs.readFileSync(logFilePath,'utf8')
-      console.log(chalk.red(`Test ${id} failed this is the history log for the test`))
+      console.log(chalk.red(`Test ${context.testId} failed this is the history log for the test`))
       console.log(chalk.red(logContent))
       console.log(chalk.red(' ======================== '))
     }
@@ -171,5 +167,10 @@ test.afterEach(() => {
     removeFile(databasePath)
     removeFile(logFilePath)
   }
-});
 
+  },
+  page: async ({}, use) => {
+    // Remove default page so it doest cause troubles
+    use(undefined as never);
+  }
+})

@@ -24,7 +24,7 @@ export const fetchSelectedPageThunk = createAsyncThunk(
     }
 
     const response = await window.electronAPI.pages.get({
-      pageID: payload.pageID
+      id: payload.pageID
     })
 
     if (thunkAPI.signal.aborted)

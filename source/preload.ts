@@ -108,7 +108,7 @@ export const electronAPI = {
     }>,
     get: ((payload) => {
       return ipcRenderer.invoke('pages.get', payload)
-    }) as QueryInvokerType<{ pageID: PageIDType}, { value: PageType & { notepad: NotepadType } }>,
+    }) as QueryInvokerType<{ id: PageIDType}, { value: PageType & { notepad: NotepadType } }>,
     create: ((payload) => {
       return ipcRenderer.invoke('pages.create', payload)
     }) as ModelCreateInvokerType<PagePayloadType, PageType>,
