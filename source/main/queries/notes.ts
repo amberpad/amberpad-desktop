@@ -3,6 +3,7 @@ import lodash from 'lodash'
 
 import { ThrowError } from '@main/utils/errors'
 import database from '@main/utils/database'
+import knex from 'knex'
 
 import type { 
   ModelQueryHandlerType,
@@ -15,46 +16,46 @@ import type {
   NotesFiltersPayloadType, 
   NoteType 
 } from '@ts/models/Notes.types'
+import { RawQuery } from '@main/utils/database/raw'
+import { Data } from '@main/utils/database/data'
 
 export async function getAll (
   options: NotesFiltersPayloadType = {
     search: null,
     pageID: undefined,
-    page: 1,
+    nextCursor: null,
   }
 ) {
-  options.page = options.page < 1 ? 1 : options.page
   for await (const queries of database.withConnection()) {
-    const data = await queries.raw(
+    const baseQuery = RawQuery(
       `
-        SELECT * 
+        SELECT *
         FROM 
-          (SELECT noteID, 
-                  rank 
-          FROM searches 
-          WHERE noteContent MATCH ?) AS "SearchQuery" 
+            (SELECT noteID, rank 
+            FROM searches 
+            WHERE noteContent MATCH :search:) AS "SearchQuery" 
         FULL JOIN 
-          (SELECT * 
-          FROM notes) AS "NotesQuery" ON "SearchQuery"."noteID" = "NotesQuery"."id" 
-        WHERE IIF(?=\'""\', 1, rank NOT NULL) 
-          AND IIF(?=0, 1, pageID=?) 
-        ORDER BY "SearchQuery"."rank" DESC, 
-                "NotesQuery"."updated_at" DESC
-        LIMIT ?
-        OFFSET ?
-      `.replace(/\s+/g,' '),
-      [
-        `"${options.search}"`,
-        `"${options.search}"`,
-        options.pageID || 0,
-        options.pageID || 0,
-        globals.PAGINATION_OFFSET,
-        globals.PAGINATION_OFFSET * (options.page - 1)
-      ]
+            (SELECT * FROM notes) AS 
+            "NotesQuery" ON "SearchQuery"."noteID" = "NotesQuery"."id" 
+        WHERE IIF(:search:='""', 1, rank NOT NULL) 
+            AND IIF(:pageId:=0, 1, pageID=:pageId:)
+        ORDER BY "SearchQuery"."rank" DESC,
+            "NotesQuery"."id" DESC
+      `,
+      {
+        search: `"${options.search}"`,
+        pageId: options.pageID || 0
+      }
     )
 
+    const paginatedQuery = baseQuery.buildCursorPaginationQuery(options.nextCursor)
+    const raw = paginatedQuery.buildForKnex()
+    const data = await queries.raw(raw.sql, raw.bindings)
+    const pagination = Data(data).getCursorPaginationObject()
+
     return {
-      values: data
-    } 
+      values: data,
+      pagination
+    }
   }
 }

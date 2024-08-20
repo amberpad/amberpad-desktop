@@ -10,9 +10,15 @@ export interface NotesSliceState {
   scrollBeginingHash: number,
   loading: boolean,
   pagination: {
+    nextCursor: number,
+    hasNextPage: boolean,
+  }  
+  /*
+  pagination: {
     page: number,
     hasNextPage: boolean,
   }
+  */
 }
 
 export const fetchNotesThunk = createAsyncThunk(
@@ -21,16 +27,18 @@ export const fetchNotesThunk = createAsyncThunk(
     payload: { 
       search: string,
       pageID: PageIDType,
-      resetPagination?: boolean,
+      resetFeed?: boolean,
     },
     thunkAPI
   ) => {
     const state = thunkAPI.getState()['notes']
-    const page = !!payload.resetPagination ? 1 : (state.pagination.page + 1)
+    //const page = !!payload.resetPagination ? 1 : (state.pagination.page + 1)
+    const nextCursor = payload.resetFeed ? null : state.pagination.nextCursor
     const response = await window.electronAPI.notes.getAll({
       search: payload.search,
       pageID: payload.pageID,
-      page,
+      //page,
+      nextCursor
     })
 
     if (thunkAPI.signal.aborted)
@@ -41,7 +49,7 @@ export const fetchNotesThunk = createAsyncThunk(
 
     return {
       ...response,
-      page,
+      resetFeed: payload.resetFeed,
     }
   },
 )
@@ -148,7 +156,8 @@ const notesSlice = createSlice({
     scrollBeginingHash: 0,
     loading: true,
     pagination: {
-      page: 1,
+      //page: 1,
+      nextCursor: null,
       hasNextPage: true,
     }
   } as NotesSliceState,
@@ -167,7 +176,7 @@ const notesSlice = createSlice({
       state.loading = false
     })
     builder.addCase(fetchNotesThunk.fulfilled, (state, action) => {
-      (action.payload.page === 1 ? set : addTop )(
+      (action.payload.resetFeed ? set : addTop )(
         state, 
         {
           ...action, 
@@ -177,20 +186,20 @@ const notesSlice = createSlice({
           }
         }
       )
-      state.loading = false
-      state.pagination.page = action.payload.page
-      if (action.payload.values.length === 0) {
-        state.pagination.hasNextPage = false
-      }
-      if (action.payload.page > 1) {
+      if (!action.payload.resetFeed) {
         state.adjustScrollHash += 1
       }
+      state.loading = false
+      state.pagination.nextCursor = action.payload.pagination.nextCursor as number
+      state.pagination.hasNextPage = action.payload.pagination.hasNextPage
     })
     builder.addCase(createNoteThunk.fulfilled, (state, action) => {
       addBotom(state, {...action, payload: { values: action.payload.values }})
       state.scrollBeginingHash += 1
     })
-    builder.addCase(updateNoteThunk.fulfilled, (state, action) => {})
+    builder.addCase(updateNoteThunk.fulfilled, (state, action) => {
+
+    })
     builder.addCase(destroyNoteThunk.fulfilled, (state, action) => {
       destroy(state, {...action, payload: { values: [action.payload.value] }})
     })

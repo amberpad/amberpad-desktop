@@ -20,6 +20,8 @@ export type ModelQueryHandlerType<
   payload: PayloadFilter,
 ) => Promise<{
   values: Model[]
+  nextCursor?: number
+  hasNextPage?: boolean
 }>
 
 export type ModelCreateHandlerType<

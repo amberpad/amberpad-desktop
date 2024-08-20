@@ -1,4 +1,4 @@
-import { BaseModelType, BaseIDType } from "@ts/models/BaseModel.types"
+import { BaseModelType, BaseIDType, Pagination } from "@ts/models/BaseModel.types"
 
 export interface BasePayloadFilter {}
 
@@ -15,7 +15,8 @@ export type ModelQueryInvokerType<
 > = (
   payload: PayloadFilter,
 ) => Promise<{
-  values: Model[]
+  values: Model[],
+  pagination: Pagination
 }>
 
 export type ModelCreateInvokerType<

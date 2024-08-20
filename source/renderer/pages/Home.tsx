@@ -21,7 +21,7 @@ export default function Home() {
     },
     pages: {
       selectedPageID: state.pages.selectedPageID
-    }
+    },
   }))
 
   /****************************************************************************
@@ -41,12 +41,15 @@ export default function Home() {
     const promise = store.dispatch(fetchNotesThunk({ 
       search: search,
       pageID: selectedPageID,
-      resetPagination: true,
+      resetFeed: true,
     }))
     return () => {
       promise.abort()
     }
-  }, [context.commons.search, context.pages.selectedPageID])
+  }, [
+    context.commons.search, 
+    context.pages.selectedPageID,
+  ])
 
   useEffect(() => {
     // Fetch notepads
