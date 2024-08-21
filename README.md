@@ -29,3 +29,12 @@ Seed of data that is loaded after migrations are run, this only works in develop
 
 ### toBundle
 Current project esbuild configuration doesn't allow for modules to be bundled in the main bundle because esbuild doesnt work well with *ESM* imports, so all imports are set as external or peer dependencies, so to bundle this dependencies they have to be imported explicitly, to avoid that there is a custom pluggin that bundles all imported uses in the main thread but is not working with dynamic requires in source code, so if some packages are not automatically bundled when electron is packed you can added it explicitly in toBundle config of the package.json (example: `"toBundle": ["better-sqlite3"]`). 
+
+
+## Features to add in future versions
+- To edit already existing notes in very easy way like with a bug button that says edit in the header of the note or draging the note to the text input zone
+- When clicking in the notepads name hide/show the pages list
+- Be able to move notes from one page to another, and pages from one notepad to another
+- To be able to attach hashtags to the note, as a third option to organize the notes
+- Add code block command to rich text editor
+- Export the notes

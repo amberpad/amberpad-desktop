@@ -3,16 +3,14 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 import type { PageIDType } from '@ts/models/Pages.types'
 import type { NoteType, NotePayloadType } from "@ts/models/Notes.types"
+import { Pagination } from '@ts/models/BaseModel.types'
 
 export interface NotesSliceState {
   values: NoteType[],
   adjustScrollHash: number,
   scrollBeginingHash: number,
   loading: boolean,
-  pagination: {
-    nextCursor: number,
-    hasNextPage: boolean,
-  }  
+  pagination: Pagination
   /*
   pagination: {
     page: number,
@@ -148,6 +146,13 @@ function destroy (
   )
 }
 
+function setPagination (
+  state: NotesSliceState, 
+  action: PayloadAction<{ pagination: Pagination }>
+) {
+  state.pagination = action.payload.pagination
+}
+
 const notesSlice = createSlice({
   name: 'notes',
   initialState: {
@@ -167,6 +172,7 @@ const notesSlice = createSlice({
     addBotom,
     update,
     destroy,
+    setPagination,
   },
   extraReducers: (builder) => {
     builder.addCase(fetchNotesThunk.pending, (state, action) => {
@@ -182,16 +188,18 @@ const notesSlice = createSlice({
           ...action, 
           payload: {
             ...action.payload,
-            values: action.payload.values.reverse()
+            values: action.payload.values.reverse(),
           }
         }
       )
+      setPagination(state, { ...action, payload: {pagination: action.payload.pagination }})
       if (!action.payload.resetFeed) {
         state.adjustScrollHash += 1
       }
       state.loading = false
-      state.pagination.nextCursor = action.payload.pagination.nextCursor as number
-      state.pagination.hasNextPage = action.payload.pagination.hasNextPage
+      //state.pagination = action.payload.pagination
+      //state.pagination.nextCursor = action.payload.pagination.nextCursor as number
+      //state.pagination.hasNextPage = action.payload.pagination.hasNextPage
     })
     builder.addCase(createNoteThunk.fulfilled, (state, action) => {
       addBotom(state, {...action, payload: { values: action.payload.values }})

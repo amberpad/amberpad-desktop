@@ -15,6 +15,7 @@ import AppUpdaterProvider from '@renderer/providers/AppUpdaterProvider'
 import '@radix-ui/themes/styles.css'
 import '@renderer/renderer.css'
 import pagesSlice from './actions/pages.slice'
+import notesSlice from './actions/notes.slice'
 
 injectGlobal`
 
@@ -65,6 +66,10 @@ window.electronAPI.getInitials().then((initials) => {
 
   const { setThemeSource } = commonsSlice.actions
   store.dispatch(setThemeSource({ value: initials.theme.themeSource }))
+
+  const { set, setPagination } = notesSlice.actions
+  store.dispatch(set({ values: initials.notes.values }))
+  store.dispatch(setPagination({ pagination: initials.notes.pagination }))
 
   root.render(
     <React.StrictMode>

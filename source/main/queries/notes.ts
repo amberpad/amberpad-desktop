@@ -43,7 +43,7 @@ export async function getAll (
             "NotesQuery"."id" DESC
       `,
       {
-        search: `"${options.search}"`,
+        search: `"${options.search || ''}"`,
         pageId: options.pageID || 0
       }
     )

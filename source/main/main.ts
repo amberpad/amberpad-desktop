@@ -108,6 +108,7 @@ app.on('activate', () => {
 
 app.whenReady()
   .then(() => console.info('Starting the application...'))
+  .then(async () => await setUpDatabase())
   .then(() => setHandlers())
   .catch((error) => {
     ThrowFatalError({ msg: `Error while setting up handlers in main thread`, error })
@@ -139,14 +140,17 @@ function setHandlers () {
   notesHandlers()
   updaterHandlers()
   themeHandlers()
+  setAppUpdaterHandlers(context.mainWindow);
 }
 
-async function launch() {
+async function setUpDatabase () {
   if (!database.exists()) {
     await database.create();
   }
   await database.connect();
-  setAppUpdaterHandlers(context.mainWindow);
+}
+
+async function launch() {
 
   // Launch main window 
   let windows = BrowserWindow.getAllWindows();

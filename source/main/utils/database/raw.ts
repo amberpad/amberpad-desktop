@@ -39,7 +39,7 @@ export function RawQuery(
   }
 
   context.buildCursorPaginationQuery = (
-    nextCursor,
+    nextCursor=null,
   ) => {
     return RawQuery(
       `
