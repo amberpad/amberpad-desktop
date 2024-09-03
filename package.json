@@ -1,6 +1,6 @@
 {
   "name": "amberpad",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "productName": "Amberpad",
   "description": "A note's manager app with the visuals of a Webchat",
   "repository": "https://github.com/maxkalavera/amberpad",
@@ -117,11 +117,11 @@
     },
     "targets": {
       "linux": [
-        "deb",
-        "pkg"
+        "deb"
       ],
       "mac": [
-        "dmg"
+        "dmg",
+        "pkg"
       ],
       "win": [
         "nsis"
