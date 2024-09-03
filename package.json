@@ -12,31 +12,8 @@
   "engines": {
     "node": "20.11.x"
   },
-  "binary": {
-    "module_name": "amberpad",
-    "module_path": "./bin",
-    "host": "https://github.com/maxkalavera/amberpad"
-  },
   "scripts": {
-    "build:main:install": "npm --prefix ./.package install ./.package && npm --prefix ./.package run rebuild",
-    "build:main:rebuild": "npm --prefix ./.package run rebuild",
-    "build:main": "babel-node main.esbuild.mjs && npm run build:main:install",
-    "build:preload": "babel-node preload.esbuild.mjs",
-    "build:renderer": "babel-node renderer.esbuild.mjs",
-    "build:prebuild": "rimraf ./.package && npm run build:main && npm run build:preload && npm run build:renderer",
-    "build:icons:darwin": "mkdirp ./.package/resources/icons/ && icon-gen -i ./resources/icons/amber.svg -o ./.package/resources/icons/ --icns --icns-name icon --icns-sizes 16,32,64,128,256",
-    "build:darwin": "npm run build:prebuild && npm run build:icons:darwin && electron-builder build --config electron-builder.config.js --projectDir ./.package --mac",
-    "build:icons:win32": "mkdirp ./.package/resources/icons/ && icon-gen -i ./resources/icons/amber.svg -o ./.package/resources/icons/ --ico --ico-name icon --ico-sizes 16,32,64,128,256",
-    "build:win32": "npm run build:prebuild && npm run build:icons:win32 && electron-builder build --config electron-builder.config.js --projectDir ./.package --win",
-    "build:icons:linux": "npm run build:icons:darwin",
-    "build:linux": "npm run build:prebuild && npm run build:icons:linux && electron-builder build --config electron-builder.config.js --projectDir ./.package --linux",
-    "build": "npm run build:prebuild && electron-builder build --config electron-builder.config.js --x64 --projectDir ./.package",
-    "build:debug": "cross-env AMBERPAD_ENVIRONMENT=development AMBERPAD_DEBUG=true npm run build:prebuild && electron-builder build --config electron-builder.config.js --projectDir ./.package",
-    "publish:darwin": "npm run build:prebuild && npm run build:icons:darwin && electron-builder build --config electron-builder.config.js --projectDir ./.package --mac -p \"onTagOrDraft\"",
-    "publish:win32": "npm run build:prebuild && npm run build:icons:win32 && electron-builder build --config electron-builder.config.js --projectDir ./.package --win -p \"onTagOrDraft\"",
-    "publish:linux": "npm run build:prebuild && npm run build:icons:linux && electron-builder build --config electron-builder.config.js --projectDir ./.package --linux -p \"onTagOrDraft\"",
-    "start:electron": "electron ./.package",
-    "start": "cross-env AMBERPAD_ENVIRONMENT=development AMBERPAD_DEBUG=true npm run build:prebuild && concurrently --kill-others --kill-others-on-fail \"npm run start:electron\" \"cross-env AMBERPAD_ENVIRONMENT=development babel-node -- renderer.esbuild.mjs --watch\"",
+    "nps": "nps",
     "test:build": "cross-env AMBERPAD_ENVIRONMENT=testing npm run build:prebuild",
     "test:build:debug": "cross-env AMBERPAD_ENVIRONMENT=testing AMBERPAD_DEBUG=true npm run build:prebuild",
     "test:start": "playwright test --config=./playwright.config.ts",
@@ -88,6 +65,8 @@
     "lowdb": "^7.0.1",
     "marked": "^12.0.2",
     "mkdirp": "^3.0.1",
+    "nps": "^5.10.0",
+    "nps-utils": "^1.7.0",
     "quill": "^2.0.2",
     "react": "^18.3.1",
     "react-content-loader": "^7.0.0",
@@ -135,6 +114,20 @@
         "x64",
         "arm64"
       ]
+    },
+    "targets": {
+      "linux": [
+        "deb",
+        "pkg"
+      ],
+      "mac": [
+        "dmg",
+        "pkg"
+      ],
+      "win": [
+        "nsis"
+      ]
     }
-  }
+  },
+  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }

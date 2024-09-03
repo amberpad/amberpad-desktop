@@ -20,7 +20,7 @@ jobs:
     - name: install dependencies
       run: yarn install
     - name: run tests
-      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- yarn run test
+      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- yarn nps test
 
   build_on_mac:
     runs-on: macos-latest
@@ -43,7 +43,7 @@ jobs:
     - name: install node dependencies
       run: yarn install
     - name: run tests
-      run: yarn run test
+      run: yarn nps test
 
   build_on_win:
     runs-on: windows-latest
@@ -63,4 +63,4 @@ jobs:
     - name: install dependencies
       run: yarn install
     - name: run tests
-      run: yarn run test
+      run: yarn nps test

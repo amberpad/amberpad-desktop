@@ -8,6 +8,7 @@ module.exports = {
   productName: pkg.productName,
   asar: true,
   npmRebuild: true,
+  artifactName: '${productName}-${version}-${os}-${arch}-install.${ext}',
   directories: {
     output: "distribution/"
   },
@@ -19,15 +20,8 @@ module.exports = {
   
   linux: {
     icon: "./resources/icons/icon.icns", // Build icons in .png format from icon.icns file
-    target: [
-      {
-        target: "deb",
-        arch: pkg.build.architectures.linux
-      },
-    ],
     category: "Utility",
     synopsis: pkg.package,
-    artifactName: "${productName}-${os}-${arch}.${ext}",
     desktop: {
       Name: pkg.productName,
       Type: "Application",
@@ -36,16 +30,6 @@ module.exports = {
     }
   },
   mac: {
-    target: [
-      {
-        target: 'dmg',
-        arch: pkg.build.architectures.mac
-      },
-      {
-        target: 'zip',
-        arch: pkg.build.architectures.mac
-      }
-    ],
     category: "public.app-category.productivity",
     darkModeSupport: false,
     // entitlements: "./resources/mac/entitlements.plist",
@@ -55,26 +39,11 @@ module.exports = {
     icon: "./resources/icons/icon.icns",
     //notarize: { "teamId": "" }
   },
-  dmg: {
-    artifactName: "${productName}-${os}-${arch}.${ext}",
-  },
   win: {
     icon: "./resources/icons/icon.ico",
-    artifactName: "${productName}-${os}-${arch}.${ext}",
-    target: [
-      {
-        target: "nsis",
-        arch: pkg.build.architectures.win
-      },
-    ],
-    "publisherName": pkg.author.name
-  },
-  nsis: {
-    artifactName: "${productName}-${os}-${arch}.${ext}",
-    oneClick: false,
-    perMachine: false,
+    publisherName: pkg.author.name
   },
   portable: {
-    artifactName: "${productName}-${os}-${version}-portable.${ext}"
+    artifactName: "${productName}-${version}-${os}-${arch}-portable.${ext}"
   }
 };
