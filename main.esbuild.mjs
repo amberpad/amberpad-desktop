@@ -70,6 +70,9 @@ await esbuild.build({
             type: pkg.type,
             scripts: {
               "rebuild": "electron-rebuild -f -o better-sqlite3,argon2,better-sqlite3-multiple-ciphers -w .",
+              "postinstall": (
+                `cp ${resolve(outDir, './resources/deps/sqlite3.gyp')} ${resolve(outDir, './node_modules/better-sqlite3-multiple-ciphers/deps/sqlite3.gyp')}`
+              ),
               /*
               "preinstall": (
                 `npm install better-sqlite3-multiple-ciphers@'${betterSqliteVersion[1]}'` + 
