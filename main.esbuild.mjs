@@ -50,9 +50,11 @@ await esbuild.build({
         build.onEnd(() => {
           const bundleAsExternal = Array.isArray(pkg.bundleAsExternal) ? pkg.bundleAsExternal : []
           bundleAsExternal.forEach(module => modulesToPack.add(module)) 
-          //modulesToPack.delete('electron')
+          /*
+          modulesToPack.delete('better-sqlite3-multiple-ciphers')
           const betterSqliteVersion = Object.entries(dependencies).find(
             ([module, version]) => ['better-sqlite3-multiple-ciphers'] .includes(module))
+          */
 
           writeFile(resolve(outDir, './package.json'), JSON.stringify({
             main: "main.mjs",
@@ -68,7 +70,12 @@ await esbuild.build({
             type: pkg.type,
             scripts: {
               "rebuild": "electron-rebuild -f -o better-sqlite3,argon2,better-sqlite3-multiple-ciphers -w .",
-              "preinstall": `npm install better-sqlite3-multiple-ciphers@'${betterSqliteVersion[1]}' --no-save --build-from-source --sqlite3=\"./resources/deps/sqlite3\"`,
+              /*
+              "preinstall": (
+                `npm install better-sqlite3-multiple-ciphers@'${betterSqliteVersion[1]}'` + 
+                ` --no-save --build-from-source --sqlite3=\"${resolve(outDir, './resources/deps/sqlite3/')}\"`
+              ),
+              */
             },
             devDependencies: Object.fromEntries(
               Object.entries(pkg.devDependencies).filter(([module, _]) => [

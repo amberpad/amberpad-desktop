@@ -81,7 +81,7 @@ context._connectKnex = (passphrase) => {
     connection: {
       filename: databasePath,
       options: {
-        // note: we need this in order to use encryption
+        // note: this code is needed in order to use encryption
         nativeBinding: resolveFromRoot(
           'node_modules',
           'better-sqlite3-multiple-ciphers',
@@ -172,6 +172,7 @@ context.testConnection = async () => {
     await context.queries.raw('PRAGMA user_version;')
     return true
   } catch (error) {
+    console.error('Text connection error:', error)
     return false
   }
 },
