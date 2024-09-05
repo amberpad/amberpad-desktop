@@ -23,8 +23,8 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: '20.11.x'
-    - name: install apt requirements
-      run: sudo apt install -y gcc-multilib g++-multilib
+    #- name: install apt requirements
+    #  run: sudo apt install -y gcc-multilib g++-multilib
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
