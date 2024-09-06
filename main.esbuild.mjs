@@ -50,6 +50,7 @@ await esbuild.build({
         build.onEnd(() => {
           const bundleAsExternal = Array.isArray(pkg.bundleAsExternal) ? pkg.bundleAsExternal : []
           bundleAsExternal.forEach(module => modulesToPack.add(module)) 
+          modulesToPack.delete('electron')
           /*
           modulesToPack.delete('better-sqlite3-multiple-ciphers')
           const betterSqliteVersion = Object.entries(dependencies).find(
@@ -80,6 +81,7 @@ await esbuild.build({
               ),
               */
             },
+            /*
             devDependencies: Object.fromEntries(
               Object.entries(pkg.devDependencies).filter(([module, _]) => [
                 ...Array.from(modulesToPack.values())
@@ -87,6 +89,17 @@ await esbuild.build({
             ),
             dependencies: Object.fromEntries(
               Object.entries(pkg.dependencies).filter(([module, _]) => [
+                ...Array.from(modulesToPack.values())
+              ].some(item => item === module))
+            ),
+            */
+            devDependencies: Object.fromEntries(
+              Object.entries(pkg.devDependencies).filter(([module, _]) => [
+                'electron'
+              ].some(item => item === module))
+            ),
+            dependencies: Object.fromEntries(
+              Object.entries(dependencies).filter(([module, _]) => [
                 ...Array.from(modulesToPack.values())
               ].some(item => item === module))
             ),
