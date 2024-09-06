@@ -37,6 +37,7 @@ module.exports = {
     gatekeeperAssess: false,
     hardenedRuntime: true,
     icon: "./resources/icons/icon.icns",
+    artifactName: '${productName}-${version}-${os}-install.${ext}',
     //notarize: { "teamId": "" }
   },
   win: {
