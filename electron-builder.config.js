@@ -38,30 +38,10 @@ module.exports = {
     hardenedRuntime: true,
     icon: "./resources/icons/icon.icns",
     //notarize: { "teamId": "" }
-    artifactName: '${productName}-${version}-${os}-install.${ext}',
-    target: [
-      {
-        target: 'default',
-        arch: [
-          'x64',
-          'arm64',
-        ]
-      },
-    ]
   },
   win: {
     icon: "./resources/icons/icon.ico",
     publisherName: pkg.author.name,
-    artifactName: '${productName}-${version}-${os}-install.${ext}',
-    target: [
-      {
-        target: 'default',
-        arch: [
-          'x64',
-          'arm64',
-        ]
-      },
-    ]
   },
   portable: {
     artifactName: "${productName}-${version}-${os}-${arch}-portable.${ext}"
