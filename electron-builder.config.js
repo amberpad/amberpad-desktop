@@ -8,7 +8,7 @@ module.exports = {
   productName: pkg.productName,
   asar: true,
   npmRebuild: true,
-  artifactName: '${productName}-${version}-${os}-${arch}-install.${ext}',
+  artifactName: '${productName}-${version}-${os}-${arch}.${ext}',
   directories: {
     output: "distribution/"
   },
@@ -37,14 +37,11 @@ module.exports = {
     gatekeeperAssess: false,
     hardenedRuntime: true,
     icon: "./resources/icons/icon.icns",
-    artifactName: '${productName}-${version}-${os}-install.${ext}',
+    artifactName: '${productName}-${version}-${os}.${ext}',
     //notarize: { "teamId": "" }
   },
   win: {
     icon: "./resources/icons/icon.ico",
     publisherName: pkg.author.name,
   },
-  portable: {
-    artifactName: "${productName}-${version}-${os}-${arch}-portable.${ext}"
-  }
 };
