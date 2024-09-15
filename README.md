@@ -1,40 +1,18 @@
-## Amberpad
-App to make annotations with the visuals of a Webchat.
+# Amberpad - Desktop
 
-## Enviroment settings
-Enviromental variables only supported in development enviroments. Usage of ".env" file inside the root of the project is supported.
+Simple, efficient, and smart. The note-taking app with a web chat aesthetic.
 
-| Variables | Description | Type |
-|-|-|-|
-| AMBERPAD_ENVIROMENT |  Defines the running enviroment | "development" or "Production" or "testing" |
+## About
 
-| AMBERPAD_DEBUG | Show errors and extra information in the console, if packaging app to testing enviroment and set to true it also shows the window with the graphic interface | "true" or "false" |
+Amberpad is a free, open-source, cross-platform note-taking app built with [Node.js](https://nodejs.org/), [Electron](https://www.electronjs.org/), [React](https://react.dev/), and [TypeScript](https://www.typescriptlang.org/). Amberpad is designed to be simple, usable, secure, and accessible—everything a note-taking app should be.
 
-| AMBERPAD_RESET_SETTINGS_STORE | Resets the file that contains settings and runnning data to default values | "true" or "false" |
+## Versions
 
-| AMBERPAD_DB_PATH | The path to the sqlite database file | string |
+Amberpad is currently in Beta development. If you encounter any issues with the app, please report them in the [issues](#) section of this repository. Any help to improve the app is greatly appreciated.
 
-| AMBERPAD_ALLOW_VERSION_UPDATE | Show a notification when there is a new version and allow user the donloawd and install update directly from the app | allowed OS separated by "\|", example: "darwin\|win32\|linux"  |
+## Contributing
 
-| AMBERPAD_ALLOW_VERSION_UPDATE | 
-Show a notification when there is a new version and allow user the donloawd and install update directly from the app 
-| allowed OS separated by "\|", example: "darwin\|win32\|linux"  |
+We welcome contributions! Please refer to our [contributing guidelines](CONTRIBUTING.md) for more information on how to get involved.
 
-| AMBERPAD_SEED | 
-Seed of data that is loaded after migrations are run, this only works in development mode
-| location inside resources/seed folder, example: "migrations/001_initial.mts"  |
-
-
-## Package.json settings
-
-### toBundle
-Current project esbuild configuration doesn't allow for modules to be bundled in the main bundle because esbuild doesnt work well with *ESM* imports, so all imports are set as external or peer dependencies, so to bundle this dependencies they have to be imported explicitly, to avoid that there is a custom pluggin that bundles all imported uses in the main thread but is not working with dynamic requires in source code, so if some packages are not automatically bundled when electron is packed you can added it explicitly in toBundle config of the package.json (example: `"toBundle": ["better-sqlite3"]`). 
-
-
-## Features to add in future versions
-- To edit already existing notes in very easy way like with a bug button that says edit in the header of the note or draging the note to the text input zone
-- When clicking in the notepads name hide/show the pages list
-- Be able to move notes from one page to another, and pages from one notepad to another
-- To be able to attach hashtags to the note, as a third option to organize the notes
-- Add code block command to rich text editor
-- Export the notes
+## Versions
+Amberpad is a project still in development, currently in Beta version, any issue with the app can be reported in the [issues]() section of this repository, any help to improve the app is appreciated.

@@ -109,6 +109,7 @@ module.exports = {
       },
       start: {
         default: 'playwright test --config=./playwright.config.ts',
+        // Run only the commands that their label is found by a global expression
         grep: 'playwright test --config=./playwright.config.ts -g'
       }
     },

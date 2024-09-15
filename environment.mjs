@@ -80,11 +80,13 @@ var configs = {
     verifier: /^(error|warn|info|verbose|debug|silly|false)$/i,
     parser: (value) => value.toLocaleLowerCase() === 'false' ? false : value.toLocaleLowerCase()
   },
+  /*
   RESET_SETTINGS_STORE: {
     default: false,
     verifier: /^(true|false)$/i,
     parser: (value) => value.toLocaleLowerCase() === 'true'
   },
+  */
   PAGINATION_OFFSET: {
     default: 20,
     verifier: /^[1-9]+$/,
@@ -96,11 +98,11 @@ var configs = {
     parser: (value) => parseInt(value),
   },
   ALLOW_VERSION_UPDATE: {
-    // "darwin | linux | win32" one of any of this separated by a "|"
+    // "darwin | linux | win32" one of any of this separated by a ","
     default: ['darwin', 'linux', 'win32'],
-    verifier: /^(darwin|linux|win32|\s|\|)+$/i,
+    verifier: /^(darwin|linux|win32|\s|,)+$/i,
     parser: (value) => [...new Set(
-      value.toLocaleLowerCase().replace(' ', '').split('|')
+      value.toLocaleLowerCase().replace(' ', '').split(',')
     )]
   },
   SEED: { 

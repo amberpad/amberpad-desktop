@@ -51,8 +51,8 @@ interface DatabaseManager {
 const DEFAULT_INSECURE_PASSWORD = 'amberpad'
 
 const databaseLocations = {
-  'production': resolveFromUserData('amberpad.sqlite'),
-  'development' : resolveFromUserData('amberpad.development.sqlite'),
+  'production': resolveFromUserData('amberpad.amber'),
+  'development' : resolveFromUserData('amberpad.development.amber'),
   'testing': process.env.__TESTING_ENVRONMENT_DB_PATH,
 }
 const databasePath = (

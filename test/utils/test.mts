@@ -17,7 +17,7 @@ type DatabaseType = knex.Knex<any, unknown[]> & {
 }
 
 const buildDatabasePath = (id: string) => 
-  `.run/amberpad.test${id ? ('.' + id) : ''}.sqlite`;
+  `.run/amberpad.test${id ? ('.' + id) : ''}.amber`;
 
 const buildLogFilePath = (id: string) => 
   `.run/logs/test.${id ? ('.' + id) : ''}.log`;
