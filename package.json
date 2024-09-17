@@ -1,6 +1,6 @@
 {
   "name": "amberpad",
-  "version": "0.14.0",
+  "version": "0.0.0",
   "productName": "Amberpad",
   "description": "A note's manager app with the visuals of a Webchat",
   "repository": "https://github.com/maxkalavera/amberpad",
@@ -12,6 +12,7 @@
   "engines": {
     "node": "20.11.x"
   },
+    "packageManager": "^yarn@1.22.0",
   "scripts": {
     "nps": "nps"
   },
@@ -122,6 +123,5 @@
         "nsis"
       ]
     }
-  },
-  "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
+  }
 }
