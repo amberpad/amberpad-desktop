@@ -14,7 +14,7 @@ Amberpad is currently in Beta development. If you encounter any issues with the 
 
 ## Contributing
 
-We welcome contributions! Please refer to our [contributing guidelines](CONTRIBUTING.md) for more information on how to get involved.
+We welcome contributions! Please refer to our [contributing guidelines](docs/CONTRIBUTING.md) for more information on how to get involved.
 
 ## Versions
 Amberpad is a project still in development, currently in Beta version, any issue with the app can be reported in the [issues]() section of this repository, any help to improve the app is appreciated.

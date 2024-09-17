@@ -16,11 +16,11 @@ jobs:
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
-      run: yarn install -g node-gyp@latest
+      run: npm install -g node-gyp@latest
     - name: install dependencies
-      run: yarn install
+      run: npm install
     - name: run tests
-      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- yarn nps test
+      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run nps test
 
   build_on_mac:
     runs-on: macos-latest
@@ -39,11 +39,11 @@ jobs:
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
-      run: yarn install -g node-gyp@latest
+      run: npm install -g node-gyp@latest
     - name: install node dependencies
-      run: yarn install
+      run: npm install
     - name: run tests
-      run: yarn nps test
+      run: npm run nps test
 
   build_on_win:
     runs-on: windows-latest
@@ -59,8 +59,8 @@ jobs:
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
-      run: yarn install -g node-gyp@latest
+      run: npm install -g node-gyp@latest
     - name: install dependencies
-      run: yarn install
+      run: npm install
     - name: run tests
-      run: yarn nps test
+      run: npm run nps test

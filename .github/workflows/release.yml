@@ -28,13 +28,13 @@ jobs:
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
-      run: yarn install -g node-gyp@latest
+      run: npm install -g node-gyp@latest
     - name: install dependencies
-      run: yarn install
+      run: npm install
     - name: build current system distributables
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn nps publish.linux
+      run: npm run nps publish.linux
 
   publish_on_mac:
     runs-on: macos-latest
@@ -54,13 +54,13 @@ jobs:
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
-      run: yarn install -g node-gyp@latest
+      run: npm install -g node-gyp@latest
     - name: install dependencies
-      run: yarn install
+      run: npm install
     - name: build current system distributables
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn nps publish.darwin
+      run: npm run nps publish.darwin
 
   publish_on_win:
     runs-on: windows-latest
@@ -75,10 +75,10 @@ jobs:
     - name: install python dependencies
       run: python -m pip install --upgrade setuptools
     - name: upgrade node-gyp
-      run: yarn install -g node-gyp@latest
+      run: npm install -g node-gyp@latest
     - name: install dependencies
-      run: yarn install
+      run: npm install
     - name: build current system distributables
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn nps publish.win32
+      run: npm run nps publish.win32
