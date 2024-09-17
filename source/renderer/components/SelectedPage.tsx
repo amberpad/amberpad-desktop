@@ -101,9 +101,9 @@ export default function SelectedPage ({
       <Card
         className={css`
           @media (prefers-color-scheme: light) {
-            background-color: var(--accent-a2);
-            border: 1px solid var(--gray-a3);
-            box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+            background-color: var(--color-background);
+            border: 1px solid var(--gray-a6);
+            
           }
 
           @media (prefers-color-scheme: dark) {

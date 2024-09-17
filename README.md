@@ -2,6 +2,8 @@
 
 Simple, efficient, and smart. The note-taking app with a web chat aesthetic.
 
+![Screenshot of the app](docs/amberpad-screenshot-dark.png)
+
 ## About
 
 Amberpad is a free, open-source, cross-platform note-taking app built with [Node.js](https://nodejs.org/), [Electron](https://www.electronjs.org/), [React](https://react.dev/), and [TypeScript](https://www.typescriptlang.org/). Amberpad is designed to be simple, usable, secure, and accessible—everything a note-taking app should be.
