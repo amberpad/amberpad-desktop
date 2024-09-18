@@ -17,6 +17,7 @@ module.exports = {
     build: {
       default: currentPlatform === undefined ? '' : series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts(currentPlatform).map(({platform, arch, target}) => 
           `${buildCommand} --${arch} --${platform} ${target}`)
       ),
@@ -28,16 +29,19 @@ module.exports = {
       ),
       darwin: series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('mac').map(({platform, arch, target}) => 
           `${buildCommand} --${arch} --${platform} ${target}`)
       ),
       win32: series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('win').map(({platform, arch, target}) => 
           `${buildCommand} --${arch} --${platform} ${target}`)
       ),
       linux: series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('linux').map(({platform, arch, target}) => 
           `${buildCommand} --${arch} --${platform} ${target}`)
       ),
@@ -77,16 +81,19 @@ module.exports = {
       ),
       darwin: series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('mac').map(({platform, arch, target}) => 
           `${buildCommand} -p \"onTagOrDraft\" --${arch} --${platform} ${target}`)
       ),
       win32: series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('win').map(({platform, arch, target}) => 
           `${buildCommand} -p \"onTagOrDraft\" --${arch} --${platform} ${target}`)
       ),
       linux: series(
         'nps build.prebuild',
+        `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('linux').map(({platform, arch, target}) => 
           `${buildCommand} -p \"onTagOrDraft\" --${arch} --${platform} ${target}`)
       ),
@@ -130,8 +137,22 @@ module.exports = {
         })
       ),
       electron: 'electron ./.package'
-    }
-  },
+    },
+
+    docker: {
+      default: (
+        `docker run --rm -ti \\
+          --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS_TAG|TRAVIS|TRAVIS_REPO_|TRAVIS_BUILD_|TRAVIS_BRANCH|TRAVIS_PULL_REQUEST_|APPVEYOR_|CSC_|GH_|GITHUB_|BT_|AWS_|STRIP|BUILD_') \\
+          --env ELECTRON_CACHE="/root/.cache/electron" \\
+          --env ELECTRON_BUILDER_CACHE="/root/.cache/electron-builder" \\
+          -v \${PWD}:/project \\
+          -v \${PWD##*/}-node-modules:/project/node_modules \\
+          -v ~/.cache/electron:/root/.cache/electron \\
+          -v ~/.cache/electron-builder:/root/.cache/electron-builder \\
+          electronuserland/builder:wine`
+      )
+    },
+  }, // End of scripts object place new scripts before
 };
 
 /*
