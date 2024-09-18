@@ -14,8 +14,8 @@ module.exports = {
   },
   publish: [{
     provider: "github",
-    owner: "maxkalavera",
-    repo: "amberpad"
+    owner: "amberpad",
+    repo: "amberpad-desktop"
   }],
   
   linux: {
