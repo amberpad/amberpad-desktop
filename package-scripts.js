@@ -19,7 +19,7 @@ module.exports = {
         'nps build.prebuild',
         `nps build.icons.${platform()}`,
         ...getPlatformArtifacts(currentPlatform).map(({platform, arch, target}) => 
-          `${buildCommand} --${arch} --${platform} ${target}`)
+          `${buildCommand} -p \"never\" --${arch} --${platform} ${target}`)
       ),
       //`${buildCommand} --dir --${currentPlatform}`
       debug: crossEnv(
@@ -31,21 +31,20 @@ module.exports = {
         'nps build.prebuild',
         `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('mac').map(({platform, arch, target}) => 
-          `${buildCommand} --${arch} --${platform} ${target}`)
+          `${buildCommand} -p \"never\" --${arch} --${platform} ${target}`)
       ),
       win32: series(
         'nps build.prebuild',
         `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('win').map(({platform, arch, target}) => 
-          `${buildCommand} --${arch} --${platform} ${target}`)
+          `${buildCommand} -p \"never\" --${arch} --${platform} ${target}`)
       ),
       linux: series(
         'nps build.prebuild',
         `nps build.icons.${platform()}`,
         ...getPlatformArtifacts('linux').map(({platform, arch, target}) => 
-          `${buildCommand} --${arch} --${platform} ${target}`)
+          `${buildCommand} -p \"never\" --${arch} --${platform} ${target}`)
       ),
-
       main: {
         default: series(
           'nps build.main.esbuild',
